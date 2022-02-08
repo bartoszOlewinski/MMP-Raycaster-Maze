@@ -1,0 +1,11 @@
+==== 08/02/22 ====
+SDL2 did not work on my machine, tried both Cygwin and MinGW(64 and 32bit) in Clion and tried using it in Visual Studio.
+Tried both Visual Studio and MinGW specific versions of SDL2.
+Closest to working was Clion with 64bit MinGW where code compiled but when any of the functions from SDL were used
+'Segmentation Fault' would be thrown.
+--------------
+Managed to integrate SFML 2.5.1 32bit into CLion, it seems to run SFML's functions correctly, will use that as a substitute for SDL2.
+--------------
+Created repository with CLion project, added README in 'src' folder to state specific version of SFML and MinGW to use when compiling code.
+Also created this file for any notes on progress.
+==================
