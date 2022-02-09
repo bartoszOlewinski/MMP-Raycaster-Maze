@@ -54,17 +54,28 @@ void Raycaster::handleWindow() {
 
     frameTimeForSpeeds = (time.asMilliseconds() - oldTime.asMilliseconds()) / 1000.0;
 
-    //long double frameTime = 1.0l / time.asMilliseconds() - oldTime.asMilliseconds();
-
-    //std::cout<<"Elapsed frame time:"<<time.asSeconds() - oldTime.asSeconds()<<" microseconds, FPS:"<<1.0 / frameTimeForSpeeds<<std::endl;
 
     rotSpeed = frameTimeForSpeeds * 3.0;
     moveSpeed = frameTimeForSpeeds * 5.0;
 
+
+
+    sf::Text text;
+    sf::Font font;
+    font.loadFromFile("arial.ttf");
+    text.setFont(font);
+    text.setString("FPS: " + std::to_string((int) std::round(1.0/frameTimeForSpeeds))
+    + "\nFrame time: " + std::to_string( frameTimeForSpeeds) + "s");
+    text.setCharacterSize(50);
+    text.setFillColor(sf::Color::White);
+    text.setPosition(60, 500);
+
+
+
+    windowPtr->draw(text);
+
     //end of frame
     windowPtr->display();
-
-
 }
 
 void Raycaster::raycastingRenderer(int screenPosX, int screenPosY) {
@@ -96,15 +107,15 @@ void Raycaster::drawScreenPlayer() {
         double sideDistX;
         double sideDistY;
 
-        /*
+
         double deltaDistX = (rayDirX == 0) ? 1e30 : std::abs(1/rayDirX);
         double deltaDistY = (rayDirY == 0) ? 1e30 : std::abs(1/rayDirY);
-         */
 
 
+/*
         double deltaDistX = sqrt(1.0f + (rayDirY * rayDirY) / (rayDirX * rayDirX));
         double deltaDistY = sqrt(1.0f + (rayDirX * rayDirX) / (rayDirY * rayDirY));
-
+*/
 
         double perpWallDist;
 
@@ -231,7 +242,10 @@ void Raycaster::playerControls() {
             player->positionY += player->directionY * moveSpeed;
 
     }else if (sf::Keyboard::isKeyPressed((sf::Keyboard::Down))) {
-
+        if (testMap[int(player->positionX - player->directionX * moveSpeed)][int(player->positionY)] == 0)
+            player->positionX -= player->directionX * moveSpeed;
+        if (testMap[int(player->positionX)][int(player->positionY - player->directionY * moveSpeed)] == 0)
+            player->positionY -= player->directionY * moveSpeed;
     }
 
 }
