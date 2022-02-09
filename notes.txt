@@ -14,3 +14,8 @@ Also created this file for any notes on progress.
 Completed first draft of the Project Outline document.
 -------------
 Started working on basic SFML functions and overall design of the code.
+-------------
+Created a couple of loops and started analysing ray casting algorithm; started working on map loading segment but stopped as it's not
+needed for now. Test 2d array will be used instead.
+-------------
+
