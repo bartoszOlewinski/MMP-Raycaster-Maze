@@ -9,3 +9,8 @@ Managed to integrate SFML 2.5.1 32bit into CLion, it seems to run SFML's functio
 Created repository with CLion project, added README in 'src' folder to state specific version of SFML and MinGW to use when compiling code.
 Also created this file for any notes on progress.
 ==================
+
+====09/02/22====
+Completed first draft of the Project Outline document.
+-------------
+Started working on basic SFML functions and overall design of the code.
