@@ -27,12 +27,12 @@ public:
     /**
      * Runs rest of the functions
      */
-    void runGame();
+    void runGame(Actor* actor);
 
 
 
 private:
-    Actor player;
+    Actor* player;
     double rotSpeed;
     double moveSpeed;
 
@@ -41,7 +41,7 @@ private:
             0,0,0,0,0,0,0,0,0,0,0,0,0,0,
             0,1,1,1,0,0,0,0,0,0,0,0,0,0,
             0,1,0,0,2,0,0,0,0,0,0,0,0,0,
-            0,1,-1,0,2,0,0,0,0,0,0,0,0,0,
+            0,1,0,0,2,0,0,0,0,0,0,0,0,0,
             0,1,0,0,2,2,3,3,0,0,0,0,0,0,
             0,1,0,0,0,0,0,3,0,0,0,0,0,0,
             0,1,0,0,1,4,0,3,0,0,0,0,0,0,

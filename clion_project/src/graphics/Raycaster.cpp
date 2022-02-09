@@ -12,8 +12,9 @@
 #include <iostream>
 
 //MAIN GAME FUNCTION
-void Raycaster::runGame() {
+void Raycaster::runGame(Actor* actor) {
 
+    player = actor;
     handleWindow();
 
 
@@ -23,6 +24,7 @@ void Raycaster::runGame() {
 void Raycaster::handleWindow() {
     //erase previous frame
     windowPtr->clear();
+    playerControls();
 
     double frameTimeForSpeeds;
 
@@ -43,8 +45,8 @@ void Raycaster::handleWindow() {
     drawScreenPlayer();
 
 
-    drawScreenAI();
-    drawInfoColumn();
+    //drawScreenAI();
+    //drawInfoColumn();
 
 
     oldTime = time;
@@ -52,7 +54,7 @@ void Raycaster::handleWindow() {
 
     frameTimeForSpeeds = (time.asMilliseconds() - oldTime.asMilliseconds()) / 1000.0;
 
-    long double frameTime = 1.0l / time.asMilliseconds() - oldTime.asMilliseconds();
+    //long double frameTime = 1.0l / time.asMilliseconds() - oldTime.asMilliseconds();
 
     //std::cout<<"Elapsed frame time:"<<time.asSeconds() - oldTime.asSeconds()<<" microseconds, FPS:"<<1.0 / frameTimeForSpeeds<<std::endl;
 
@@ -62,7 +64,7 @@ void Raycaster::handleWindow() {
     //end of frame
     windowPtr->display();
 
-    playerControls();
+
 }
 
 void Raycaster::raycastingRenderer(int screenPosX, int screenPosY) {
@@ -79,23 +81,16 @@ void Raycaster::drawScreenAI() {
 }
 
 void Raycaster::drawScreenPlayer() {
-    player.positionX = 3.0f;
-    player.positionY = 2.0f;
-
-    player.directionX = 1.0f;
-    player.directionY = 0.0f;
-
-
-
+    sf::VertexArray lines (sf::Lines, 18 * RENDER_WIDTH);
 
     for (int x = 0; x < RENDER_WIDTH; x++) {
         double cameraX = 2 * x / (double)RENDER_WIDTH;
-        double rayDirX = player.directionX + player.planeX * cameraX;
-        double rayDirY = player.directionY + player.planeY * cameraX;
+        double rayDirX = player->directionX + player->planeX * cameraX;
+        double rayDirY = player->directionY + player->planeY * cameraX;
 
 
-        int mapX = (int) player.positionX;
-        int mapY = (int) player.positionY;
+        int mapX = (int) player->positionX;
+        int mapY = (int) player->positionY;
 
 
         double sideDistX;
@@ -105,6 +100,7 @@ void Raycaster::drawScreenPlayer() {
         double deltaDistX = (rayDirX == 0) ? 1e30 : std::abs(1/rayDirX);
         double deltaDistY = (rayDirY == 0) ? 1e30 : std::abs(1/rayDirY);
          */
+
 
         double deltaDistX = sqrt(1.0f + (rayDirY * rayDirY) / (rayDirX * rayDirX));
         double deltaDistY = sqrt(1.0f + (rayDirX * rayDirX) / (rayDirY * rayDirY));
@@ -122,17 +118,17 @@ void Raycaster::drawScreenPlayer() {
 
         if (rayDirX < 0) {
             stepX = -1;
-            sideDistX = (player.positionX - mapX) * deltaDistX;
+            sideDistX = (player->positionX - mapX) * deltaDistX;
         } else {
             stepX = 1;
-            sideDistX = (mapX + 1.0 - player.positionX) * deltaDistX;
+            sideDistX = (mapX + 1.0 - player->positionX) * deltaDistX;
         }
         if (rayDirY < 0) {
             stepY = -1;
-            sideDistY = (player.positionY - mapY) * deltaDistY;
+            sideDistY = (player->positionY - mapY) * deltaDistY;
         } else {
             stepY = 1;
-            sideDistY = (mapY + 1.0 - player.positionY) * deltaDistY;
+            sideDistY = (mapY + 1.0 - player->positionY) * deltaDistY;
         }
 
 
@@ -160,9 +156,12 @@ void Raycaster::drawScreenPlayer() {
 
 
         int drawStart = -lineHeight / 2 + RENDER_HEIGHT / 2;
+
         if (drawStart < 0)
             drawStart = 0;
+
         int drawEnd = lineHeight / 2 + RENDER_HEIGHT / 2;
+
         if (drawEnd >= RENDER_HEIGHT)
             drawEnd = RENDER_HEIGHT - 1;
 
@@ -190,7 +189,6 @@ void Raycaster::drawScreenPlayer() {
             color.g /= 2;
             color.b /= 2;
         }
-        sf::VertexArray lines (sf::Lines, RENDER_WIDTH);
 
 
         //drawing the vertical line of pixels
@@ -205,32 +203,32 @@ void Raycaster::drawScreenPlayer() {
 }
 
 void Raycaster::playerControls() {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
 
-        double oldDirX = player.directionX;
-        player.directionX = player.directionX * cos(-rotSpeed) - player.directionY * sin(-rotSpeed);
-        player.directionX = oldDirX * sin(-rotSpeed) + player.directionY * cos(-rotSpeed);
+        double oldDirX = player->directionX;
+        player->directionX = player->directionX * cos(-rotSpeed) - player->directionY * sin(-rotSpeed);
+        player->directionY = oldDirX * sin(-rotSpeed) + player->directionY * cos(-rotSpeed);
 
-        double oldPlaneX = player.planeX;
-        player.planeX = player.planeX * cos(-rotSpeed) - player.planeY * sin(-rotSpeed);
-        player.planeY = oldPlaneX * sin(-rotSpeed) + player.planeY * cos(-rotSpeed);
+        double oldPlaneX = player->planeX;
+        player->planeX = player->planeX * cos(-rotSpeed) - player->planeY * sin(-rotSpeed);
+        player->planeY = oldPlaneX * sin(-rotSpeed) + player->planeY * cos(-rotSpeed);
 
-    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
 
-        double oldDirX = player.directionX;
-        player.directionX = player.directionX * cos(rotSpeed) - player.directionY * sin(rotSpeed);
-        player.directionX = oldDirX * sin(rotSpeed) + player.directionY * cos(rotSpeed);
+        double oldDirX = player->directionX;
+        player->directionX = player->directionX * cos(rotSpeed) - player->directionY * sin(rotSpeed);
+        player->directionY = oldDirX * sin(rotSpeed) + player->directionY * cos(rotSpeed);
 
-        double oldPlaneX = player.planeX;
-        player.planeX = player.planeX * cos(rotSpeed) - player.planeY * sin(rotSpeed);
-        player.planeY = oldPlaneX * sin(rotSpeed) + player.planeY * cos(rotSpeed);
+        double oldPlaneX = player->planeX;
+        player->planeX = player->planeX * cos(rotSpeed) - player->planeY * sin(rotSpeed);
+        player->planeY = oldPlaneX * sin(rotSpeed) + player->planeY * cos(rotSpeed);
 
     } else if (sf::Keyboard::isKeyPressed((sf::Keyboard::Up))) {
 
-        if (testMap[int(player.positionX + player.directionX * moveSpeed)][int(player.positionY)] == 0)
-            player.positionX += player.directionX * moveSpeed;
-        if (testMap[int(player.positionX)][int(player.positionY + player.directionY * moveSpeed)] == 0)
-            player.positionY+= player.directionY * moveSpeed;
+        if (testMap[int(player->positionX + player->directionX * moveSpeed)][int(player->positionY)] == 0)
+            player->positionX += player->directionX * moveSpeed;
+        if (testMap[int(player->positionX)][int(player->positionY + player->directionY * moveSpeed)] == 0)
+            player->positionY+= player->directionY * moveSpeed;
 
     }else if (sf::Keyboard::isKeyPressed((sf::Keyboard::Down))) {
 

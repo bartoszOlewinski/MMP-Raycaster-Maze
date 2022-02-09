@@ -14,8 +14,8 @@ public:
     double directionX;
     double directionY;
 
-    double planeX = 0.0;
-    double planeY = 0.66;
+    double planeX;
+    double planeY;
 };
 
 
