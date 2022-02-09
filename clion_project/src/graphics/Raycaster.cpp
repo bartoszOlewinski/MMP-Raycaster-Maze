@@ -228,7 +228,7 @@ void Raycaster::playerControls() {
         if (testMap[int(player->positionX + player->directionX * moveSpeed)][int(player->positionY)] == 0)
             player->positionX += player->directionX * moveSpeed;
         if (testMap[int(player->positionX)][int(player->positionY + player->directionY * moveSpeed)] == 0)
-            player->positionY+= player->directionY * moveSpeed;
+            player->positionY += player->directionY * moveSpeed;
 
     }else if (sf::Keyboard::isKeyPressed((sf::Keyboard::Down))) {
 

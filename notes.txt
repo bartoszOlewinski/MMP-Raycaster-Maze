@@ -18,4 +18,5 @@ Started working on basic SFML functions and overall design of the code.
 Created a couple of loops and started analysing ray casting algorithm; started working on map loading segment but stopped as it's not
 needed for now. Test 2d array will be used instead.
 -------------
-
+Removed map loading segment, managed to get the raycaster to work, although there is a fish eye lens and some weird shift
+to camera placement as well as weird movement bug.
