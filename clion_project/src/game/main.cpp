@@ -4,6 +4,19 @@
 #include "../graphics/Raycaster.h"
 
 
+void setUpActor(Actor* actor) {
+    //set up actors parameters
+
+    actor->positionX = 3.0f;
+    actor->positionY = 2.5;
+
+    actor->directionX = 1.0f;
+    actor->directionY = 0.0f;
+
+    actor->planeY = 0.66f;
+    actor->planeX = 0.0f;
+}
+
 int main() {
 
     const int FRAME_LIMIT = 60;
@@ -12,22 +25,18 @@ int main() {
     sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_TITLE, sf::Style::Close);
     window.setFramerateLimit(FRAME_LIMIT);
 
-
     //create a raycaster and initialize window
     Raycaster raycaster(&window);
+
+
     Actor player{};
-    player.positionX = 3.0f;
-    player.positionY = 2.5f;
+    Actor agent{};
 
-    player.directionX = 1.0f;
-    player.directionY = 0.0f;
-
-    player.planeY = 0.66f;
-    player.planeX = 0.0f;
+    setUpActor(&player);
 
     //main loop
     while(window.isOpen()) {
-        raycaster.runGame(&player);
+        raycaster.runGame(&player, &agent);
     }
 
 

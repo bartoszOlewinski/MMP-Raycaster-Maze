@@ -27,14 +27,15 @@ public:
     /**
      * Runs rest of the functions
      */
-    void runGame(Actor* actor);
+    void runGame(Actor *actor, Actor *actorAI);
 
 
 
 private:
-    Actor* player;
-    double rotSpeed;
-    double moveSpeed;
+    Actor* agent{};
+    Actor* player{};
+    double rotSpeed{};
+    double moveSpeed{};
 
 
     int testMap[14][14] = {
@@ -67,10 +68,8 @@ private:
      * Renders image using raycasting,
      * depending on whether it is AI or not
      * the image is rendered in different places
-     * @param screenPosX position on X axis for start point
-     * @param screenPosY position on Y axis for start point
      */
-    void raycastingRenderer(int screenPosX, int screenPosY);
+    void raycastingRenderer(Actor * actor);
 
     /**
      * draws information column
@@ -82,6 +81,8 @@ private:
     void drawScreenPlayer();
 
     void playerControls();
+
+    void debugTextDisplay(double frameTime) const;
 };
 
 

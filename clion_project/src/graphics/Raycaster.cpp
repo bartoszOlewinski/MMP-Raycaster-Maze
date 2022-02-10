@@ -11,25 +11,27 @@
 #include <cmath>
 #include <iostream>
 
-//MAIN GAME FUNCTION
-void Raycaster::runGame(Actor* actor) {
 
+void Raycaster::runGame(Actor *actor, Actor *actorAI) {
+    //establish actors, get pointers
     player = actor;
+    agent = actorAI;
+
     handleWindow();
-
-
 }
 
 
 void Raycaster::handleWindow() {
-    double frameTimeForSpeeds;
-
+    //variables for frame timing
+    double frameTime;
     sf::Event event{};
     sf::Clock clock;
     sf::Time time = clock.getElapsedTime();
     sf::Time oldTime;
 
-    playerControls();
+    //only when window is focused allow for player inputs
+    if (windowPtr->hasFocus())
+        playerControls();
 
     //handling closing window
     while(windowPtr->pollEvent(event)) {
@@ -37,46 +39,47 @@ void Raycaster::handleWindow() {
             windowPtr->close();
     }
 
+
+
+    //RENDERING ============================
     //clear before render
-    windowPtr->clear(sf::Color::Black);
+    sf::Color backgroundColor = sf::Color::Black;
+    backgroundColor.r /= 4;
+    backgroundColor.g /= 4;
+    backgroundColor.b /= 4;
 
-    //draw here
+    windowPtr->clear(backgroundColor);
+
+    //render game screens
     drawScreenPlayer();
-
-
     //drawScreenAI();
+
+    //create info column
     //drawInfoColumn();
+
+    //======================================
 
 
     oldTime = time;
     time = clock.getElapsedTime();
+    frameTime = (time.asMilliseconds() - oldTime.asMilliseconds()) / 1000.0;
 
-    frameTimeForSpeeds = (time.asMilliseconds() - oldTime.asMilliseconds()) / 1000.0;
+    //speeds shouldn't be tied to framerate, potentially game breaking, *B U G S*
+    //rotSpeed = frameTime * 3.0;
+    //moveSpeed = frameTime * 5.0;
 
-    rotSpeed = frameTimeForSpeeds * 30.0;
-    moveSpeed = frameTimeForSpeeds * 50.0;
+    rotSpeed = 0.06;
+    moveSpeed = 0.1;
 
+    //display some info
+    debugTextDisplay(frameTime);
 
-    sf::Text text;
-    sf::Font font;
-    font.loadFromFile("arial.ttf");
-    text.setFont(font);
-    text.setString("FPS: " + std::to_string((int) std::round(1.0/frameTimeForSpeeds))
-    + "\nFrame time: " + std::to_string( frameTimeForSpeeds) + "s");
-    text.setCharacterSize(50);
-    text.setFillColor(sf::Color::White);
-    text.setPosition(60, 500);
-
-
-
-
-    windowPtr->draw(text);
-
-    //end of frame
+    //display everything that's been drawn in draw functions
     windowPtr->display();
 }
 
-void Raycaster::raycastingRenderer(int screenPosX, int screenPosY) {
+void Raycaster::raycastingRenderer(Actor * actor) {
+
 
 
 }
@@ -180,9 +183,9 @@ void Raycaster::drawScreenPlayer() {
         switch (testMap[mapX][mapY]) {
             case 1: color = sf::Color::Blue;
             break;
-            case 2: color = sf::Color::Red;
+            case 2: color = sf::Color::Magenta;
             break;
-            case 3: color = sf::Color::White;
+            case 3: color = sf::Color::Red;
             break;
             case 4: color = sf::Color::Cyan;
             break;
@@ -200,32 +203,32 @@ void Raycaster::drawScreenPlayer() {
             color.b /= 2;
         }
 
-        //try drawing floor and ceiling
+        //floor and ceiling colour
         sf::Color greyColor;
         greyColor.r = 105;
         greyColor.g = 105;
         greyColor.b = 105;
 
-        //ceiling
+        //drawing ceiling
         lines.append(sf::Vertex(sf::Vector2f((float)x+10, 0.0), greyColor));
         lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) drawStart), greyColor));
-        //floor
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) RENDER_HEIGHT), greyColor));
+        //drawing floor
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) RENDER_HEIGHT-1), greyColor));
+        //RENDER_HEIGHT - 1 to fix constant floor pixel at the bottom of the screen
         lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) drawEnd), greyColor));
 
 
-        //drawing the vertical line of pixels
-        lines.append(sf::Vertex(
-                sf::Vector2f((float)x+10, (float)drawStart),color));
-        lines.append(sf::Vertex(
-                sf::Vector2f((float)x+10, (float)drawEnd),color));
+        //drawing walls and their colours
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)drawStart),color));
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)drawEnd),color));
 
-
+        //draw the vertex array onto the window
         windowPtr->draw(lines);
-
     }
 }
 
+
+//PROTOTYPE ONLY, NEED PROPER INTERFACE ||| OR ||| another function that handles AI's inputs
 void Raycaster::playerControls() {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
 
@@ -262,6 +265,41 @@ void Raycaster::playerControls() {
             player->positionY -= player->directionY * moveSpeed;
     }
 
+    //
+    //ADD STRAFING AND ACTION BUTTON (alt & space)
+    //
+
+}
+
+void Raycaster::debugTextDisplay(double frameTime) const {
+    sf::Text text;
+    sf::Font font;
+    font.loadFromFile("arial.ttf");
+    text.setFont(font);
+
+    std::string stringText = "PLAYER SCREEN DEBUG:\nFPS: " + std::to_string((int) std::round(1.0/frameTime))
+                             + "\nFrame time: " + std::to_string( frameTime) + "s\nInputs: ";
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+        stringText += "UP, ";
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+        stringText += "DOWN, ";
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+        stringText += "LEFT, ";
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+        stringText += "RIGHT, ";
+    }
+
+    text.setString(stringText);
+    text.setCharacterSize(20);
+    text.setFillColor(sf::Color::White);
+    text.setPosition(20, 750);
+
+
+    windowPtr->draw(text);
 }
 
 
