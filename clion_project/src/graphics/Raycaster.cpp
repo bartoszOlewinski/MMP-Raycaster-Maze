@@ -94,7 +94,7 @@ void Raycaster::drawScreenPlayer() {
     //lines.resize(0);
 
     for (int x = 0; x < RENDER_WIDTH; x++) {
-        double cameraX = 2 * x / (double)RENDER_WIDTH;
+        double cameraX = 2 * x / double(RENDER_WIDTH) - 1;
         double rayDirX = player->directionX + player->planeX * cameraX;
         double rayDirY = player->directionY + player->planeY * cameraX;
 

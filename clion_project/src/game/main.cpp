@@ -22,8 +22,8 @@ int main() {
     player.directionX = 1.0f;
     player.directionY = 0.0f;
 
-    player.planeY = 0.66;
-    player.planeX = 0;
+    player.planeY = 0.66f;
+    player.planeX = 0.0f;
 
     //main loop
     while(window.isOpen()) {
