@@ -38,7 +38,7 @@ void Raycaster::handleWindow() {
     }
 
     //clear before render
-    windowPtr->clear();
+    windowPtr->clear(sf::Color::Black);
 
     //draw here
     drawScreenPlayer();
@@ -53,8 +53,8 @@ void Raycaster::handleWindow() {
 
     frameTimeForSpeeds = (time.asMilliseconds() - oldTime.asMilliseconds()) / 1000.0;
 
-    rotSpeed = frameTimeForSpeeds * 3.0;
-    moveSpeed = frameTimeForSpeeds * 5.0;
+    rotSpeed = frameTimeForSpeeds * 30.0;
+    moveSpeed = frameTimeForSpeeds * 50.0;
 
 
     sf::Text text;
@@ -91,7 +91,7 @@ void Raycaster::drawScreenAI() {
 
 void Raycaster::drawScreenPlayer() {
     sf::VertexArray lines (sf::Lines, 18 * RENDER_WIDTH);
-    //lines.resize(0);
+    lines.resize(0);
 
     for (int x = 0; x < RENDER_WIDTH; x++) {
         double cameraX = 2 * x / double(RENDER_WIDTH) - 1;
@@ -200,12 +200,26 @@ void Raycaster::drawScreenPlayer() {
             color.b /= 2;
         }
 
+        //try drawing floor and ceiling
+        sf::Color greyColor;
+        greyColor.r = 105;
+        greyColor.g = 105;
+        greyColor.b = 105;
+
+        //ceiling
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, 0.0), greyColor));
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) drawStart), greyColor));
+        //floor
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) RENDER_HEIGHT), greyColor));
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) drawEnd), greyColor));
+
 
         //drawing the vertical line of pixels
         lines.append(sf::Vertex(
-                sf::Vector2f((float)x, (float)drawStart),color));
+                sf::Vector2f((float)x+10, (float)drawStart),color));
         lines.append(sf::Vertex(
-                sf::Vector2f((float)x, (float)drawEnd),color));
+                sf::Vector2f((float)x+10, (float)drawEnd),color));
+
 
         windowPtr->draw(lines);
 
@@ -233,7 +247,8 @@ void Raycaster::playerControls() {
         player->planeX = player->planeX * cos(rotSpeed) - player->planeY * sin(rotSpeed);
         player->planeY = oldPlaneX * sin(rotSpeed) + player->planeY * cos(rotSpeed);
 
-    } else if (sf::Keyboard::isKeyPressed((sf::Keyboard::Up))) {
+    }
+    if (sf::Keyboard::isKeyPressed((sf::Keyboard::Up))) {
 
         if (testMap[int(player->positionX + player->directionX * moveSpeed)][int(player->positionY)] == 0)
             player->positionX += player->directionX * moveSpeed;

@@ -20,3 +20,6 @@ needed for now. Test 2d array will be used instead.
 -------------
 Removed map loading segment, managed to get the raycaster to work, although there is a fish eye lens and some weird shift
 to camera placement as well as weird movement bug.
+-------------
+Completely fixed the raycasting, need to figure out how to cap framerate to 60 as the moving and rotating speed are tied
+to frame timings. Changed up the map a little to create more room for traversal.
