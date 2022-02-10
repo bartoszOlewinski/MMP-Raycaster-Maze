@@ -22,10 +22,6 @@ void Raycaster::runGame(Actor* actor) {
 
 
 void Raycaster::handleWindow() {
-    //erase previous frame
-    windowPtr->clear();
-    playerControls();
-
     double frameTimeForSpeeds;
 
     sf::Event event{};
@@ -33,13 +29,16 @@ void Raycaster::handleWindow() {
     sf::Time time = clock.getElapsedTime();
     sf::Time oldTime;
 
+    playerControls();
+
     //handling closing window
     while(windowPtr->pollEvent(event)) {
         if (event.type == sf::Event::Closed)
             windowPtr->close();
     }
 
-
+    //clear before render
+    windowPtr->clear();
 
     //draw here
     drawScreenPlayer();
@@ -54,10 +53,8 @@ void Raycaster::handleWindow() {
 
     frameTimeForSpeeds = (time.asMilliseconds() - oldTime.asMilliseconds()) / 1000.0;
 
-
     rotSpeed = frameTimeForSpeeds * 3.0;
     moveSpeed = frameTimeForSpeeds * 5.0;
-
 
 
     sf::Text text;
@@ -69,6 +66,7 @@ void Raycaster::handleWindow() {
     text.setCharacterSize(50);
     text.setFillColor(sf::Color::White);
     text.setPosition(60, 500);
+
 
 
 
@@ -93,6 +91,7 @@ void Raycaster::drawScreenAI() {
 
 void Raycaster::drawScreenPlayer() {
     sf::VertexArray lines (sf::Lines, 18 * RENDER_WIDTH);
+    //lines.resize(0);
 
     for (int x = 0; x < RENDER_WIDTH; x++) {
         double cameraX = 2 * x / (double)RENDER_WIDTH;

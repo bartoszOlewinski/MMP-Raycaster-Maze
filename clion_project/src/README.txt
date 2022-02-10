@@ -8,3 +8,6 @@ SFML 2.5.1 32bit
 https://www.sfml-dev.org/files/SFML-2.5.1-windows-gcc-7.3.0-mingw-32-bit.zip
 
 Both links are also available from SFML Download site.
+
+SFML .dll files are required to be in the same directory as project's .exe file, also
+arial.ttf (font file) is required for debug displays

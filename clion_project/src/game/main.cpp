@@ -17,7 +17,7 @@ int main() {
     Raycaster raycaster(&window);
     Actor player{};
     player.positionX = 3.0f;
-    player.positionY = 2.0f;
+    player.positionY = 2.5f;
 
     player.directionX = 1.0f;
     player.directionY = 0.0f;
