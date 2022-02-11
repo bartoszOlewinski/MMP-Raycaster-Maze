@@ -20,7 +20,7 @@ void setUpActor(Actor* actor) {
 int main() {
 
     const int FRAME_LIMIT = 60;
-    const std::string WINDOW_TITLE = "Raycaster prototype";
+    const std::string WINDOW_TITLE = "Raycaster Maze prototype";
 
     sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_TITLE, sf::Style::Close);
     window.setFramerateLimit(FRAME_LIMIT);

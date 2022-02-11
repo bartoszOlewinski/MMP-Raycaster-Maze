@@ -23,3 +23,8 @@ to camera placement as well as weird movement bug.
 -------------
 Completely fixed the raycasting, need to figure out how to cap framerate to 60 as the moving and rotating speed are tied
 to frame timings. Changed up the map a little to create more room for traversal.
+-------------
+Added floor and ceiling colouring, fixed rotate and move speeds relying on framerate. Tidied up some code.
+================
+
+====10/02/22=====

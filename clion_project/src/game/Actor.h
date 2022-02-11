@@ -16,6 +16,9 @@ public:
 
     double planeX;
     double planeY;
+
+    int score;
+    double time;
 };
 
 

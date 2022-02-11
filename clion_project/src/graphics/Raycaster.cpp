@@ -40,14 +40,14 @@ void Raycaster::handleWindow() {
     }
 
 
-
-    //RENDERING ============================
-    //clear before render
     sf::Color backgroundColor = sf::Color::Black;
     backgroundColor.r /= 4;
     backgroundColor.g /= 4;
     backgroundColor.b /= 4;
 
+
+    //RENDERING ============================
+    //clear before render
     windowPtr->clear(backgroundColor);
 
     //render game screens
@@ -280,17 +280,26 @@ void Raycaster::debugTextDisplay(double frameTime) const {
     std::string stringText = "PLAYER SCREEN DEBUG:\nFPS: " + std::to_string((int) std::round(1.0/frameTime))
                              + "\nFrame time: " + std::to_string( frameTime) + "s\nInputs: ";
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-        stringText += "UP, ";
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-        stringText += "DOWN, ";
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-        stringText += "LEFT, ";
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-        stringText += "RIGHT, ";
+    //only add inputs if game is in foucs
+    if (windowPtr->hasFocus()) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+            stringText += "UP, ";
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+            stringText += "DOWN, ";
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+            stringText += "LEFT, ";
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+            stringText += "RIGHT, ";
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+            stringText += "SPACE, ";
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
+            stringText += "ALT, ";
+        }
     }
 
     text.setString(stringText);
