@@ -10,6 +10,7 @@
 #include <SFML/Window/Keyboard.hpp>
 #include <cmath>
 #include <iostream>
+#include <thread>
 
 
 void Raycaster::runGame(Actor *actor, Actor *actorAI) {
@@ -17,11 +18,20 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
     player = actor;
     agent = actorAI;
 
-    handleWindow();
+    //windowPtr->setFramerateLimit(60);
+
+    //only when window is focused allow for player inputs
+    if (windowPtr->hasFocus())
+        playerControls();
+
+
+    //std::thread thread(&Raycaster::renderWindow, this);
+
+    renderWindow();
 }
 
 
-void Raycaster::handleWindow() {
+void Raycaster::renderWindow() {
     //variables for frame timing
     double frameTime;
     sf::Event event{};
@@ -29,9 +39,7 @@ void Raycaster::handleWindow() {
     sf::Time time = clock.getElapsedTime();
     sf::Time oldTime;
 
-    //only when window is focused allow for player inputs
-    if (windowPtr->hasFocus())
-        playerControls();
+
 
     //handling closing window
     while(windowPtr->pollEvent(event)) {
@@ -78,6 +86,8 @@ void Raycaster::handleWindow() {
     windowPtr->display();
 }
 
+
+
 void Raycaster::raycastingRenderer(Actor * actor) {
 
 
@@ -93,7 +103,7 @@ void Raycaster::drawScreenAI() {
 }
 
 void Raycaster::drawScreenPlayer() {
-    sf::VertexArray lines (sf::Lines, 18 * RENDER_WIDTH);
+    sf::VertexArray lines (sf::Lines,  RENDER_WIDTH);
     lines.resize(0);
 
     for (int x = 0; x < RENDER_WIDTH; x++) {
@@ -210,17 +220,17 @@ void Raycaster::drawScreenPlayer() {
         greyColor.b = 105;
 
         //drawing ceiling
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, 0.0), greyColor));
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, 0), greyColor));
         lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) drawStart), greyColor));
-        //drawing floor
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) RENDER_HEIGHT-1), greyColor));
-        //RENDER_HEIGHT - 1 to fix constant floor pixel at the bottom of the screen
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) drawEnd), greyColor));
 
+        //drawing floor, RENDER_HEIGHT - 1 to fix constant floor pixel at the bottom of the screen
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) RENDER_HEIGHT-1), greyColor));
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) drawEnd), greyColor));
 
         //drawing walls and their colours
         lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)drawStart),color));
         lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)drawEnd),color));
+
 
         //draw the vertex array onto the window
         windowPtr->draw(lines);
@@ -277,10 +287,10 @@ void Raycaster::debugTextDisplay(double frameTime) const {
     font.loadFromFile("arial.ttf");
     text.setFont(font);
 
-    std::string stringText = "PLAYER SCREEN DEBUG:\nFPS: " + std::to_string((int) std::round(1.0/frameTime))
+    std::string stringText = "PLAYER SCREEN DEBUG:\nFPS: " + std::to_string((int) std::round(1.0f/frameTime))
                              + "\nFrame time: " + std::to_string( frameTime) + "s\nInputs: ";
 
-    //only add inputs if game is in foucs
+    //only add inputs if game is in focus
     if (windowPtr->hasFocus()) {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
             stringText += "UP, ";

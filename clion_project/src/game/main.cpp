@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <SFML/Graphics.hpp>
+#include <thread>
 #include "../graphics/Raycaster.h"
 
 
@@ -22,8 +23,8 @@ int main() {
     const int FRAME_LIMIT = 60;
     const std::string WINDOW_TITLE = "Raycaster Maze prototype";
 
-    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_TITLE, sf::Style::Close);
-    window.setFramerateLimit(FRAME_LIMIT);
+    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_TITLE, sf::Style::Default);
+
 
     //create a raycaster and initialize window
     Raycaster raycaster(&window);

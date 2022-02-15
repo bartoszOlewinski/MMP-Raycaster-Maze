@@ -62,7 +62,7 @@ private:
     /**
      * handles window entity
      */
-    void handleWindow();
+    void renderWindow();
 
     /**
      * Renders image using raycasting,
