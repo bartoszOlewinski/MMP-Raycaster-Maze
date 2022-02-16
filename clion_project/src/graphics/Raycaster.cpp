@@ -18,69 +18,82 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
     player = actor;
     agent = actorAI;
 
-    //windowPtr->setFramerateLimit(60);
 
-    //only when window is focused allow for player inputs
-    if (windowPtr->hasFocus())
-        playerControls();
+    sf::Clock clock;
+
+    sf::Time timeSinceLastUpdate = sf::Time::Zero;
 
 
-    //std::thread thread(&Raycaster::renderWindow, this);
+    sf::Event event{};
 
-    renderWindow();
+
+    //floor and ceiling colour
+    greyColor.r = 105;
+    greyColor.g = 105;
+    greyColor.b = 105;
+
+
+
+//=================MAIN GAME LOOP==========================
+
+    while (windowPtr->isOpen()) {
+
+        while(windowPtr->pollEvent(event)) {
+            if (event.type == sf::Event::Closed)
+                windowPtr->close();
+        }
+
+
+        //fixed time step, put logic and updates inside while loop
+        timeSinceLastUpdate += clock.restart();
+
+        while (timeSinceLastUpdate > TimePerFrame) {
+
+            timeSinceLastUpdate -= TimePerFrame;
+
+            playerControls();
+        }
+
+
+        //raycaster
+        renderWindow();
+
+
+
+    }
+    //========================================================
 }
 
 
 void Raycaster::renderWindow() {
-    //variables for frame timing
-    double frameTime;
-    sf::Event event{};
-    sf::Clock clock;
-    sf::Time time = clock.getElapsedTime();
-    sf::Time oldTime;
 
+    //sf::Color backgroundColor = sf::Color::Black;
+    //backgroundColor.r /= 4;
+    //backgroundColor.g /= 4;
+    //backgroundColor.b /= 4;
 
-
-    //handling closing window
-    while(windowPtr->pollEvent(event)) {
-        if (event.type == sf::Event::Closed)
-            windowPtr->close();
-    }
-
-
-    sf::Color backgroundColor = sf::Color::Black;
-    backgroundColor.r /= 4;
-    backgroundColor.g /= 4;
-    backgroundColor.b /= 4;
-
+    //get time before the render
+    time = fpsClock.getElapsedTime();
 
     //RENDERING ============================
     //clear before render
-    windowPtr->clear(backgroundColor);
+    windowPtr->clear();
 
-    //render game screens
+
+    //RENDER GAME SCREENS
     drawScreenPlayer();
     //drawScreenAI();
 
     //create info column
     //drawInfoColumn();
 
-    //======================================
-
-
     oldTime = time;
-    time = clock.getElapsedTime();
+    time = fpsClock.getElapsedTime();
     frameTime = (time.asMilliseconds() - oldTime.asMilliseconds()) / 1000.0;
 
-    //speeds shouldn't be tied to framerate, potentially game breaking, *B U G S*
-    //rotSpeed = frameTime * 3.0;
-    //moveSpeed = frameTime * 5.0;
 
-    rotSpeed = 0.06;
-    moveSpeed = 0.1;
+    debugTextDisplay();
 
-    //display some info
-    debugTextDisplay(frameTime);
 
     //display everything that's been drawn in draw functions
     windowPtr->display();
@@ -103,8 +116,14 @@ void Raycaster::drawScreenAI() {
 }
 
 void Raycaster::drawScreenPlayer() {
-    sf::VertexArray lines (sf::Lines,  RENDER_WIDTH);
+    sf::VertexArray lines (sf::Lines,  RENDER_WIDTH); //why use RENDER_WIDTH and resize to 0 after???
     lines.resize(0);
+
+    //load textures
+    sf::Texture texture;
+    //texture.loadFromFile("../resources/textures/texture_sheet_test.png");
+
+    sf::RenderStates state(&texture);
 
     for (int x = 0; x < RENDER_WIDTH; x++) {
         double cameraX = 2 * x / double(RENDER_WIDTH) - 1;
@@ -120,11 +139,12 @@ void Raycaster::drawScreenPlayer() {
         double sideDistY;
 
 
+        //1e30 for avoiding zeros, technically should be fine since c++ can handle division by 0
         double deltaDistX = (rayDirX == 0) ? 1e30 : std::abs(1/rayDirX);
         double deltaDistY = (rayDirY == 0) ? 1e30 : std::abs(1/rayDirY);
 
 
-/*
+/* EUCLIDEAN DISTANCE, CREATES FISHEYE EFFECT
         double deltaDistX = sqrt(1.0f + (rayDirY * rayDirY) / (rayDirX * rayDirX));
         double deltaDistY = sqrt(1.0f + (rayDirX * rayDirX) / (rayDirY * rayDirY));
 */
@@ -188,18 +208,18 @@ void Raycaster::drawScreenPlayer() {
         if (drawEnd >= RENDER_HEIGHT)
             drawEnd = RENDER_HEIGHT - 1;
 
+
+
         //selecting wall color based on number in the 2d map
         sf::Color color;
         switch (testMap[mapX][mapY]) {
             case 1: color = sf::Color::Blue;
             break;
-            case 2: color = sf::Color::Magenta;
+            case 2: color = sf::Color::Yellow;
             break;
             case 3: color = sf::Color::Red;
             break;
             case 4: color = sf::Color::Cyan;
-            break;
-            case 5: color = sf::Color::Yellow;
             break;
             default: color = sf::Color::Green;
             break;
@@ -213,11 +233,35 @@ void Raycaster::drawScreenPlayer() {
             color.b /= 2;
         }
 
-        //floor and ceiling colour
-        sf::Color greyColor;
-        greyColor.r = 105;
-        greyColor.g = 105;
-        greyColor.b = 105;
+
+        /*
+        //-1 so texture '0' can be used?
+        int textureNumber = testMap[mapX][mapY] - 1;
+
+        double wallX;
+        if (side == 0)
+            wallX = player->positionY + perpWallDist * rayDirY;
+        else
+            wallX = player->positionX + perpWallDist * rayDirX;
+        wallX -= floor((wallX));
+
+
+        int textureX = int(wallX * double(128));
+        if (side == 0 && rayDirX > 0) textureX = 128 - textureX - 1;
+        if (side == 1 && rayDirY < 0) textureX = 128 - textureX - 1;
+
+
+        double step = 1.0 * 128 / lineHeight;
+
+        double texturePos = (drawStart - RENDER_HEIGHT / 2 + lineHeight / 2) * step;
+        for (int y = drawStart; y < drawEnd; y++) {
+            int textureY = (int) texturePos & (128 - 1);
+            texturePos += step;
+
+
+
+        }
+        */
 
         //drawing ceiling
         lines.append(sf::Vertex(sf::Vector2f((float)x+10, 0), greyColor));
@@ -234,54 +278,85 @@ void Raycaster::drawScreenPlayer() {
 
         //draw the vertex array onto the window
         windowPtr->draw(lines);
+
+        //for textured version
+        //windowPtr->draw(lines, state);
     }
 }
 
 
 //PROTOTYPE ONLY, NEED PROPER INTERFACE ||| OR ||| another function that handles AI's inputs
 void Raycaster::playerControls() {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+    if (windowPtr->hasFocus()) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && !sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
 
-        double oldDirX = player->directionX;
-        player->directionX = player->directionX * cos(-rotSpeed) - player->directionY * sin(-rotSpeed);
-        player->directionY = oldDirX * sin(-rotSpeed) + player->directionY * cos(-rotSpeed);
+            double oldDirX = player->directionX;
+            player->directionX = player->directionX * cos(-rotSpeed) - player->directionY * sin(-rotSpeed);
+            player->directionY = oldDirX * sin(-rotSpeed) + player->directionY * cos(-rotSpeed);
 
-        double oldPlaneX = player->planeX;
-        player->planeX = player->planeX * cos(-rotSpeed) - player->planeY * sin(-rotSpeed);
-        player->planeY = oldPlaneX * sin(-rotSpeed) + player->planeY * cos(-rotSpeed);
+            double oldPlaneX = player->planeX;
+            player->planeX = player->planeX * cos(-rotSpeed) - player->planeY * sin(-rotSpeed);
+            player->planeY = oldPlaneX * sin(-rotSpeed) + player->planeY * cos(-rotSpeed);
 
-    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && !sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
 
-        double oldDirX = player->directionX;
-        player->directionX = player->directionX * cos(rotSpeed) - player->directionY * sin(rotSpeed);
-        player->directionY = oldDirX * sin(rotSpeed) + player->directionY * cos(rotSpeed);
+            double oldDirX = player->directionX;
+            player->directionX = player->directionX * cos(rotSpeed) - player->directionY * sin(rotSpeed);
+            player->directionY = oldDirX * sin(rotSpeed) + player->directionY * cos(rotSpeed);
 
-        double oldPlaneX = player->planeX;
-        player->planeX = player->planeX * cos(rotSpeed) - player->planeY * sin(rotSpeed);
-        player->planeY = oldPlaneX * sin(rotSpeed) + player->planeY * cos(rotSpeed);
+            double oldPlaneX = player->planeX;
+            player->planeX = player->planeX * cos(rotSpeed) - player->planeY * sin(rotSpeed);
+            player->planeY = oldPlaneX * sin(rotSpeed) + player->planeY * cos(rotSpeed);
 
+        }
+        if (sf::Keyboard::isKeyPressed((sf::Keyboard::Up))) {
+
+            if (testMap[int(player->positionX + player->directionX * moveSpeed)][int(player->positionY)] == 0)
+                player->positionX += player->directionX * moveSpeed;
+            if (testMap[int(player->positionX)][int(player->positionY + player->directionY * moveSpeed)] == 0)
+                player->positionY += player->directionY * moveSpeed;
+
+        } else if (sf::Keyboard::isKeyPressed((sf::Keyboard::Down))) {
+
+            if (testMap[int(player->positionX - player->directionX * moveSpeed)][int(player->positionY)] == 0)
+                player->positionX -= player->directionX * moveSpeed;
+            if (testMap[int(player->positionX)][int(player->positionY - player->directionY * moveSpeed)] == 0)
+                player->positionY -= player->directionY * moveSpeed;
+        }
+
+        //strafing
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
+
+            if (testMap[int(player->positionX - player->planeX * moveSpeed)][int(player->positionY)] == 0)
+                player->positionX -= player->planeX * moveSpeed;
+            if (testMap[int(player->positionX)][int(player->positionY - player->planeY * moveSpeed)] == 0)
+                player->positionY -= player->planeY * moveSpeed;
+
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
+
+            if (testMap[int(player->positionX + player->planeX * moveSpeed)][int(player->positionY)] == 0)
+                player->positionX += player->planeX * moveSpeed;
+            if (testMap[int(player->positionX)][int(player->positionY + player->planeY * moveSpeed)] == 0)
+                player->positionY += player->planeY * moveSpeed;
+
+
+        }
+
+        //sprinting
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
+            moveSpeed *= 1.4;
+        }
+
+        //action button
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+
+
+        }
     }
-    if (sf::Keyboard::isKeyPressed((sf::Keyboard::Up))) {
-
-        if (testMap[int(player->positionX + player->directionX * moveSpeed)][int(player->positionY)] == 0)
-            player->positionX += player->directionX * moveSpeed;
-        if (testMap[int(player->positionX)][int(player->positionY + player->directionY * moveSpeed)] == 0)
-            player->positionY += player->directionY * moveSpeed;
-
-    }else if (sf::Keyboard::isKeyPressed((sf::Keyboard::Down))) {
-        if (testMap[int(player->positionX - player->directionX * moveSpeed)][int(player->positionY)] == 0)
-            player->positionX -= player->directionX * moveSpeed;
-        if (testMap[int(player->positionX)][int(player->positionY - player->directionY * moveSpeed)] == 0)
-            player->positionY -= player->directionY * moveSpeed;
-    }
-
-    //
-    //ADD STRAFING AND ACTION BUTTON (alt & space)
-    //
 
 }
 
-void Raycaster::debugTextDisplay(double frameTime) const {
+void Raycaster::debugTextDisplay() const {
     sf::Text text;
     sf::Font font;
     font.loadFromFile("arial.ttf");
@@ -310,6 +385,9 @@ void Raycaster::debugTextDisplay(double frameTime) const {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
             stringText += "ALT, ";
         }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
+            stringText += "LSHIFT, ";
+        }
     }
 
     text.setString(stringText);
@@ -319,6 +397,10 @@ void Raycaster::debugTextDisplay(double frameTime) const {
 
 
     windowPtr->draw(text);
+}
+
+void Raycaster::setupWindow() {
+
 }
 
 

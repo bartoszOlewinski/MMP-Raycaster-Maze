@@ -20,11 +20,12 @@ void setUpActor(Actor* actor) {
 
 int main() {
 
-    const int FRAME_LIMIT = 60;
     const std::string WINDOW_TITLE = "Raycaster Maze prototype";
 
     sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_TITLE, sf::Style::Default);
+    window.clear(sf::Color::Black);
 
+    window.setVerticalSyncEnabled(true);
 
     //create a raycaster and initialize window
     Raycaster raycaster(&window);
@@ -34,12 +35,11 @@ int main() {
     Actor agent{};
 
     setUpActor(&player);
+    //setUpActor(&agent);
+
 
     //main loop
-    while(window.isOpen()) {
-        raycaster.runGame(&player, &agent);
-    }
-
+    raycaster.runGame(&player, &agent);
 
     return 0;
 }

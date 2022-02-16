@@ -7,6 +7,7 @@
 
 
 #include <SFML/Window.hpp>
+#include <unordered_map>
 #include "../game/MapHandler.h"
 #include "../game/Actor.h"
 
@@ -34,29 +35,58 @@ public:
 private:
     Actor* agent{};
     Actor* player{};
-    double rotSpeed{};
-    double moveSpeed{};
 
 
+    sf::Color greyColor;
+
+
+    double frameTime;
+
+    sf::Clock fpsClock;
+    sf::Time time;
+    sf::Time oldTime;
+
+    const sf::Time TimePerFrame = sf::seconds(1.f / 60.f);
+
+    double rotSpeed = TimePerFrame.asSeconds() * 3.0;
+    double moveSpeed = TimePerFrame.asSeconds() * 5.0;
+
+
+    enum class Textures {
+        GreyDefault,
+        RedCircle,
+        BlueCross,
+    };
+
+    //unordered map for textures and its symbols on map
+    const std::unordered_map<int, Textures> textureMap {
+            {1, Textures::GreyDefault},
+            {2, Textures::RedCircle},
+            {3, Textures::BlueCross},
+    };
+
+
+    //just for testing purposes
     int testMap[14][14] = {
             0,0,0,0,0,2,1,1,2,0,0,0,0,0,
             0,1,1,1,0,2,0,0,0,2,0,0,0,0,
             0,1,0,0,2,2,0,0,0,1,0,0,0,0,
-            0,1,0,0,0,0,0,1,0,3,4,0,0,
+            0,1,0,0,0,0,0,1,0,3,2,2,0,0,
             0,1,0,0,2,2,3,3,0,0,0,0,3,2,
             0,1,0,0,0,0,0,0,0,0,0,0,0,2,
-            0,1,0,0,1,4,0,0,0,0,5,0,0,1,
-            0,1,0,0,1,4,0,0,0,0,5,0,0,1,
-            0,1,0,0,5,4,0,0,0,0,5,0,0,5,
-            0,0,5,5,5,4,0,0,0,0,0,0,0,4,
-            0,0,0,0,0,2,0,0,0,0,0,0,4,0,
-            0,0,0,0,0,1,0,0,0,0,0,3,0,0,
-            0,0,0,0,0,3,0,0,0,2,2,3,0,0,
-            0,0,0,0,0,4,1,5,1,1,0,0,0,0,
+            0,1,0,0,0,0,0,0,0,0,2,0,0,1,
+            0,1,0,0,1,3,0,0,0,0,3,0,0,1,
+            0,1,0,0,2,3,0,0,0,0,1,0,0,1,
+            0,0,3,3,1,2,0,0,0,0,0,0,0,1,
+            0,0,0,0,0,2,0,0,0,0,0,0,2,0,
+            0,0,0,0,0,1,0,0,0,0,0,2,0,0,
+            0,0,0,0,0,2,0,0,0,2,2,3,0,0,
+            0,0,0,0,0,2,3,3,1,1,0,0,0,0,
     };
 
 
 
+    void setupWindow();
 
 
     /**
@@ -82,7 +112,7 @@ private:
 
     void playerControls();
 
-    void debugTextDisplay(double frameTime) const;
+    void debugTextDisplay() const;
 };
 
 
