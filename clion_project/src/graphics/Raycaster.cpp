@@ -121,7 +121,7 @@ void Raycaster::drawScreenPlayer() {
 
     //load textures
     sf::Texture texture;
-    //texture.loadFromFile("../resources/textures/texture_sheet_test.png");
+    texture.loadFromFile("../resources/textures/texture_sheet_test.png");
 
     sf::RenderStates state(&texture);
 
@@ -139,12 +139,19 @@ void Raycaster::drawScreenPlayer() {
         double sideDistY;
 
 
+
         //1e30 for avoiding zeros, technically should be fine since c++ can handle division by 0
+        /*
         double deltaDistX = (rayDirX == 0) ? 1e30 : std::abs(1/rayDirX);
         double deltaDistY = (rayDirY == 0) ? 1e30 : std::abs(1/rayDirY);
+         */
+        double deltaDistX = std::abs(1/rayDirX);
+        double deltaDistY = std::abs(1/rayDirY);
 
 
-/* EUCLIDEAN DISTANCE, CREATES FISHEYE EFFECT
+
+// EUCLIDEAN DISTANCE, CREATES FISHEYE EFFECT
+/*
         double deltaDistX = sqrt(1.0f + (rayDirY * rayDirY) / (rayDirX * rayDirX));
         double deltaDistY = sqrt(1.0f + (rayDirX * rayDirX) / (rayDirY * rayDirY));
 */
@@ -210,6 +217,7 @@ void Raycaster::drawScreenPlayer() {
 
 
 
+        /*
         //selecting wall color based on number in the 2d map
         sf::Color color;
         switch (testMap[mapX][mapY]) {
@@ -232,11 +240,14 @@ void Raycaster::drawScreenPlayer() {
             color.g /= 2;
             color.b /= 2;
         }
+         */
 
 
-        /*
+
         //-1 so texture '0' can be used?
         int textureNumber = testMap[mapX][mapY] - 1;
+        double textureCoordX = textureNumber * singleTextureSize % textureSheetSize;
+        double textureCoordY = textureNumber * singleTextureSize / textureSheetSize * singleTextureSize;
 
         double wallX;
         if (side == 0)
@@ -247,21 +258,30 @@ void Raycaster::drawScreenPlayer() {
 
 
         int textureX = int(wallX * double(128));
+        textureCoordX += textureX;
+
         if (side == 0 && rayDirX > 0) textureX = 128 - textureX - 1;
         if (side == 1 && rayDirY < 0) textureX = 128 - textureX - 1;
 
-
-        double step = 1.0 * 128 / lineHeight;
-
-        double texturePos = (drawStart - RENDER_HEIGHT / 2 + lineHeight / 2) * step;
-        for (int y = drawStart; y < drawEnd; y++) {
-            int textureY = (int) texturePos & (128 - 1);
-            texturePos += step;
-
-
-
+        sf::Color color = sf::Color::White;
+        if (side == 1) {
+            color.r /= 2;
+            color.g /= 2;
+            color.b /= 2;
         }
-        */
+
+
+
+
+        /*
+        //drawing walls and their colours
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)drawStart),color));
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)drawEnd),color));
+         */
+
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)drawStart),color, sf::Vector2f((float)textureCoordX, (float)textureCoordY + 1)));
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)drawEnd),color, sf::Vector2f((float)textureCoordX, (float)textureCoordY + 128 - 1)));
+
 
         //drawing ceiling
         lines.append(sf::Vertex(sf::Vector2f((float)x+10, 0), greyColor));
@@ -271,16 +291,11 @@ void Raycaster::drawScreenPlayer() {
         lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) RENDER_HEIGHT-1), greyColor));
         lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) drawEnd), greyColor));
 
-        //drawing walls and their colours
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)drawStart),color));
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)drawEnd),color));
-
-
         //draw the vertex array onto the window
-        windowPtr->draw(lines);
+        //windowPtr->draw(lines);
 
         //for textured version
-        //windowPtr->draw(lines, state);
+        windowPtr->draw(lines, state);
     }
 }
 
@@ -342,9 +357,9 @@ void Raycaster::playerControls() {
 
         }
 
-        //sprinting
+        //sprinting; currently can break player out of bounds
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
-            moveSpeed *= 1.4;
+            //moveSpeed *= 1.4;
         }
 
         //action button
