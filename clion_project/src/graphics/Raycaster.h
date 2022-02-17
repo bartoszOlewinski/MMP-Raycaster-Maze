@@ -39,6 +39,10 @@ private:
 
     sf::Color greyColor;
 
+    sf::Text text;
+    sf::Font font;
+    std::string stringText;
+
 
     double frameTime;
 
@@ -49,10 +53,13 @@ private:
     const sf::Time TimePerFrame = sf::seconds(1.f / 60.f);
 
     double rotSpeed = TimePerFrame.asSeconds() * 3.0;
-    double moveSpeed = TimePerFrame.asSeconds() * 5.0;
+    double moveSpeed = TimePerFrame.asSeconds() * 4.0;
+
 
     int textureSheetSize = 768;
     int singleTextureSize = 128;
+
+    sf::Texture texture;
 
 
     enum class Textures {
@@ -115,7 +122,6 @@ private:
 
     void playerControls();
 
-    void debugTextDisplay() const;
 };
 
 

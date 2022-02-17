@@ -2,12 +2,19 @@
 // Created by Bartosz Olewinski on 09/02/2022.
 //
 
+#define PLAYER_DEBUG_DISPLAY
+
+
+
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics.hpp>
+#include <SFML/Window/Keyboard.hpp>
+#include <SFML/Audio.hpp>
+
 #include "Raycaster.h"
 #include "../game/Actor.h"
 
-#include <SFML/Window/Keyboard.hpp>
+
 #include <cmath>
 #include <iostream>
 #include <thread>
@@ -33,6 +40,21 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
     greyColor.b = 105;
 
 
+    //load textures
+    texture.loadFromFile("../resources/textures/texture_sheet_test.png");
+
+
+
+#ifdef PLAYER_DEBUG_DISPLAY
+    //set up text and font
+    font.loadFromFile("arial.ttf");
+    text.setFont(font);
+
+    text.setCharacterSize(20);
+    text.setFillColor(sf::Color::White);
+    text.setPosition(20, 750);
+#endif
+
 
 //=================MAIN GAME LOOP==========================
 
@@ -42,7 +64,6 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
             if (event.type == sf::Event::Closed)
                 windowPtr->close();
         }
-
 
         //fixed time step, put logic and updates inside while loop
         timeSinceLastUpdate += clock.restart();
@@ -66,17 +87,11 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
 
 void Raycaster::renderWindow() {
-
-    //sf::Color backgroundColor = sf::Color::Black;
-    //backgroundColor.r /= 4;
-    //backgroundColor.g /= 4;
-    //backgroundColor.b /= 4;
-
     //get time before the render
     time = fpsClock.getElapsedTime();
 
     //RENDERING ============================
-    //clear before render
+    //clear before drawing next frame
     windowPtr->clear();
 
 
@@ -87,13 +102,15 @@ void Raycaster::renderWindow() {
     //create info column
     //drawInfoColumn();
 
+
     oldTime = time;
     time = fpsClock.getElapsedTime();
     frameTime = (time.asMilliseconds() - oldTime.asMilliseconds()) / 1000.0;
 
 
-    debugTextDisplay();
-
+#ifdef PLAYER_DEBUG_DISPLAY
+    windowPtr->draw(text);
+#endif
 
     //display everything that's been drawn in draw functions
     windowPtr->display();
@@ -119,10 +136,6 @@ void Raycaster::drawScreenPlayer() {
     sf::VertexArray lines (sf::Lines,  RENDER_WIDTH); //why use RENDER_WIDTH and resize to 0 after???
     lines.resize(0);
 
-    //load textures
-    sf::Texture texture;
-    texture.loadFromFile("../resources/textures/texture_sheet_test.png");
-
     sf::RenderStates state(&texture);
 
     for (int x = 0; x < RENDER_WIDTH; x++) {
@@ -145,6 +158,7 @@ void Raycaster::drawScreenPlayer() {
         double deltaDistX = (rayDirX == 0) ? 1e30 : std::abs(1/rayDirX);
         double deltaDistY = (rayDirY == 0) ? 1e30 : std::abs(1/rayDirY);
          */
+        //is fine without the giant number :)
         double deltaDistX = std::abs(1/rayDirX);
         double deltaDistY = std::abs(1/rayDirY);
 
@@ -246,8 +260,8 @@ void Raycaster::drawScreenPlayer() {
 
         //-1 so texture '0' can be used?
         int textureNumber = testMap[mapX][mapY] - 1;
-        double textureCoordX = textureNumber * singleTextureSize % textureSheetSize;
-        double textureCoordY = textureNumber * singleTextureSize / textureSheetSize * singleTextureSize;
+        int textureCoordX = textureNumber * singleTextureSize % textureSheetSize;
+        int textureCoordY = textureNumber * singleTextureSize / textureSheetSize * singleTextureSize;
 
         double wallX;
         if (side == 0)
@@ -257,11 +271,15 @@ void Raycaster::drawScreenPlayer() {
         wallX -= floor((wallX));
 
 
-        int textureX = int(wallX * double(128));
+        int textureX = int(wallX * float(singleTextureSize));
         textureCoordX += textureX;
 
+
+        //not used???
         if (side == 0 && rayDirX > 0) textureX = 128 - textureX - 1;
         if (side == 1 && rayDirY < 0) textureX = 128 - textureX - 1;
+
+
 
         sf::Color color = sf::Color::White;
         if (side == 1) {
@@ -279,17 +297,25 @@ void Raycaster::drawScreenPlayer() {
         lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)drawEnd),color));
          */
 
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)drawStart),color, sf::Vector2f((float)textureCoordX, (float)textureCoordY + 1)));
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)drawEnd),color, sf::Vector2f((float)textureCoordX, (float)textureCoordY + 128 - 1)));
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)drawStart),color,
+                                sf::Vector2f((float)textureCoordX, (float)textureCoordY + 1)));
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)drawEnd),color,
+                                sf::Vector2f((float)textureCoordX, (float)(textureCoordY + singleTextureSize - 1))));
+
 
 
         //drawing ceiling
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, 0), greyColor));
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) drawStart), greyColor));
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, 0), greyColor,
+                                sf::Vector2f( 640.0f,  128.0f)));
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) drawStart), greyColor,
+                                sf::Vector2f( 640.0f,  128.0f)));
 
-        //drawing floor, RENDER_HEIGHT - 1 to fix constant floor pixel at the bottom of the screen
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) RENDER_HEIGHT-1), greyColor));
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) drawEnd), greyColor));
+        //drawing floor
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) RENDER_HEIGHT - 1), greyColor,
+                                sf::Vector2f( 640.0f,  128.0f)));
+
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) drawEnd), greyColor,
+                                sf::Vector2f( 640.0f,  128.0f)));
 
         //draw the vertex array onto the window
         //windowPtr->draw(lines);
@@ -302,8 +328,16 @@ void Raycaster::drawScreenPlayer() {
 
 //PROTOTYPE ONLY, NEED PROPER INTERFACE ||| OR ||| another function that handles AI's inputs
 void Raycaster::playerControls() {
+
+#ifdef PLAYER_DEBUG_DISPLAY
+    stringText = "PLAYER SCREEN DEBUG:\nFPS: " + std::to_string((int) std::round(1.0f/frameTime))
+                 + "\nFrame time: " + std::to_string( frameTime) + "s\nInputs: ";
+#endif
+
+
     if (windowPtr->hasFocus()) {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && !sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
+            stringText += "LEFT, ";
 
             double oldDirX = player->directionX;
             player->directionX = player->directionX * cos(-rotSpeed) - player->directionY * sin(-rotSpeed);
@@ -314,6 +348,7 @@ void Raycaster::playerControls() {
             player->planeY = oldPlaneX * sin(-rotSpeed) + player->planeY * cos(-rotSpeed);
 
         } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && !sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
+            stringText += "RIGHT, ";
 
             double oldDirX = player->directionX;
             player->directionX = player->directionX * cos(rotSpeed) - player->directionY * sin(rotSpeed);
@@ -325,6 +360,7 @@ void Raycaster::playerControls() {
 
         }
         if (sf::Keyboard::isKeyPressed((sf::Keyboard::Up))) {
+            stringText += "UP, ";
 
             if (testMap[int(player->positionX + player->directionX * moveSpeed)][int(player->positionY)] == 0)
                 player->positionX += player->directionX * moveSpeed;
@@ -332,6 +368,7 @@ void Raycaster::playerControls() {
                 player->positionY += player->directionY * moveSpeed;
 
         } else if (sf::Keyboard::isKeyPressed((sf::Keyboard::Down))) {
+            stringText += "DOWN, ";
 
             if (testMap[int(player->positionX - player->directionX * moveSpeed)][int(player->positionY)] == 0)
                 player->positionX -= player->directionX * moveSpeed;
@@ -341,6 +378,7 @@ void Raycaster::playerControls() {
 
         //strafing
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
+            stringText += "LEFT, ALT, ";
 
             if (testMap[int(player->positionX - player->planeX * moveSpeed)][int(player->positionY)] == 0)
                 player->positionX -= player->planeX * moveSpeed;
@@ -348,6 +386,7 @@ void Raycaster::playerControls() {
                 player->positionY -= player->planeY * moveSpeed;
 
         } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
+            stringText += "RIGHT, ALT, ";
 
             if (testMap[int(player->positionX + player->planeX * moveSpeed)][int(player->positionY)] == 0)
                 player->positionX += player->planeX * moveSpeed;
@@ -357,61 +396,28 @@ void Raycaster::playerControls() {
 
         }
 
+        /*
         //sprinting; currently can break player out of bounds
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
-            //moveSpeed *= 1.4;
+            moveSpeed *= 1.4;
         }
+         */
 
         //action button
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-
-
-        }
-    }
-
-}
-
-void Raycaster::debugTextDisplay() const {
-    sf::Text text;
-    sf::Font font;
-    font.loadFromFile("arial.ttf");
-    text.setFont(font);
-
-    std::string stringText = "PLAYER SCREEN DEBUG:\nFPS: " + std::to_string((int) std::round(1.0f/frameTime))
-                             + "\nFrame time: " + std::to_string( frameTime) + "s\nInputs: ";
-
-    //only add inputs if game is in focus
-    if (windowPtr->hasFocus()) {
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-            stringText += "UP, ";
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-            stringText += "DOWN, ";
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-            stringText += "LEFT, ";
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-            stringText += "RIGHT, ";
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
             stringText += "SPACE, ";
+
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
-            stringText += "ALT, ";
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
-            stringText += "LSHIFT, ";
-        }
+
+
+#ifdef PLAYER_DEBUG_DISPLAY
+        text.setString(stringText);
+        //windowPtr->draw(text);
+        //std::cout<<stringText<<std::endl;
+#endif
+
     }
 
-    text.setString(stringText);
-    text.setCharacterSize(20);
-    text.setFillColor(sf::Color::White);
-    text.setPosition(20, 750);
-
-
-    windowPtr->draw(text);
 }
 
 void Raycaster::setupWindow() {

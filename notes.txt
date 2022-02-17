@@ -27,4 +27,15 @@ to frame timings. Changed up the map a little to create more room for traversal.
 Added floor and ceiling colouring, fixed rotate and move speeds relying on framerate. Tidied up some code.
 ================
 
-====10/02/22=====
+====17/02/22=====
+Added first version of texturing, because previous implementation was not using them, floors and ceilings are not being coloured
+currently as they need additional texture parameter to be renderer, possibly an easy fix. Performance dropped once again.
+Thanks to fixed time step I implemented yesterday the game still feels ok, the framerate drop could be connected to
+relatively small processing power of my laptop's gpu.
+The textures don't scale when approached and rather try to fit within the camera view.
+
+Fixed floor and ceiling, not going to place any textures on them, just plain grey colour. Added music (probably not legal)
+for fun (must be .FLAC, .WAV, or .Ogg but last doesn't work) and optimized the game enough to completely remove massive
+stutter when run on battery. Currently it stays around 30fps at all times.
+Might need to create debug class for all info display and stuff, but it works for now.
+Added multiple definitions and ifdefs for some debug purposes.

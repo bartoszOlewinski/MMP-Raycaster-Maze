@@ -1,7 +1,9 @@
 #include <iostream>
+#include <thread>
 
 #include <SFML/Graphics.hpp>
-#include <thread>
+#include <SFML/Audio.hpp>
+
 #include "../graphics/Raycaster.h"
 
 
@@ -18,9 +20,28 @@ void setUpActor(Actor* actor) {
     actor->planeX = 0.0f;
 }
 
+
+#define DEBUG_MODE
+//#define RELEASE_MODE
+
+
+#define MUSIC_MODE
+
+
+
+
 int main() {
 
-    const std::string WINDOW_TITLE = "Raycaster Maze prototype";
+    std::string WINDOW_TITLE = "Raycaster Maze";
+
+    const std::string VERSION = "0.1.3";
+
+
+#ifdef DEBUG_MODE
+    WINDOW_TITLE += " - Prototype textured " + VERSION;
+#endif
+
+
 
     sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_TITLE, sf::Style::Default);
     window.clear(sf::Color::Black);
@@ -36,6 +57,19 @@ int main() {
 
     setUpActor(&player);
     //setUpActor(&agent);
+
+#ifdef MUSIC_MODE
+    sf::SoundBuffer buffer;
+    if (!buffer.loadFromFile("../resources/sounds/into.flac"))
+        std::cout<<"music not loaded"<<std::endl;
+
+    sf::Sound sound;
+    sound.setBuffer(buffer);
+    sound.play();
+    sound.setVolume(20.f);
+    sound.setLoop(true);
+#endif
+
 
 
     //main loop
