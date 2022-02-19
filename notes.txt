@@ -43,12 +43,14 @@ Added multiple definitions and ifdefs for some debug purposes.
 The texturing is mirroring some of them, need to figure out how to prevent that, tutorials have code that handles them
 but they seem to invert everything permanently in my raycaster. -- Fixed it c:
 
-Fixed the texture distortion but the rendering goes out of render bounds creating '3D movie' like effect. If I restrict
+Fixed the textureWallSheet distortion but the rendering goes out of render bounds creating '3D movie' like effect. If I restrict
 associated values then distortion comes back.
 
 ====18/02/22====
 Created DebugConsole class, will be useful for toggling between options without a menu.
 
 ====19/02/22===
-Fixed texture distortion. Simple proportion of overflown pixels at the top or bottom / total height of render + overflown values =
+Fixed texture distortion. Simple proportion of overflown pixels at the top or bottom / (total height of render + overflown pixels) =
 = X / single texture height, where X is how much added to or subtracted from the texture Y coordinate must be.
+Changed map from int to unsigned char, movement checks now check if tile is <= '.' as all the items will be represented
+by characters with lower values than numbers in ascii table.

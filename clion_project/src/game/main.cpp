@@ -34,7 +34,7 @@ int main() {
 
     std::string WINDOW_TITLE = "Raycaster Maze";
 
-    const std::string VERSION = "0.1.3";
+    const std::string VERSION = "0.1.3.1";
 
 
 #ifdef DEBUG_MODE

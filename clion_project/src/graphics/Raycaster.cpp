@@ -13,6 +13,7 @@
 
 #include "Raycaster.h"
 #include "../game/Actor.h"
+#include "../game/Sprite.h"
 
 
 #include <cmath>
@@ -43,8 +44,7 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
 
     //load textures
-    texture.loadFromFile("../resources/textures/texture_sheet_test.png");
-
+    textureWallSheet.loadFromFile("../resources/textures/texture_sheet_test.png");
 
 
 #ifdef PLAYER_DEBUG_DISPLAY
@@ -138,7 +138,18 @@ void Raycaster::drawScreenPlayer() {
     sf::VertexArray lines (sf::Lines,  RENDER_WIDTH); //why use RENDER_WIDTH and resize to 0 after???
     lines.resize(0);
 
-    sf::RenderStates state(&texture);
+    sf::RenderStates state(&textureWallSheet);
+
+    //sprites
+    double spriteBuffer[RENDER_WIDTH];
+
+    int numberOfSprites = 3;
+
+    int spriteOrder[numberOfSprites];
+    double spriteDistance[numberOfSprites];
+    Sprite spriteArray[numberOfSprites];
+
+
 
     for (int x = 0; x < RENDER_WIDTH; x++) {
         double cameraX = 2 * x / double(RENDER_WIDTH) - 1;
@@ -154,25 +165,9 @@ void Raycaster::drawScreenPlayer() {
         double sideDistY;
 
 
-
-        //1e30 for avoiding zeros, technically should be fine since c++ can handle division by 0
-        /*
-        double deltaDistX = (rayDirX == 0) ? 1e30 : std::abs(1/rayDirX);
-        double deltaDistY = (rayDirY == 0) ? 1e30 : std::abs(1/rayDirY);
-         */
-
         //is fine without the giant number :)
         double deltaDistX = std::abs(1/rayDirX);
         double deltaDistY = std::abs(1/rayDirY);
-
-
-
-// EUCLIDEAN DISTANCE, CREATES FISHEYE EFFECT
-
-        //double deltaDistX = sqrt(1.0f + (rayDirY * rayDirY) / (rayDirX * rayDirX));
-        //double deltaDistY = sqrt(1.0f + (rayDirX * rayDirX) / (rayDirY * rayDirY));
-
-
 
 
         double perpWallDist = 0.0f;
@@ -214,8 +209,16 @@ void Raycaster::drawScreenPlayer() {
 
                 //perpWallDist = (mapY - player->positionY + (1 - stepY) / 2) / rayDirY;
             }
-            if (testMap[mapX][mapY] > 0)
+            //if (testMap[mapX][mapY] != '.' && testMap[mapX][mapY] > 48 && testMap[mapX][mapY] < 58)
+            if (testMap[mapX][mapY] != '.') {
                 hit = 1;
+            } else if (testMap[mapX][mapY] < '.') { //if it's an object
+                //need to figure out counter to know what index to use
+
+
+
+            }
+
         }
 
 
@@ -228,59 +231,50 @@ void Raycaster::drawScreenPlayer() {
 
 
 
-
-
         //height of line to draw on screen
         int lineHeight = (int) (RENDER_HEIGHT / perpWallDist);
-        int startAdjustment = 0;
-        int endAdjustment = 0;
 
         //drawing ceiling======================================================
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, 0), greyColor,
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, 10), greyColor,
                                 sf::Vector2f( 640.0f,  128.0f)));
 
         int drawStart = int(-lineHeight * (1.0f - 0.5f) + RENDER_HEIGHT * 0.5f);
-
-        int overflowStartPixels = -drawStart;
+        int overflownPixels = -drawStart;
 
 
         if (drawStart < 0) {
             drawStart = 0;
-
         }
 
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) drawStart), greyColor,
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) drawStart + 10), greyColor,
                                 sf::Vector2f( 640.0f,  128.0f)));
         //======================================================================
 
 
 
         //drawing floor=============================================
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) RENDER_HEIGHT), greyColor,
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) RENDER_HEIGHT + 10), greyColor,
                                 sf::Vector2f( 640.0f,  128.0f)));
 
         int drawEnd = int(lineHeight * 0.5f + RENDER_HEIGHT * 0.5f);
 
-        int overflowEndPixels = drawEnd - RENDER_HEIGHT;
-
+        int pixelAdjustment = 0;
 
         if (drawEnd > RENDER_HEIGHT) {
             drawEnd = RENDER_HEIGHT - 1;
 
-            int size = overflowStartPixels + overflowEndPixels + RENDER_HEIGHT;
-
-            endAdjustment = overflowEndPixels * singleTextureSize / size;
-            startAdjustment = overflowStartPixels * singleTextureSize / size;
+            //simple ratio of total pixels to be rendered and single textureWallSheet pixel height
+            pixelAdjustment = overflownPixels * singleTextureSize / (overflownPixels + overflownPixels + RENDER_HEIGHT);
         }
 
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) drawEnd), greyColor,
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) drawEnd + 10), greyColor,
                                 sf::Vector2f( 640.0f,  128.0f)));
         //==============================================================
 
 
 
-        //getting the position of texture in texture sheet
-        int textureNumber = testMap[mapX][mapY] - 1;
+        //getting the position of textureWallSheet in textureWallSheet sheet
+        int textureNumber = int(testMap[mapX][mapY]) - '0' - 1;
 
         int textureCoordX = textureNumber * singleTextureSize % textureSheetSize;
         int textureCoordY = textureNumber * singleTextureSize / textureSheetSize * singleTextureSize;
@@ -300,7 +294,7 @@ void Raycaster::drawScreenPlayer() {
         //get x coordinate
         int textureX = int(wallX * double(singleTextureSize));
 
-        //flip texture
+        //flip textureWallSheet
         if (!side && rayDirX <= 0)
             textureX = singleTextureSize - textureX - 1;
         if (side && rayDirY >= 0)
@@ -320,18 +314,33 @@ void Raycaster::drawScreenPlayer() {
 
 
         //drawing textured lines==================================
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)drawStart),color,
-                                sf::Vector2f((float)textureCoordX, (float)(textureCoordY + 1 + startAdjustment))));
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)drawStart + 10),color,
+                                sf::Vector2f((float)textureCoordX, (float)(textureCoordY + 1 + pixelAdjustment))));
 
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)(drawEnd)),color,
-                                sf::Vector2f((float)textureCoordX, (float)(textureCoordY + singleTextureSize - 1 - endAdjustment))));
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)(drawEnd + 10)),color,
+                                sf::Vector2f((float)textureCoordX, (float)(textureCoordY + singleTextureSize - 1 - pixelAdjustment))));
         //=======================================================
+
+
+
+        spriteBuffer[x] = perpWallDist;
+
+
 
 
 
         //drawing on screen for textured version
         windowPtr->draw(lines, state);
     }
+
+    //SPRITE CASTING ==========================================================
+    for (int i = 0; i < numberOfSprites; i++) {
+        spriteOrder[i] = i;
+        //spriteDistance[i] = ((player->positionX ))
+
+    }
+
+    //=========================================================================
 }
 
 
@@ -371,17 +380,17 @@ void Raycaster::playerControls() {
         if (sf::Keyboard::isKeyPressed((sf::Keyboard::Up))) {
             stringText += "UP, ";
 
-            if (testMap[int(player->positionX + player->directionX * moveSpeed)][int(player->positionY)] == 0)
+            if (testMap[int(player->positionX + player->directionX * moveSpeed)][int(player->positionY)] <= '.')
                 player->positionX += player->directionX * moveSpeed;
-            if (testMap[int(player->positionX)][int(player->positionY + player->directionY * moveSpeed)] == 0)
+            if (testMap[int(player->positionX)][int(player->positionY + player->directionY * moveSpeed)] <= '.')
                 player->positionY += player->directionY * moveSpeed;
 
         } else if (sf::Keyboard::isKeyPressed((sf::Keyboard::Down))) {
             stringText += "DOWN, ";
 
-            if (testMap[int(player->positionX - player->directionX * moveSpeed)][int(player->positionY)] == 0)
+            if (testMap[int(player->positionX - player->directionX * moveSpeed)][int(player->positionY)] <= '.')
                 player->positionX -= player->directionX * moveSpeed;
-            if (testMap[int(player->positionX)][int(player->positionY - player->directionY * moveSpeed)] == 0)
+            if (testMap[int(player->positionX)][int(player->positionY - player->directionY * moveSpeed)] <= '.')
                 player->positionY -= player->directionY * moveSpeed;
         }
 
@@ -389,17 +398,17 @@ void Raycaster::playerControls() {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
             stringText += "LEFT, ALT, ";
 
-            if (testMap[int(player->positionX - player->planeX * moveSpeed)][int(player->positionY)] == 0)
+            if (testMap[int(player->positionX - player->planeX * moveSpeed)][int(player->positionY)] <= '.')
                 player->positionX -= player->planeX * moveSpeed;
-            if (testMap[int(player->positionX)][int(player->positionY - player->planeY * moveSpeed)] == 0)
+            if (testMap[int(player->positionX)][int(player->positionY - player->planeY * moveSpeed)] <= '.')
                 player->positionY -= player->planeY * moveSpeed;
 
         } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
             stringText += "RIGHT, ALT, ";
 
-            if (testMap[int(player->positionX + player->planeX * moveSpeed)][int(player->positionY)] == 0)
+            if (testMap[int(player->positionX + player->planeX * moveSpeed)][int(player->positionY)] <= '.')
                 player->positionX += player->planeX * moveSpeed;
-            if (testMap[int(player->positionX)][int(player->positionY + player->planeY * moveSpeed)] == 0)
+            if (testMap[int(player->positionX)][int(player->positionY + player->planeY * moveSpeed)] <=  '.')
                 player->positionY += player->planeY * moveSpeed;
 
 
