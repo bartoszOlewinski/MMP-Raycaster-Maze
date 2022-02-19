@@ -38,7 +38,7 @@ int main() {
 
 
 #ifdef DEBUG_MODE
-    WINDOW_TITLE += " - Prototype textured " + VERSION;
+    WINDOW_TITLE += " - prototype_textured_" + VERSION;
 #endif
 
 
@@ -60,7 +60,7 @@ int main() {
 
 #ifdef MUSIC_MODE
     sf::SoundBuffer buffer;
-    if (!buffer.loadFromFile("../resources/sounds/into.flac"))
+    if (!buffer.loadFromFile("../resources/sounds/into_sandys_city.flac"))
         std::cout<<"music not loaded"<<std::endl;
 
     sf::Sound sound;

@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include "../game/MapHandler.h"
 #include "../game/Actor.h"
+#include "../game/DebugConsole.cpp"
 
 
 const int WINDOW_WIDTH = 1600;
@@ -35,6 +36,8 @@ public:
 private:
     Actor* agent{};
     Actor* player{};
+
+    DebugConsole debugConsole = DebugConsole(nullptr);
 
 
     sf::Color greyColor;

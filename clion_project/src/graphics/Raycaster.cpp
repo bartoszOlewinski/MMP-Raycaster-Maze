@@ -25,6 +25,8 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
     player = actor;
     agent = actorAI;
 
+    debugConsole = DebugConsole(windowPtr);
+
 
     sf::Clock clock;
 
@@ -60,6 +62,7 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
     while (windowPtr->isOpen()) {
 
+
         while(windowPtr->pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 windowPtr->close();
@@ -78,9 +81,6 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
         //raycaster
         renderWindow();
-
-
-
     }
     //========================================================
 }
@@ -101,6 +101,8 @@ void Raycaster::renderWindow() {
 
     //create info column
     //drawInfoColumn();
+    debugConsole.activateDebug();
+    debugConsole.commandOpener();
 
 
     oldTime = time;
@@ -158,6 +160,7 @@ void Raycaster::drawScreenPlayer() {
         double deltaDistX = (rayDirX == 0) ? 1e30 : std::abs(1/rayDirX);
         double deltaDistY = (rayDirY == 0) ? 1e30 : std::abs(1/rayDirY);
          */
+
         //is fine without the giant number :)
         double deltaDistX = std::abs(1/rayDirX);
         double deltaDistY = std::abs(1/rayDirY);
@@ -165,13 +168,14 @@ void Raycaster::drawScreenPlayer() {
 
 
 // EUCLIDEAN DISTANCE, CREATES FISHEYE EFFECT
-/*
-        double deltaDistX = sqrt(1.0f + (rayDirY * rayDirY) / (rayDirX * rayDirX));
-        double deltaDistY = sqrt(1.0f + (rayDirX * rayDirX) / (rayDirY * rayDirY));
-*/
 
-        double perpWallDist;
+        //double deltaDistX = sqrt(1.0f + (rayDirY * rayDirY) / (rayDirX * rayDirX));
+        //double deltaDistY = sqrt(1.0f + (rayDirX * rayDirX) / (rayDirY * rayDirY));
 
+
+
+
+        double perpWallDist = 0.0f;
 
         int stepX;
         int stepY;
@@ -201,88 +205,112 @@ void Raycaster::drawScreenPlayer() {
                 sideDistX += deltaDistX;
                 mapX += stepX;
                 side = 0;
+
+                //perpWallDist = (mapX - player->positionX + (1 - stepX) / 2) / rayDirX;
             } else {
                 sideDistY += deltaDistY;
                 mapY += stepY;
                 side = 1;
+
+                //perpWallDist = (mapY - player->positionY + (1 - stepY) / 2) / rayDirY;
             }
             if (testMap[mapX][mapY] > 0)
                 hit = 1;
         }
+
 
         if(side == 0)
             perpWallDist = (sideDistX - deltaDistX);
         else
             perpWallDist = (sideDistY - deltaDistY);
 
+
+
+
+
+
+
         //height of line to draw on screen
         int lineHeight = (int) (RENDER_HEIGHT / perpWallDist);
+        int startAdjustment = 0;
+        int endAdjustment = 0;
+
+        //drawing ceiling======================================================
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, 0), greyColor,
+                                sf::Vector2f( 640.0f,  128.0f)));
+
+        int drawStart = int(-lineHeight * (1.0f - 0.5f) + RENDER_HEIGHT * 0.5f);
+
+        int overflowStartPixels = -drawStart;
 
 
-        int drawStart = -lineHeight / 2 + RENDER_HEIGHT / 2;
-
-        if (drawStart < 0)
+        if (drawStart < 0) {
             drawStart = 0;
 
-        int drawEnd = lineHeight / 2 + RENDER_HEIGHT / 2;
+        }
 
-        if (drawEnd >= RENDER_HEIGHT)
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) drawStart), greyColor,
+                                sf::Vector2f( 640.0f,  128.0f)));
+        //======================================================================
+
+
+
+        //drawing floor=============================================
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) RENDER_HEIGHT), greyColor,
+                                sf::Vector2f( 640.0f,  128.0f)));
+
+        int drawEnd = int(lineHeight * 0.5f + RENDER_HEIGHT * 0.5f);
+
+        int overflowEndPixels = drawEnd - RENDER_HEIGHT;
+
+
+        if (drawEnd > RENDER_HEIGHT) {
             drawEnd = RENDER_HEIGHT - 1;
 
+            int size = overflowStartPixels + overflowEndPixels + RENDER_HEIGHT;
 
-
-        /*
-        //selecting wall color based on number in the 2d map
-        sf::Color color;
-        switch (testMap[mapX][mapY]) {
-            case 1: color = sf::Color::Blue;
-            break;
-            case 2: color = sf::Color::Yellow;
-            break;
-            case 3: color = sf::Color::Red;
-            break;
-            case 4: color = sf::Color::Cyan;
-            break;
-            default: color = sf::Color::Green;
-            break;
+            endAdjustment = overflowEndPixels * singleTextureSize / size;
+            startAdjustment = overflowStartPixels * singleTextureSize / size;
         }
 
-
-        //different brightness of the wall
-        if (side == 1) {
-            color.r /= 2;
-            color.g /= 2;
-            color.b /= 2;
-        }
-         */
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) drawEnd), greyColor,
+                                sf::Vector2f( 640.0f,  128.0f)));
+        //==============================================================
 
 
 
-        //-1 so texture '0' can be used?
+        //getting the position of texture in texture sheet
         int textureNumber = testMap[mapX][mapY] - 1;
+
         int textureCoordX = textureNumber * singleTextureSize % textureSheetSize;
         int textureCoordY = textureNumber * singleTextureSize / textureSheetSize * singleTextureSize;
 
+
+
+
+        //calculate where wall was hit
         double wallX;
         if (side == 0)
             wallX = player->positionY + perpWallDist * rayDirY;
         else
             wallX = player->positionX + perpWallDist * rayDirX;
-        wallX -= floor((wallX));
+        wallX -= floor(wallX);
 
 
-        int textureX = int(wallX * float(singleTextureSize));
+        //get x coordinate
+        int textureX = int(wallX * double(singleTextureSize));
+
+        //flip texture
+        if (!side && rayDirX <= 0)
+            textureX = singleTextureSize - textureX - 1;
+        if (side && rayDirY >= 0)
+            textureX = singleTextureSize - textureX - 1;
+
         textureCoordX += textureX;
 
-
-        //not used???
-        if (side == 0 && rayDirX > 0) textureX = 128 - textureX - 1;
-        if (side == 1 && rayDirY < 0) textureX = 128 - textureX - 1;
-
-
-
+        //shading
         sf::Color color = sf::Color::White;
-        if (side == 1) {
+        if (side == 0) {
             color.r /= 2;
             color.g /= 2;
             color.b /= 2;
@@ -291,36 +319,17 @@ void Raycaster::drawScreenPlayer() {
 
 
 
-        /*
-        //drawing walls and their colours
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)drawStart),color));
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)drawEnd),color));
-         */
-
+        //drawing textured lines==================================
         lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)drawStart),color,
-                                sf::Vector2f((float)textureCoordX, (float)textureCoordY + 1)));
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)drawEnd),color,
-                                sf::Vector2f((float)textureCoordX, (float)(textureCoordY + singleTextureSize - 1))));
+                                sf::Vector2f((float)textureCoordX, (float)(textureCoordY + 1 + startAdjustment))));
+
+        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float)(drawEnd)),color,
+                                sf::Vector2f((float)textureCoordX, (float)(textureCoordY + singleTextureSize - 1 - endAdjustment))));
+        //=======================================================
 
 
 
-        //drawing ceiling
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, 0), greyColor,
-                                sf::Vector2f( 640.0f,  128.0f)));
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) drawStart), greyColor,
-                                sf::Vector2f( 640.0f,  128.0f)));
-
-        //drawing floor
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) RENDER_HEIGHT - 1), greyColor,
-                                sf::Vector2f( 640.0f,  128.0f)));
-
-        lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) drawEnd), greyColor,
-                                sf::Vector2f( 640.0f,  128.0f)));
-
-        //draw the vertex array onto the window
-        //windowPtr->draw(lines);
-
-        //for textured version
+        //drawing on screen for textured version
         windowPtr->draw(lines, state);
     }
 }
