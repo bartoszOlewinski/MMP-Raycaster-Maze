@@ -8,9 +8,9 @@
 
 #include <SFML/Window.hpp>
 #include <unordered_map>
-#include "../game/MapHandler.h"
 #include "../game/Actor.h"
 #include "../game/DebugConsole.cpp"
+#include "../game/Map.h"
 
 
 const int WINDOW_WIDTH = 1600;
@@ -38,6 +38,7 @@ private:
     Actor* player{};
 
     DebugConsole debugConsole = DebugConsole(nullptr);
+    Map map;
 
 
     sf::Color greyColor;
@@ -59,8 +60,8 @@ private:
     double moveSpeed = TimePerFrame.asSeconds() * 4.0;
 
 
-    int textureSheetSize = 768 + 128;
-    int singleTextureSize = 128;
+    static const int textureSheetSize = 896;
+    static const int singleTextureSize = 128;
 
     sf::Texture textureWallSheet;
 
@@ -82,22 +83,7 @@ private:
 
 
     //just for testing purposes
-    unsigned char testMap[14][14] = {
-            '.','.','.','.','.','2','1','1','2','.','.','.','.','.',
-            '.','1','4','1','.','2','.','.','.','2','.','.','.','.',
-            '.','5','.','.','2','2','.','.','.','1','.','.','.','.',
-            '.','4','.','.','.','.','.','1','.','3','2','2','.','.',
-            '.','3','.','.','.','2','3','3','.','.','.','.','3','2',
-            '.','5','.','.','.','.','.','.','.','.','.','.','.','2',
-            '.','5','.','.','.','.','.','.','.','.','2','.','.','1',
-            '.','1','.','.','1','3','.','.','!','.','3','.','.','1',
-            '.','1','.','.','2','3','.','.','!','.','1','.','.','1',
-            '.','.','3','3','1','2','.','.','!','.','.','.','.','1',
-            '.','.','.','.','.','2','.','.','.','.','.','.','2','.',
-            '.','.','.','.','.','1','.','.','.','.','.','2','.','.',
-            '.','.','.','.','.','2','.','.','.','2','2','3','.','.',
-            '.','.','.','.','.','2','3','3','1','1','.','.','.','.',
-    };
+    unsigned char mapInUse[14][14];
 
 
 
@@ -126,6 +112,8 @@ private:
     void drawScreenPlayer();
 
     void playerControls();
+
+    void getSpriteLocations();
 
 };
 

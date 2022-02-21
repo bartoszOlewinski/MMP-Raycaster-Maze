@@ -49,8 +49,12 @@ associated values then distortion comes back.
 ====18/02/22====
 Created DebugConsole class, will be useful for toggling between options without a menu.
 
-====19/02/22===
+====19/02/22====
 Fixed texture distortion. Simple proportion of overflown pixels at the top or bottom / (total height of render + overflown pixels) =
 = X / single texture height, where X is how much added to or subtracted from the texture Y coordinate must be.
 Changed map from int to unsigned char, movement checks now check if tile is <= '.' as all the items will be represented
 by characters with lower values than numbers in ascii table.
+
+====21/02/22====
+Started reworking map handling as sprite handling requires to store each sprite position before rendering them. Removed
+MapHandler class and replaced it with Map class with similar functionality.

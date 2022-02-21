@@ -22,11 +22,28 @@
 
 
 void Raycaster::runGame(Actor *actor, Actor *actorAI) {
+    debugConsole = DebugConsole(windowPtr);
+    map.loadMapDetails();
+
     //establish actors, get pointers
     player = actor;
     agent = actorAI;
 
-    debugConsole = DebugConsole(windowPtr);
+    //set up starting point
+    player->positionX = map.startingPosX;
+    player->positionY = map.startingPosY;
+    agent->positionX = map.startingPosX;
+    agent->positionY = map.startingPosY;
+
+
+
+
+    //copy the map to the raycaster
+    for (int i = 0; i < Map::MAP_SIZE; i++) {
+        for (int j = 0; j < Map::MAP_SIZE; j++) {
+            mapInUse[i][j] = map.mapArray[i][j];
+        }
+    }
 
 
     sf::Clock clock;
@@ -45,6 +62,9 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
     //load textures
     textureWallSheet.loadFromFile("../resources/textures/texture_sheet_test.png");
+
+
+
 
 
 #ifdef PLAYER_DEBUG_DISPLAY
@@ -101,6 +121,7 @@ void Raycaster::renderWindow() {
 
     //create info column
     //drawInfoColumn();
+
     debugConsole.activateDebug();
     debugConsole.commandOpener();
 
@@ -143,14 +164,20 @@ void Raycaster::drawScreenPlayer() {
     //sprites
     double spriteBuffer[RENDER_WIDTH];
 
-    int numberOfSprites = 3;
+    int numberOfSprites = map.numOfSprites;
 
     int spriteOrder[numberOfSprites];
     double spriteDistance[numberOfSprites];
+
     Sprite spriteArray[numberOfSprites];
 
+   //for (int i = 0; i < numberOfSprites; i++) {
+        //spriteArray[i] = map.spriteLocationMap.;
+    //}
 
 
+
+    //START CASTING RAYS
     for (int x = 0; x < RENDER_WIDTH; x++) {
         double cameraX = 2 * x / double(RENDER_WIDTH) - 1;
         double rayDirX = player->directionX + player->planeX * cameraX;
@@ -209,16 +236,10 @@ void Raycaster::drawScreenPlayer() {
 
                 //perpWallDist = (mapY - player->positionY + (1 - stepY) / 2) / rayDirY;
             }
-            //if (testMap[mapX][mapY] != '.' && testMap[mapX][mapY] > 48 && testMap[mapX][mapY] < 58)
-            if (testMap[mapX][mapY] != '.') {
+            //if (mapInUse[mapX][mapY] != '.' && mapInUse[mapX][mapY] > 48 && mapInUse[mapX][mapY] < 58)
+            if (mapInUse[mapX][mapY] != '.' && mapInUse[mapX][mapY] != '#') {
                 hit = 1;
-            } else if (testMap[mapX][mapY] < '.') { //if it's an object
-                //need to figure out counter to know what index to use
-
-
-
             }
-
         }
 
 
@@ -274,7 +295,7 @@ void Raycaster::drawScreenPlayer() {
 
 
         //getting the position of textureWallSheet in textureWallSheet sheet
-        int textureNumber = int(testMap[mapX][mapY]) - '0' - 1;
+        int textureNumber = int(mapInUse[mapX][mapY]) - '0' - 1;
 
         int textureCoordX = textureNumber * singleTextureSize % textureSheetSize;
         int textureCoordY = textureNumber * singleTextureSize / textureSheetSize * singleTextureSize;
@@ -323,9 +344,11 @@ void Raycaster::drawScreenPlayer() {
 
 
 
+
+
+
+        //some distance buffers for sprites
         spriteBuffer[x] = perpWallDist;
-
-
 
 
 
@@ -333,12 +356,20 @@ void Raycaster::drawScreenPlayer() {
         windowPtr->draw(lines, state);
     }
 
-    //SPRITE CASTING ==========================================================
-    for (int i = 0; i < numberOfSprites; i++) {
-        spriteOrder[i] = i;
-        //spriteDistance[i] = ((player->positionX ))
 
+    //SPRITE CASTING ==========================================================
+
+    //get all the sprites present in the map
+    int i = 0;
+    for (auto& sprite: map.spriteLocationMap) {
+        spriteOrder[i] = i;
+
+        spriteDistance[i] = ((player->positionX - std::get<0>(sprite.second)) * (player->positionX - std::get<0>(sprite.second))
+                + (player->positionY - std::get<1>(sprite.second)) * (player->positionY - std::get<1>(sprite.second)));
+        i++;
     }
+
+
 
     //=========================================================================
 }
@@ -380,17 +411,17 @@ void Raycaster::playerControls() {
         if (sf::Keyboard::isKeyPressed((sf::Keyboard::Up))) {
             stringText += "UP, ";
 
-            if (testMap[int(player->positionX + player->directionX * moveSpeed)][int(player->positionY)] <= '.')
+            if (mapInUse[int(player->positionX + player->directionX * moveSpeed)][int(player->positionY)] <= '.')
                 player->positionX += player->directionX * moveSpeed;
-            if (testMap[int(player->positionX)][int(player->positionY + player->directionY * moveSpeed)] <= '.')
+            if (mapInUse[int(player->positionX)][int(player->positionY + player->directionY * moveSpeed)] <= '.')
                 player->positionY += player->directionY * moveSpeed;
 
         } else if (sf::Keyboard::isKeyPressed((sf::Keyboard::Down))) {
             stringText += "DOWN, ";
 
-            if (testMap[int(player->positionX - player->directionX * moveSpeed)][int(player->positionY)] <= '.')
+            if (mapInUse[int(player->positionX - player->directionX * moveSpeed)][int(player->positionY)] <= '.')
                 player->positionX -= player->directionX * moveSpeed;
-            if (testMap[int(player->positionX)][int(player->positionY - player->directionY * moveSpeed)] <= '.')
+            if (mapInUse[int(player->positionX)][int(player->positionY - player->directionY * moveSpeed)] <= '.')
                 player->positionY -= player->directionY * moveSpeed;
         }
 
@@ -398,17 +429,17 @@ void Raycaster::playerControls() {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
             stringText += "LEFT, ALT, ";
 
-            if (testMap[int(player->positionX - player->planeX * moveSpeed)][int(player->positionY)] <= '.')
+            if (mapInUse[int(player->positionX - player->planeX * moveSpeed)][int(player->positionY)] <= '.')
                 player->positionX -= player->planeX * moveSpeed;
-            if (testMap[int(player->positionX)][int(player->positionY - player->planeY * moveSpeed)] <= '.')
+            if (mapInUse[int(player->positionX)][int(player->positionY - player->planeY * moveSpeed)] <= '.')
                 player->positionY -= player->planeY * moveSpeed;
 
         } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
             stringText += "RIGHT, ALT, ";
 
-            if (testMap[int(player->positionX + player->planeX * moveSpeed)][int(player->positionY)] <= '.')
+            if (mapInUse[int(player->positionX + player->planeX * moveSpeed)][int(player->positionY)] <= '.')
                 player->positionX += player->planeX * moveSpeed;
-            if (testMap[int(player->positionX)][int(player->positionY + player->planeY * moveSpeed)] <=  '.')
+            if (mapInUse[int(player->positionX)][int(player->positionY + player->planeY * moveSpeed)] <= '.')
                 player->positionY += player->planeY * moveSpeed;
 
 
@@ -439,6 +470,10 @@ void Raycaster::playerControls() {
 }
 
 void Raycaster::setupWindow() {
+
+}
+
+void Raycaster::getSpriteLocations() {
 
 }
 

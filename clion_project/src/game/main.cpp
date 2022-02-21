@@ -7,19 +7,6 @@
 #include "../graphics/Raycaster.h"
 
 
-void setUpActor(Actor* actor) {
-    //set up actors parameters
-
-    actor->positionX = 3.0f;
-    actor->positionY = 2.5;
-
-    actor->directionX = 1.0f;
-    actor->directionY = 0.0f;
-
-    actor->planeY = 0.66f;
-    actor->planeX = 0.0f;
-}
-
 
 #define DEBUG_MODE
 //#define RELEASE_MODE
@@ -30,11 +17,22 @@ void setUpActor(Actor* actor) {
 
 
 
+void setUpActor(Actor* actor) {
+    //set up actors parameters
+    actor->directionX = 1.0f;
+    actor->directionY = 0.0f;
+
+    actor->planeY = 0.66f;
+    actor->planeX = 0.0f;
+}
+
+
+
 int main() {
 
     std::string WINDOW_TITLE = "Raycaster Maze";
 
-    const std::string VERSION = "0.1.3.1";
+    const std::string VERSION = "0.1.3.2";
 
 
 #ifdef DEBUG_MODE
@@ -56,7 +54,8 @@ int main() {
     Actor agent{};
 
     setUpActor(&player);
-    //setUpActor(&agent);
+    setUpActor(&agent);
+
 
 #ifdef MUSIC_MODE
     sf::SoundBuffer buffer;
@@ -72,8 +71,12 @@ int main() {
 
 
 
-    //main loop
+    //MAIN LOOP INSIDE
     raycaster.runGame(&player, &agent);
+
+
+
+
 
     return 0;
 }
