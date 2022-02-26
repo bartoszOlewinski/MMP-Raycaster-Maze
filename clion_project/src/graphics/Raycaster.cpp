@@ -64,6 +64,7 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
     //load textures
     textureWallSheet.loadFromFile("../resources/textures/texture_sheet_test.png");
+    spriteTexture.loadFromFile("../resources/textures/bag_transparent.png");
 
 
 
@@ -162,11 +163,7 @@ void Raycaster::drawScreenPlayer() {
     lines.resize(0);
 
     sf::RenderStates state(&textureWallSheet);
-
-    //sprites
-    sf::Texture sprites;
-    sprites.loadFromFile("../resources/textures/sprite_bag.png");
-    sf::RenderStates spriteState(&sprites);
+    sf::RenderStates spriteState(&spriteTexture);
 
     double spriteBuffer[RENDER_WIDTH];
 
@@ -410,18 +407,22 @@ void Raycaster::drawScreenPlayer() {
             drawEndX = RENDER_WIDTH + 10 - 1;
 
 
+
+
         int i = 1;
         //loop through every stripe of screen that must draw a sprite
         for (int stripe = drawStartX; stripe < drawEndX; stripe++) {
+            int texX = int(256 *(stripe - (-spriteWidth / 2+ spriteScreenX)) * singleTextureSize / spriteWidth) / 256;
+
             if (transformY > 0 && stripe > 0 && stripe < RENDER_WIDTH && transformY < spriteBuffer[stripe]) {
 
                 //check for symbols and what to render
-                spriteLines.append(sf::Vertex(sf::Vector2f((float) stripe + 10, (float) drawStartY + 60),sf::Vector2f((float) 768 + i, (float) (60))));
+                spriteLines.append(sf::Vertex(sf::Vector2f((float) stripe + 10, (float) drawStartY),sf::Vector2f((float) texX, (float) (1))));
 
-                spriteLines.append(sf::Vertex(sf::Vector2f((float) stripe + 10, (float) drawEndY),sf::Vector2f((float) 768 + i, (float) (singleTextureSize - 1))));
+                spriteLines.append(sf::Vertex(sf::Vector2f((float) stripe + 10, (float) drawEndY),sf::Vector2f((float) texX, (float) (singleTextureSize - 1))));
 
                 i++;
-                windowPtr->draw(spriteLines,state);
+                windowPtr->draw(spriteLines,spriteState);
             }
         }
     }

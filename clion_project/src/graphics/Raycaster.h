@@ -64,6 +64,7 @@ private:
     static const int singleTextureSize = 128;
 
     sf::Texture textureWallSheet;
+    sf::Texture spriteTexture;
 
 
     //just for testing purposes
