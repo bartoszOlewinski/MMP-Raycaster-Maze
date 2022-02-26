@@ -38,7 +38,7 @@ private:
     Actor* player{};
 
     DebugConsole debugConsole = DebugConsole(nullptr);
-    Map map;
+
 
 
     sf::Color greyColor;
@@ -66,24 +66,10 @@ private:
     sf::Texture textureWallSheet;
 
 
-    enum class Textures {
-        GreyDefault,
-        RedCircle,
-        BlueCross,
-        MoneyBag,
-    };
-
-    //unordered map for textures and its symbols on map
-    const std::unordered_map<int, Textures> textureMap {
-            {'1', Textures::GreyDefault},
-            {'2', Textures::RedCircle},
-            {'3', Textures::BlueCross},
-            {'!', Textures::MoneyBag}
-    };
-
-
     //just for testing purposes
-    unsigned char mapInUse[14][14];
+    Map map;
+    unsigned char mapInUse[Map::MAP_SIZE][Map::MAP_SIZE];
+
 
 
 
@@ -114,6 +100,8 @@ private:
     void playerControls();
 
     void getSpriteLocations();
+
+    static void sortSprites(int* order, double* dist, int amount);
 
 };
 

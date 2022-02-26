@@ -8,10 +8,13 @@
 
 class Sprite {
 public:
+    //explicit Sprite(double posX, double posY);
+
     double posX;
     double posY;
-    int texture;
-    int score;
+    char textureChar;
+    //int texture;
+    //int score;
 };
 
 

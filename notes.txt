@@ -58,3 +58,11 @@ by characters with lower values than numbers in ascii table.
 ====21/02/22====
 Started reworking map handling as sprite handling requires to store each sprite position before rendering them. Removed
 MapHandler class and replaced it with Map class with similar functionality.
+
+====23/02/22====
+Created most of the basic sprite rendering code. There is a segmentation fault caused by unordered_map property of Map
+class, its loading method fails at inserting second sprite currently placed in the map.
+
+Managed to fix most of the loading issues by redesigning some parts of the Map class and the way sprite data is stored.
+Currently renderer draws a black rectangle in the top left cornet, length of which varies and changes depending on the distance
+to the sprite position.

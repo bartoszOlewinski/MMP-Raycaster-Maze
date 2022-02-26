@@ -3,3 +3,9 @@
 //
 
 #include "Sprite.h"
+/*
+Sprite::Sprite(double posX, double posY) {
+    Sprite::posX = posX;
+    Sprite::posY = posY;
+}
+ */

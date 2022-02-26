@@ -23,7 +23,9 @@
 
 void Raycaster::runGame(Actor *actor, Actor *actorAI) {
     debugConsole = DebugConsole(windowPtr);
+
     map.loadMapDetails();
+
 
     //establish actors, get pointers
     player = actor;
@@ -162,19 +164,11 @@ void Raycaster::drawScreenPlayer() {
     sf::RenderStates state(&textureWallSheet);
 
     //sprites
+    sf::Texture sprites;
+    sprites.loadFromFile("../resources/textures/sprite_bag.png");
+    sf::RenderStates spriteState(&sprites);
+
     double spriteBuffer[RENDER_WIDTH];
-
-    int numberOfSprites = map.numOfSprites;
-
-    int spriteOrder[numberOfSprites];
-    double spriteDistance[numberOfSprites];
-
-    Sprite spriteArray[numberOfSprites];
-
-   //for (int i = 0; i < numberOfSprites; i++) {
-        //spriteArray[i] = map.spriteLocationMap.;
-    //}
-
 
 
     //START CASTING RAYS
@@ -237,7 +231,7 @@ void Raycaster::drawScreenPlayer() {
                 //perpWallDist = (mapY - player->positionY + (1 - stepY) / 2) / rayDirY;
             }
             //if (mapInUse[mapX][mapY] != '.' && mapInUse[mapX][mapY] > 48 && mapInUse[mapX][mapY] < 58)
-            if (mapInUse[mapX][mapY] != '.' && mapInUse[mapX][mapY] != '#') {
+            if (mapInUse[mapX][mapY] != '.' && mapInUse[mapX][mapY] != '#' && mapInUse[mapX][mapY] != '!') {
                 hit = 1;
             }
         }
@@ -359,15 +353,80 @@ void Raycaster::drawScreenPlayer() {
 
     //SPRITE CASTING ==========================================================
 
-    //get all the sprites present in the map
-    int i = 0;
-    for (auto& sprite: map.spriteLocationMap) {
-        spriteOrder[i] = i;
+    sf::VertexArray spriteLines(sf::Lines, RENDER_WIDTH);
+    spriteLines.resize(0);
 
-        spriteDistance[i] = ((player->positionX - std::get<0>(sprite.second)) * (player->positionX - std::get<0>(sprite.second))
-                + (player->positionY - std::get<1>(sprite.second)) * (player->positionY - std::get<1>(sprite.second)));
-        i++;
+    int numberOfSprites = map.numOfSprites;
+
+    int spriteOrder[numberOfSprites];
+    double spriteDistance[numberOfSprites];
+
+
+    for (int i = 0; i <numberOfSprites; i++) {
+        spriteOrder[i] = i;
+        spriteDistance[i] = ((player->positionX - map.spriteList[i].posX) * (player->positionX - map.spriteList[i].posX) +
+                player->positionY - map.spriteList[i].posY) * (player->positionY - map.spriteList[i].posY);
+
+
     }
+
+    //sort the sprites
+    sortSprites(spriteOrder, spriteDistance, numberOfSprites);
+
+    //draw the sprites
+    for (int j = 0; j < numberOfSprites; j++) {
+        double spriteX = map.spriteList[spriteOrder[j]].posX - player->positionX;
+        double spriteY = map.spriteList[spriteOrder[j]].posY - player->positionY;
+
+
+        double invDet = 1.0 / (player->planeX * player->directionY - player->directionX * player->planeY);
+
+        double transformX = invDet * (player->directionY * spriteX - player->directionX * spriteY);
+        double transformY = invDet * (-player->planeY * spriteX + player->planeX * spriteY);
+
+        int spriteScreenX = int((RENDER_WIDTH / 2) * (1 + transformX / transformY));
+
+
+        //calculating Y axis variables
+        int spriteHeight = abs(int(RENDER_HEIGHT / (transformY)));
+
+        int drawStartY = -spriteHeight / 2 + RENDER_HEIGHT / 2;
+        if(drawStartY < 10)
+            drawStartY = 10;
+
+        int drawEndY = spriteHeight / 2 + RENDER_HEIGHT / 2;
+        if (drawEndY >= RENDER_HEIGHT + 10)
+            drawEndY = RENDER_HEIGHT + 10 - 1;
+
+        //calculating X axis variables
+        int spriteWidth = abs(int(RENDER_HEIGHT / (transformY)));
+
+        int drawStartX = -spriteWidth / 2 + spriteScreenX;
+        if (drawStartX < 10)
+            drawStartX = 10;
+
+        int drawEndX = spriteWidth / 2 + spriteScreenX;
+        if (drawEndX >= RENDER_WIDTH + 10)
+            drawEndX = RENDER_WIDTH + 10 - 1;
+
+
+        int i = 1;
+        //loop through every stripe of screen that must draw a sprite
+        for (int stripe = drawStartX; stripe < drawEndX; stripe++) {
+            if (transformY > 0 && stripe > 0 && stripe < RENDER_WIDTH && transformY < spriteBuffer[stripe]) {
+
+                //check for symbols and what to render
+                spriteLines.append(sf::Vertex(sf::Vector2f((float) stripe + 10, (float) drawStartY + 60),sf::Vector2f((float) 768 + i, (float) (60))));
+
+                spriteLines.append(sf::Vertex(sf::Vector2f((float) stripe + 10, (float) drawEndY),sf::Vector2f((float) 768 + i, (float) (singleTextureSize - 1))));
+
+                i++;
+                windowPtr->draw(spriteLines,state);
+            }
+        }
+    }
+
+
 
 
 
@@ -475,6 +534,21 @@ void Raycaster::setupWindow() {
 
 void Raycaster::getSpriteLocations() {
 
+}
+
+//COPIED FROM TUTORIAL BY LODEV
+void Raycaster::sortSprites(int *order, double *dist, int amount) {
+    std::vector<std::pair<double, int>> sprites(amount);
+    for(int i = 0; i < amount; i++) {
+        sprites[i].first = dist[i];
+        sprites[i].second = order[i];
+    }
+    std::sort(sprites.begin(), sprites.end());
+    // restore in reverse order to go from farthest to nearest
+    for(int i = 0; i < amount; i++) {
+        dist[i] = sprites[amount - i - 1].first;
+        order[i] = sprites[amount - i - 1].second;
+    }
 }
 
 
