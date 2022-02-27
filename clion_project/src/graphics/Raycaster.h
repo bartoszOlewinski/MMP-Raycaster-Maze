@@ -19,6 +19,8 @@ const int WINDOW_HEIGHT = 900;
 const int RENDER_WIDTH = 640;
 const int RENDER_HEIGHT = 480;
 
+const float ITEM_HIT_BOX = 0.5f;
+
 class Raycaster {
 public:
     sf::RenderWindow* windowPtr;
@@ -46,6 +48,8 @@ private:
     sf::Text text;
     sf::Font font;
     std::string stringText;
+    sf::Text infoText;
+    std::string infoString;
 
 
     double frameTime;
@@ -67,8 +71,9 @@ private:
     sf::Texture spriteTexture;
 
 
+
     //just for testing purposes
-    Map map;
+    Map mapObject;
     unsigned char mapInUse[Map::MAP_SIZE][Map::MAP_SIZE];
 
 

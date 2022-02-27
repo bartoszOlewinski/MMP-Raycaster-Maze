@@ -19,6 +19,8 @@ public:
 
     int score;
     double time;
+
+    bool hasWon = false;
 };
 
 

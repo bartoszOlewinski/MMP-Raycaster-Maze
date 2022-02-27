@@ -19,7 +19,7 @@
 
 void setUpActor(Actor* actor) {
     //set up actors parameters
-    actor->directionX = 1.0f;
+    actor->directionX = -1.0f;
     actor->directionY = 0.0f;
 
     actor->planeY = 0.66f;
@@ -32,11 +32,11 @@ int main() {
 
     std::string WINDOW_TITLE = "Raycaster Maze";
 
-    const std::string VERSION = "0.1.3.2";
+    const std::string VERSION = "0.1.4.0";
 
 
 #ifdef DEBUG_MODE
-    WINDOW_TITLE += " - prototype_textured_" + VERSION;
+    WINDOW_TITLE += " - " + VERSION;
 #endif
 
 

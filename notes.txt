@@ -15,14 +15,14 @@ Completed first draft of the Project Outline document.
 -------------
 Started working on basic SFML functions and overall design of the code.
 -------------
-Created a couple of loops and started analysing ray casting algorithm; started working on map loading segment but stopped as it's not
+Created a couple of loops and started analysing ray casting algorithm; started working on mapObject loading segment but stopped as it's not
 needed for now. Test 2d array will be used instead.
 -------------
-Removed map loading segment, managed to get the raycaster to work, although there is a fish eye lens and some weird shift
+Removed mapObject loading segment, managed to get the raycaster to work, although there is a fish eye lens and some weird shift
 to camera placement as well as weird movement bug.
 -------------
 Completely fixed the raycasting, need to figure out how to cap framerate to 60 as the moving and rotating speed are tied
-to frame timings. Changed up the map a little to create more room for traversal.
+to frame timings. Changed up the mapObject a little to create more room for traversal.
 -------------
 Added floor and ceiling colouring, fixed rotate and move speeds relying on framerate. Tidied up some code.
 ================
@@ -52,17 +52,20 @@ Created DebugConsole class, will be useful for toggling between options without 
 ====19/02/22====
 Fixed texture distortion. Simple proportion of overflown pixels at the top or bottom / (total height of render + overflown pixels) =
 = X / single texture height, where X is how much added to or subtracted from the texture Y coordinate must be.
-Changed map from int to unsigned char, movement checks now check if tile is <= '.' as all the items will be represented
+Changed mapObject from int to unsigned char, movement checks now check if tile is <= '.' as all the items will be represented
 by characters with lower values than numbers in ascii table.
 
 ====21/02/22====
-Started reworking map handling as sprite handling requires to store each sprite position before rendering them. Removed
+Started reworking mapObject handling as sprite handling requires to store each sprite position before rendering them. Removed
 MapHandler class and replaced it with Map class with similar functionality.
 
 ====23/02/22====
 Created most of the basic sprite rendering code. There is a segmentation fault caused by unordered_map property of Map
-class, its loading method fails at inserting second sprite currently placed in the map.
+class, its loading method fails at inserting second sprite currently placed in the mapObject.
 
 Managed to fix most of the loading issues by redesigning some parts of the Map class and the way sprite data is stored.
 Currently renderer draws a black rectangle in the top left cornet, length of which varies and changes depending on the distance
 to the sprite position.
+
+====26/02/22====
+Created first working version of sprites, created a couple of textures and improved mapObject loading as well as mapObject's size.

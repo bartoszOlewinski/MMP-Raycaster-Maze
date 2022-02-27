@@ -24,7 +24,9 @@
 void Raycaster::runGame(Actor *actor, Actor *actorAI) {
     debugConsole = DebugConsole(windowPtr);
 
-    map.loadMapDetails();
+    //pick random number, feed it to loading function,
+    //switch case loads map
+    mapObject.loadMapDetails();
 
 
     //establish actors, get pointers
@@ -32,28 +34,19 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
     agent = actorAI;
 
     //set up starting point
-    player->positionX = map.startingPosX;
-    player->positionY = map.startingPosY;
-    agent->positionX = map.startingPosX;
-    agent->positionY = map.startingPosY;
+    player->positionX = mapObject.startingPosX;
+    player->positionY = mapObject.startingPosY;
+    agent->positionX = mapObject.startingPosX;
+    agent->positionY = mapObject.startingPosY;
 
 
-
-
-    //copy the map to the raycaster
+    //copy the mapObject to the raycaster
     for (int i = 0; i < Map::MAP_SIZE; i++) {
         for (int j = 0; j < Map::MAP_SIZE; j++) {
-            mapInUse[i][j] = map.mapArray[i][j];
+            mapInUse[i][j] = mapObject.mapArray[i][j];
         }
     }
 
-
-    sf::Clock clock;
-
-    sf::Time timeSinceLastUpdate = sf::Time::Zero;
-
-
-    sf::Event event{};
 
 
     //floor and ceiling colour
@@ -64,15 +57,25 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
     //load textures
     textureWallSheet.loadFromFile("../resources/textures/texture_sheet_test.png");
-    spriteTexture.loadFromFile("../resources/textures/bag_transparent.png");
+    spriteTexture.loadFromFile("../resources/textures/bag_money.png");
 
+    sf::Clock clock;
+    sf::Time timeSinceLastUpdate = sf::Time::Zero;
+    sf::Event event{};
 
+    font.loadFromFile("arial.ttf");
 
+    infoString = "PLAYER TIME:\n\nAGENT TIME:\n\nPLAYER SCORE:\n\nAGENT SCORE:";
+
+    infoText.setFont(font);
+    infoText.setFillColor(sf::Color::White);
+    infoText.setString(infoString);
+    infoText.setPosition(660, 40);
+    infoText.setCharacterSize(20);
 
 
 #ifdef PLAYER_DEBUG_DISPLAY
     //set up text and font
-    font.loadFromFile("arial.ttf");
     text.setFont(font);
 
     text.setCharacterSize(20);
@@ -100,7 +103,6 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
             playerControls();
         }
-
 
         //raycaster
         renderWindow();
@@ -138,6 +140,7 @@ void Raycaster::renderWindow() {
     windowPtr->draw(text);
 #endif
 
+    windowPtr->draw(infoText);
     //display everything that's been drawn in draw functions
     windowPtr->display();
 }
@@ -307,9 +310,9 @@ void Raycaster::drawScreenPlayer() {
         int textureX = int(wallX * double(singleTextureSize));
 
         //flip textureWallSheet
-        if (!side && rayDirX <= 0)
+        if (!side && rayDirX > 0)
             textureX = singleTextureSize - textureX - 1;
-        if (side && rayDirY >= 0)
+        if (side && rayDirY <= 0)
             textureX = singleTextureSize - textureX - 1;
 
         textureCoordX += textureX;
@@ -353,7 +356,7 @@ void Raycaster::drawScreenPlayer() {
     sf::VertexArray spriteLines(sf::Lines, RENDER_WIDTH);
     spriteLines.resize(0);
 
-    int numberOfSprites = map.numOfSprites;
+    int numberOfSprites = mapObject.numOfSprites;
 
     int spriteOrder[numberOfSprites];
     double spriteDistance[numberOfSprites];
@@ -361,8 +364,8 @@ void Raycaster::drawScreenPlayer() {
 
     for (int i = 0; i <numberOfSprites; i++) {
         spriteOrder[i] = i;
-        spriteDistance[i] = ((player->positionX - map.spriteList[i].posX) * (player->positionX - map.spriteList[i].posX) +
-                player->positionY - map.spriteList[i].posY) * (player->positionY - map.spriteList[i].posY);
+        spriteDistance[i] = ((player->positionX - mapObject.spriteList[i].posX) * (player->positionX - mapObject.spriteList[i].posX) +
+                             player->positionY - mapObject.spriteList[i].posY) * (player->positionY - mapObject.spriteList[i].posY);
 
 
     }
@@ -372,8 +375,8 @@ void Raycaster::drawScreenPlayer() {
 
     //draw the sprites
     for (int j = 0; j < numberOfSprites; j++) {
-        double spriteX = map.spriteList[spriteOrder[j]].posX - player->positionX;
-        double spriteY = map.spriteList[spriteOrder[j]].posY - player->positionY;
+        double spriteX = mapObject.spriteList[spriteOrder[j]].posX - player->positionX;
+        double spriteY = mapObject.spriteList[spriteOrder[j]].posY - player->positionY;
 
 
         double invDet = 1.0 / (player->planeX * player->directionY - player->directionX * player->planeY);
@@ -417,9 +420,11 @@ void Raycaster::drawScreenPlayer() {
             if (transformY > 0 && stripe > 0 && stripe < RENDER_WIDTH && transformY < spriteBuffer[stripe]) {
 
                 //check for symbols and what to render
-                spriteLines.append(sf::Vertex(sf::Vector2f((float) stripe + 10, (float) drawStartY),sf::Vector2f((float) texX, (float) (1))));
+                spriteLines.append(sf::Vertex(sf::Vector2f((float) stripe + 10, (float) drawStartY),
+                                              sf::Vector2f((float) texX, (float) (1))));
 
-                spriteLines.append(sf::Vertex(sf::Vector2f((float) stripe + 10, (float) drawEndY),sf::Vector2f((float) texX, (float) (singleTextureSize - 1))));
+                spriteLines.append(sf::Vertex(sf::Vector2f((float) stripe + 10, (float) drawEndY),
+                                              sf::Vector2f((float) texX, (float) (singleTextureSize - 1))));
 
                 i++;
                 windowPtr->draw(spriteLines,spriteState);
@@ -445,8 +450,8 @@ void Raycaster::playerControls() {
 
 
     if (windowPtr->hasFocus()) {
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && !sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
-            stringText += "LEFT, ";
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && !sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
+            stringText += "RIGHT, ";
 
             double oldDirX = player->directionX;
             player->directionX = player->directionX * cos(-rotSpeed) - player->directionY * sin(-rotSpeed);
@@ -456,8 +461,8 @@ void Raycaster::playerControls() {
             player->planeX = player->planeX * cos(-rotSpeed) - player->planeY * sin(-rotSpeed);
             player->planeY = oldPlaneX * sin(-rotSpeed) + player->planeY * cos(-rotSpeed);
 
-        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && !sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
-            stringText += "RIGHT, ";
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && !sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
+            stringText += "LEFT, ";
 
             double oldDirX = player->directionX;
             player->directionX = player->directionX * cos(rotSpeed) - player->directionY * sin(rotSpeed);
@@ -537,6 +542,9 @@ void Raycaster::getSpriteLocations() {
 
 }
 
+
+
+
 //COPIED FROM TUTORIAL BY LODEV
 void Raycaster::sortSprites(int *order, double *dist, int amount) {
     std::vector<std::pair<double, int>> sprites(amount);
@@ -551,5 +559,6 @@ void Raycaster::sortSprites(int *order, double *dist, int amount) {
         order[i] = sprites[amount - i - 1].second;
     }
 }
+
 
 
