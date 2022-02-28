@@ -62,11 +62,20 @@ private:
     std::string eqString;
 
 
+    sf::Text popUpText;
+    std::string popUpString;
+
+
     double frameTime;
 
     sf::Clock fpsClock;
     sf::Time time;
     sf::Time oldTime;
+
+
+    sf::Time startPopUp;
+    bool newItem = false;
+
 
     const sf::Time TimePerFrame = sf::seconds(1.f / 60.f);
 

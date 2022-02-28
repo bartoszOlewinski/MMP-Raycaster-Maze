@@ -89,6 +89,16 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
     equipmentText.setCharacterSize(20);
 
 
+    //popup text
+    popUpText.setFont(font);
+    popUpText.setFillColor(sf::Color::Yellow);
+    popUpText.setOutlineColor(sf::Color::Black);
+    popUpText.setOutlineThickness(1.0);
+    popUpText.setString(popUpString);
+    popUpText.setPosition(12, 12);
+    popUpText.setCharacterSize(20);
+
+
 
 
 #ifdef PLAYER_DEBUG_DISPLAY
@@ -157,7 +167,7 @@ void Raycaster::renderWindow() {
 
     //RENDER GAME SCREENS
     drawScreenPlayer();
-    //drawScreenAI();
+    drawScreenAI();
 
     //create info column
     //drawInfoColumn();
@@ -176,8 +186,11 @@ void Raycaster::renderWindow() {
     windowPtr->draw(debugText);
 #endif
 
+
+    //essential text displays
     windowPtr->draw(infoText);
     windowPtr->draw(equipmentText);
+    windowPtr->draw(popUpText);
 
 
     //display everything that's been drawn in draw functions
@@ -197,7 +210,314 @@ void Raycaster::drawInfoColumn() {
 }
 
 void Raycaster::drawScreenAI() {
+    sf::VertexArray lines (sf::Lines,  RENDER_WIDTH); //why use RENDER_WIDTH and resize to 0 after???
+    lines.resize(0);
 
+
+    sf::RenderStates state(&textureWallSheet);
+    sf::RenderStates bagState(&bagTexture);
+    sf::RenderStates goldKeyState(&keyTexture);
+
+    double spriteBuffer[RENDER_WIDTH];
+
+
+
+    //==================START CASTING RAYS=====================================
+    for (int x = 0; x < RENDER_WIDTH; x++) {
+        double cameraX = 2 * x / double(RENDER_WIDTH) - 1;
+        double rayDirX = player->directionX + player->planeX * cameraX;
+        double rayDirY = player->directionY + player->planeY * cameraX;
+
+
+        int mapX = (int) player->positionX;
+        int mapY = (int) player->positionY;
+
+
+        double sideDistX;
+        double sideDistY;
+
+
+        //is fine without the giant number :)
+        double deltaDistX = std::abs(1/rayDirX);
+        double deltaDistY = std::abs(1/rayDirY);
+
+
+        double perpWallDist;
+
+        int stepX;
+        int stepY;
+
+        int hit = 0;
+        int side;
+
+
+        if (rayDirX < 0) {
+            stepX = -1;
+            sideDistX = (player->positionX - mapX) * deltaDistX;
+        } else {
+            stepX = 1;
+            sideDistX = (mapX + 1.0 - player->positionX) * deltaDistX;
+        }
+        if (rayDirY < 0) {
+            stepY = -1;
+            sideDistY = (player->positionY - mapY) * deltaDistY;
+        } else {
+            stepY = 1;
+            sideDistY = (mapY + 1.0 - player->positionY) * deltaDistY;
+        }
+
+
+        while (hit == 0) {
+            if (sideDistX < sideDistY) {
+                sideDistX += deltaDistX;
+                mapX += stepX;
+                side = 0;
+
+                //perpWallDist = (mapX - player->positionX + (1 - stepX) / 2) / rayDirX;
+            } else {
+                sideDistY += deltaDistY;
+                mapY += stepY;
+                side = 1;
+
+                //perpWallDist = (mapY - player->positionY + (1 - stepY) / 2) / rayDirY;
+            }
+            //if (mapInUse[mapX][mapY] != '.' && mapInUse[mapX][mapY] > 48 && mapInUse[mapX][mapY] < 58)
+            if (mapInUse[mapX][mapY] != '.' && mapInUse[mapX][mapY] != '#' && mapInUse[mapX][mapY] != '!'
+                && mapInUse[mapX][mapY] != '$') {
+                hit = 1;
+            }
+        }
+
+
+        if(side == 0)
+            perpWallDist = (sideDistX - deltaDistX);
+        else
+            perpWallDist = (sideDistY - deltaDistY);
+
+
+
+
+
+        //height of line to draw on screen
+        int lineHeight = (int) (RENDER_HEIGHT / perpWallDist);
+
+        //drawing ceiling======================================================
+        lines.append(sf::Vertex(sf::Vector2f((float)x + 950, 10), greyColor,
+                                sf::Vector2f( 640.0f,  128.0f)));
+
+        int drawStart = int((float)-lineHeight * (1.0f - 0.5f) + RENDER_HEIGHT * 0.5f);
+        int overflownPixels = -drawStart;
+
+
+        if (drawStart < 0) {
+            drawStart = 0;
+        }
+
+        lines.append(sf::Vertex(sf::Vector2f((float)x + 950, (float) drawStart + 10), greyColor,
+                                sf::Vector2f( 640.0f,  128.0f)));
+        //======================================================================
+
+
+
+
+
+        //drawing floor=============================================
+        lines.append(sf::Vertex(sf::Vector2f((float)x + 950, (float) RENDER_HEIGHT + 10), greyColor,
+                                sf::Vector2f( 640.0f,  128.0f)));
+
+        int drawEnd = int((float)lineHeight * 0.5f + RENDER_HEIGHT * 0.5f);
+
+        int pixelAdjustment = 0;
+
+        if (drawEnd > RENDER_HEIGHT) {
+            drawEnd = RENDER_HEIGHT - 1;
+
+            //simple ratio of total pixels to be rendered and single textureWallSheet pixel height
+            pixelAdjustment = overflownPixels * singleTextureSize / (overflownPixels + overflownPixels + RENDER_HEIGHT);
+        }
+
+        lines.append(sf::Vertex(sf::Vector2f((float)x + 950, (float) drawEnd + 10), greyColor,
+                                sf::Vector2f( 640.0f,  128.0f)));
+        //==============================================================
+
+
+
+
+
+        //getting the position of textureWallSheet in textureWallSheet sheet
+        int textureNumber = int(mapInUse[mapX][mapY]) - '0' - 1;
+
+        int textureCoordX = textureNumber * singleTextureSize % textureSheetSize;
+        int textureCoordY = textureNumber * singleTextureSize / textureSheetSize * singleTextureSize;
+
+
+
+
+        //calculate where wall was hit
+        double wallX;
+        if (side == 0)
+            wallX = player->positionY + perpWallDist * rayDirY;
+        else
+            wallX = player->positionX + perpWallDist * rayDirX;
+        wallX -= floor(wallX);
+
+
+        //get x coordinate
+        int textureX = int(wallX * double(singleTextureSize));
+
+        //flip textureWallSheet
+        if (!side && rayDirX > 0)
+            textureX = singleTextureSize - textureX - 1;
+        if (side && rayDirY <= 0)
+            textureX = singleTextureSize - textureX - 1;
+
+        textureCoordX += textureX;
+
+        //shading
+        sf::Color color = sf::Color::White;
+        if (side == 0) {
+            color.r /= 2;
+            color.g /= 2;
+            color.b /= 2;
+        }
+
+
+
+
+        //drawing textured lines==================================
+        lines.append(sf::Vertex(sf::Vector2f((float)x + 950, (float)drawStart + 10),color,
+                                sf::Vector2f((float)textureCoordX, (float)(textureCoordY + 1 + pixelAdjustment))));
+
+        lines.append(sf::Vertex(sf::Vector2f((float)x + 950, (float)(drawEnd + 10)),color,
+                                sf::Vector2f((float)textureCoordX, (float)(textureCoordY + singleTextureSize - 1 - pixelAdjustment))));
+        //=======================================================
+
+
+
+
+
+
+        //some distance buffers for sprites
+        spriteBuffer[x] = perpWallDist;
+
+
+
+        //drawing on screen for textured version
+        windowPtr->draw(lines, state);
+    }
+    //========================================================================
+
+
+
+
+    //SPRITE CASTING ==========================================================
+
+    sf::VertexArray spriteLines(sf::Lines, RENDER_WIDTH);
+    spriteLines.resize(0);
+
+    unsigned int numberOfSprites = loadedSpriteList.size();
+
+    int spriteOrder[numberOfSprites];
+    double spriteDistance[numberOfSprites];
+
+
+    for (int i = 0; i < numberOfSprites; i++) {
+        spriteOrder[i] = i;
+        spriteDistance[i] = ((player->positionX - loadedSpriteList[i].posX) * (player->positionX - loadedSpriteList[i].posX) +
+                             (player->positionY - loadedSpriteList[i].posY) * (player->positionY - loadedSpriteList[i].posY));
+
+    }
+
+
+    //sort the sprites
+    sortSprites(spriteOrder, spriteDistance, numberOfSprites);
+
+    //draw the sprites
+    for (int j = 0; j < numberOfSprites; j++) {
+        //clear vertex
+        spriteLines.clear();
+
+        double spriteX = loadedSpriteList[spriteOrder[j]].posX - player->positionX;
+        double spriteY = loadedSpriteList[spriteOrder[j]].posY - player->positionY;
+
+
+
+        double invDet = 1.0 / (player->planeX * player->directionY - player->directionX * player->planeY);
+
+        double transformX = invDet * (player->directionY * spriteX - player->directionX * spriteY);
+        double transformY = invDet * (-player->planeY * spriteX + player->planeX * spriteY);
+
+        int spriteScreenX = int(( (float) RENDER_WIDTH / 2) * (1 + transformX / transformY));
+
+
+        //calculating Y axis variables
+        int spriteHeight = abs(int(RENDER_HEIGHT / (transformY)));
+
+        int drawStartY = -spriteHeight / 2 + RENDER_HEIGHT / 2;
+        if(drawStartY < 10)
+            drawStartY = 10;
+
+        int drawEndY = spriteHeight / 2 + RENDER_HEIGHT / 2;
+        if (drawEndY >= RENDER_HEIGHT + 10) {
+            drawEndY = RENDER_HEIGHT + 10 - 1;
+        }
+
+
+        //calculating X axis variables
+        int spriteWidth = abs(int(RENDER_HEIGHT / (transformY)));
+
+        int drawStartX = -spriteWidth / 2 + spriteScreenX;
+        if (drawStartX < 0)
+            drawStartX = 950;
+
+        int drawEndX = spriteWidth / 2 + spriteScreenX;
+        if (drawEndX >= RENDER_WIDTH + 10)
+            drawEndX = RENDER_WIDTH + 950 - 1;
+
+
+        unsigned char spriteHit = loadedSpriteList[spriteOrder[j]].textureChar;
+
+
+        int i = 1;
+        //loop through every stripe of screen that must draw a sprite
+        for (int stripe = drawStartX; stripe < drawEndX; stripe++) {
+            int texX = int(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * singleTextureSize / spriteWidth) / 256;
+
+            if (transformY > 0 && stripe > 0 && stripe < RENDER_WIDTH && transformY < spriteBuffer[stripe]) {
+
+
+                //check for symbols and what to render
+                spriteLines.append(sf::Vertex(sf::Vector2f((float) stripe + 950, (float) drawStartY),
+                                              sf::Vector2f((float) texX, (float) (1))));
+
+                spriteLines.append(sf::Vertex(sf::Vector2f((float) stripe + 950, (float) drawEndY),
+                                              sf::Vector2f((float) texX, (float) (singleTextureSize - 1))));
+
+                i++;
+
+
+                switch (spriteHit) {
+                    case '!':
+                        windowPtr->draw(spriteLines, bagState);
+                        break;
+
+                    case '$':
+                        windowPtr->draw(spriteLines, goldKeyState);
+                        break;
+
+                    default:
+                        std::cout<<"Unknown map symbol"<<std::endl;
+                }
+
+            }
+        }
+    }
+
+
+
+
+
+    //=========================================================================
 }
 
 void Raycaster::drawScreenPlayer() {
@@ -445,8 +765,10 @@ void Raycaster::drawScreenPlayer() {
             drawStartY = 10;
 
         int drawEndY = spriteHeight / 2 + RENDER_HEIGHT / 2;
-        if (drawEndY >= RENDER_HEIGHT + 10)
+        if (drawEndY >= RENDER_HEIGHT + 10) {
             drawEndY = RENDER_HEIGHT + 10 - 1;
+        }
+
 
         //calculating X axis variables
         int spriteWidth = abs(int(RENDER_HEIGHT / (transformY)));
@@ -469,6 +791,7 @@ void Raycaster::drawScreenPlayer() {
             int texX = int(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * singleTextureSize / spriteWidth) / 256;
 
             if (transformY > 0 && stripe > 0 && stripe < RENDER_WIDTH && transformY < spriteBuffer[stripe]) {
+
 
                 //check for symbols and what to render
                 spriteLines.append(sf::Vertex(sf::Vector2f((float) stripe + 10, (float) drawStartY),
@@ -601,51 +924,92 @@ void Raycaster::playerControls() {
 //update texts and handle item hit detection
 void Raycaster::update(Actor *actor) {
 
-    //information column update
-    if (mapInUse[(int)actor->positionX][(int)actor->positionY] == '!' ||
-            mapInUse[(int)actor->positionX][(int)actor->positionY] == '$') {
+    //information column update===============================================
 
-        if (mapInUse[(int)actor->positionX][(int)actor->positionY] == '!')
+    if (mapInUse[(int)actor->positionX][(int)actor->positionY] == '!' || mapInUse[(int)actor->positionX][(int)actor->positionY] == '$') {
+
+        if (mapInUse[(int)actor->positionX][(int)actor->positionY] == '!') {
+
             actor->score += 100;
 
-        else if (mapInUse[(int)actor->positionX][(int)actor->positionY] == '$')
+            popUpString = "money bag picked up";
+        }
+
+        else if (mapInUse[(int)actor->positionX][(int)actor->positionY] == '$') {
+
             actor->collectedKeys.push_back('$');
+
+            popUpString = "golden key picked up";
+
+        }
+        startPopUp = fpsClock.getElapsedTime();
+
+        newItem = true;
+        popUpText.setString(popUpString);
+
 
 
         mapInUse[(int)actor->positionX][(int)actor->positionY] = '.';
 
         //delete the sprite from sprite list
         for(int i = 0; i < loadedSpriteList.size(); i++) {
-            if((int)loadedSpriteList[i].posX == (int)actor->positionX &&
-               (int)loadedSpriteList[i].posY == (int)actor->positionY) {
+            if((int)loadedSpriteList[i].posX == (int)actor->positionX && (int)loadedSpriteList[i].posY == (int)actor->positionY) {
+
                 loadedSpriteList.erase(loadedSpriteList.begin() + i);
+
             }
         }
     }
+
+
+    sf::Time finishPopUp = fpsClock.getElapsedTime();
+    if (finishPopUp.asSeconds() - startPopUp.asSeconds() > 2 && !popUpString.empty() && newItem) {
+
+        popUpString.clear();
+        popUpText.setString(popUpString);
+        newItem = false;
+
+        startPopUp = sf::Time::Zero;
+    }
+
+
+
+
+
+
+
+
 
     scoreString = actor-> name + " Score\n" + std::to_string(actor->score);
     timerString = "\n\n" + actor->name +" Time\n" + std::to_string(actor->time.asSeconds()) + "s";
 
 
     infoText.setString(scoreString + timerString);
+    //===================================================
 
 
 
-
-    //equipment text update
+    //equipment text update================================================
     eqString = "empty";
     for (char collectedKey : actor->collectedKeys) {
         switch (collectedKey) {
             case '$':
                 eqString = "golden key,";
                 break;
+            case '%':
+                eqString = "silver key,";
 
             default:
                 eqString = "empty";
         }
     }
 
+
+
     equipmentText.setString(eqDefaultString + eqString);
+
+    //==================================================================
+
 }
 
 

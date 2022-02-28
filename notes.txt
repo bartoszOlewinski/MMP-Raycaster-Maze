@@ -36,11 +36,11 @@ The textures don't scale when approached and rather try to fit within the camera
 
 Fixed floor and ceiling, not going to place any textures on them, just plain grey colour. Added music (probably not legal)
 for fun (must be .FLAC, .WAV, or .Ogg but last doesn't work) and optimized the game enough to completely remove massive
-stutter when run on battery. Currently it stays around 30fps at all times.
+stutter when run on battery. Currently, it stays around 30fps at all times.
 Might need to create debug class for all info display and stuff, but it works for now.
-Added multiple definitions and ifdefs for some debug purposes.
+Added multiple definitions and if defs for some debug purposes.
 
-The texturing is mirroring some of them, need to figure out how to prevent that, tutorials have code that handles them
+The texturing is mirroring some of them, need to figure out how to prevent that, tutorials have code that handles them,
 but they seem to invert everything permanently in my raycaster. -- Fixed it c:
 
 Fixed the textureWallSheet distortion but the rendering goes out of render bounds creating '3D movie' like effect. If I restrict
@@ -64,18 +64,18 @@ Created most of the basic sprite rendering code. There is a segmentation fault c
 class, its loading method fails at inserting second sprite currently placed in the mapObject.
 
 Managed to fix most of the loading issues by redesigning some parts of the Map class and the way sprite data is stored.
-Currently renderer draws a black rectangle in the top left cornet, length of which varies and changes depending on the distance
+Currently, renderer draws a black rectangle in the top left cornet, length of which varies and changes depending on the distance
 to the sprite position.
 
 ====26/02/22====
 Created first working version of sprites, created a couple of textures and improved mapObject loading as well as mapObject's size.
 
 ====28/02/22====
-Fixed all issues connected to sprites; the distance was calulated wrongly creating weird effect where when player would cross
+Fixed all issues connected to sprites; the distance was calculated wrongly creating weird effect where when player would cross
 axis on which the sprites are displayed, the furthest away would be drawn in front of the rest.
 Fixed bug where sprites would draw on top of each other when using more than one, turned out to be an easy fix with clearing
 vertex buffer that caused the problem.
 
 Improved the map01, added golden key sprite, added point system, added timer.
 
-Created text equipment display, further improved map01.
+Created text equipment display.
