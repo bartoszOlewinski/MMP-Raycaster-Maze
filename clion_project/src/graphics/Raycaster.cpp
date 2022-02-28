@@ -8,17 +8,13 @@
 
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics.hpp>
-#include <SFML/Window/Keyboard.hpp>
 #include <SFML/Audio.hpp>
 
 #include "Raycaster.h"
-#include "../game/Actor.h"
-#include "../game/Sprite.h"
 
 
 #include <cmath>
 #include <iostream>
-#include <thread>
 
 
 void Raycaster::runGame(Actor *actor, Actor *actorAI) {
@@ -101,7 +97,7 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
         }
 
         //fixed time step, put logic and updates inside while loop
-        //first add up time to the timer
+        //first add time to the timer
         if (!player->hasFinished)
             player->time += fixedTimeStepClock.getElapsedTime();
 
@@ -211,7 +207,7 @@ void Raycaster::drawScreenPlayer() {
         double deltaDistY = std::abs(1/rayDirY);
 
 
-        double perpWallDist = 0.0f;
+        double perpWallDist;
 
         int stepX;
         int stepY;
@@ -274,7 +270,7 @@ void Raycaster::drawScreenPlayer() {
         lines.append(sf::Vertex(sf::Vector2f((float)x+10, 10), greyColor,
                                 sf::Vector2f( 640.0f,  128.0f)));
 
-        int drawStart = int(-lineHeight * (1.0f - 0.5f) + RENDER_HEIGHT * 0.5f);
+        int drawStart = int((float)-lineHeight * (1.0f - 0.5f) + RENDER_HEIGHT * 0.5f);
         int overflownPixels = -drawStart;
 
 
@@ -292,7 +288,7 @@ void Raycaster::drawScreenPlayer() {
         lines.append(sf::Vertex(sf::Vector2f((float)x+10, (float) RENDER_HEIGHT + 10), greyColor,
                                 sf::Vector2f( 640.0f,  128.0f)));
 
-        int drawEnd = int(lineHeight * 0.5f + RENDER_HEIGHT * 0.5f);
+        int drawEnd = int((float)lineHeight * 0.5f + RENDER_HEIGHT * 0.5f);
 
         int pixelAdjustment = 0;
 
@@ -412,7 +408,7 @@ void Raycaster::drawScreenPlayer() {
         double transformX = invDet * (player->directionY * spriteX - player->directionX * spriteY);
         double transformY = invDet * (-player->planeY * spriteX + player->planeX * spriteY);
 
-        int spriteScreenX = int((RENDER_WIDTH / 2) * (1 + transformX / transformY));
+        int spriteScreenX = int(( (float) RENDER_WIDTH / 2) * (1 + transformX / transformY));
 
 
         //calculating Y axis variables
@@ -570,7 +566,6 @@ void Raycaster::playerControls() {
 #ifdef PLAYER_DEBUG_DISPLAY
         debugText.setString(stringText);
         //windowPtr->draw(debugText);
-        //std::cout<<stringText<<std::endl;
 #endif
 
     }
