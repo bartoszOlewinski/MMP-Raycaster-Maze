@@ -12,7 +12,7 @@
 //#define RELEASE_MODE
 
 
-#define MUSIC_MODE
+//#define MUSIC_MODE
 
 
 
@@ -24,6 +24,8 @@ void setUpActor(Actor* actor) {
 
     actor->planeY = 0.66f;
     actor->planeX = 0.0f;
+
+    actor->score = 0;
 }
 
 
@@ -32,7 +34,7 @@ int main() {
 
     std::string WINDOW_TITLE = "Raycaster Maze";
 
-    const std::string VERSION = "0.1.4.0";
+    const std::string VERSION = "0.1.5.0";
 
 
 #ifdef DEBUG_MODE

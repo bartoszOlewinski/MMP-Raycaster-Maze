@@ -28,6 +28,8 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
     //switch case loads map
     mapObject.loadMapDetails();
 
+    loadedSpriteList = mapObject.spriteList;
+
 
     //establish actors, get pointers
     player = actor;
@@ -65,7 +67,7 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
     font.loadFromFile("arial.ttf");
 
-    infoString = "PLAYER TIME:\n\nAGENT TIME:\n\nPLAYER SCORE:\n\nAGENT SCORE:";
+    infoString = "PLAYER SCORE: " + std::to_string(player->score);
 
     infoText.setFont(font);
     infoText.setFillColor(sf::Color::White);
@@ -100,6 +102,24 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
         while (timeSinceLastUpdate > TimePerFrame) {
 
             timeSinceLastUpdate -= TimePerFrame;
+
+
+            if (mapInUse[(int)player->positionX][(int)player->positionY] == '!') {
+                mapInUse[(int)player->positionX][(int)player->positionY] = '.';
+                player->score += 100;
+                infoString = "PLAYER:SCORE: " + std::to_string(player->score);
+                infoText.setString(infoString);
+
+                //delete the sprite from sprite list
+                for(int i = 0; i < loadedSpriteList.size(); i++) {
+                    if((int)loadedSpriteList[i].posX == (int)player->positionX &&
+                            (int)loadedSpriteList[i].posY == (int)player->positionY) {
+                        loadedSpriteList.erase(loadedSpriteList.begin() + i);
+                    }
+                }
+            }
+
+
 
             playerControls();
         }
@@ -356,7 +376,7 @@ void Raycaster::drawScreenPlayer() {
     sf::VertexArray spriteLines(sf::Lines, RENDER_WIDTH);
     spriteLines.resize(0);
 
-    int numberOfSprites = mapObject.numOfSprites;
+    unsigned int numberOfSprites = loadedSpriteList.size();
 
     int spriteOrder[numberOfSprites];
     double spriteDistance[numberOfSprites];
@@ -364,8 +384,8 @@ void Raycaster::drawScreenPlayer() {
 
     for (int i = 0; i <numberOfSprites; i++) {
         spriteOrder[i] = i;
-        spriteDistance[i] = ((player->positionX - mapObject.spriteList[i].posX) * (player->positionX - mapObject.spriteList[i].posX) +
-                             player->positionY - mapObject.spriteList[i].posY) * (player->positionY - mapObject.spriteList[i].posY);
+        spriteDistance[i] = ((player->positionX - loadedSpriteList[i].posX) * (player->positionX - loadedSpriteList[i].posX) +
+                             player->positionY - loadedSpriteList[i].posY) * (player->positionY - loadedSpriteList[i].posY);
 
 
     }
@@ -375,8 +395,8 @@ void Raycaster::drawScreenPlayer() {
 
     //draw the sprites
     for (int j = 0; j < numberOfSprites; j++) {
-        double spriteX = mapObject.spriteList[spriteOrder[j]].posX - player->positionX;
-        double spriteY = mapObject.spriteList[spriteOrder[j]].posY - player->positionY;
+        double spriteX = loadedSpriteList[spriteOrder[j]].posX - player->positionX;
+        double spriteY = loadedSpriteList[spriteOrder[j]].posY - player->positionY;
 
 
         double invDet = 1.0 / (player->planeX * player->directionY - player->directionX * player->planeY);
@@ -542,6 +562,11 @@ void Raycaster::getSpriteLocations() {
 
 }
 
+void Raycaster::update() {
+
+
+
+}
 
 
 

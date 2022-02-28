@@ -75,6 +75,7 @@ private:
     //just for testing purposes
     Map mapObject;
     unsigned char mapInUse[Map::MAP_SIZE][Map::MAP_SIZE];
+    std::vector<Sprite> loadedSpriteList;
 
 
 
@@ -106,6 +107,8 @@ private:
     void playerControls();
 
     void getSpriteLocations();
+
+    void update();
 
     static void sortSprites(int* order, double* dist, int amount);
 
