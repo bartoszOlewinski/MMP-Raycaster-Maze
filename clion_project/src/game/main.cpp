@@ -12,7 +12,7 @@
 //#define RELEASE_MODE
 
 
-//#define MUSIC_MODE
+#define MUSIC_MODE
 
 
 
