@@ -5,7 +5,7 @@
 #include "Map.h"
 
 //#define MAP testMap
-#define MAP testMap01
+#define MAP map01
 
 
 void Map::loadMapDetails() {
@@ -17,24 +17,41 @@ void Map::loadMapDetails() {
             mapArray[i][j] = testMap[i][j];
 #endif
 
-#if MAP == testMap01
+#if MAP == map01
             mapArray[i][j] = map01[i][j];
 #endif
 
 
 
             // + 0.5f to move the positions into center of the cell they occupy
+            //ACTOR SPAWN
             if (mapArray[i][j] == '#') {
                 Map::startingPosX = (float)i + 0.5f;
                 Map::startingPosY = (float)j + 0.5f;
 
-            } else if (mapArray[i][j] == '!') {
+            }
+            //BAG OF MONEY
+            else if (mapArray[i][j] == '!') {
                 Map::numOfSprites++;
+                Map::maxPoints += 100;
 
                 Sprite tempSprite{};
                 tempSprite.posX = (float)i + 0.5f;
                 tempSprite.posY = (float)j + 0.5f;
                 tempSprite.textureChar = '!';
+                tempSprite.score = 100;
+
+                spriteList.push_back(tempSprite);
+            }
+            //GOLDEN KEY
+            else if (mapArray[i][j] == '$') {
+                Map::numOfSprites++;
+
+                Sprite tempSprite{};
+                tempSprite.posX = (float)i + 0.5f;
+                tempSprite.posY = (float)j + 0.5f;
+                tempSprite.textureChar = '$';
+
 
                 spriteList.push_back(tempSprite);
             }

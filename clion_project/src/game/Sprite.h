@@ -14,7 +14,7 @@ public:
     double posY;
     char textureChar;
     //int texture;
-    //int score;
+    int score;
 };
 
 

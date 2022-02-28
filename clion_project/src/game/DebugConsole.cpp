@@ -64,13 +64,13 @@ public:
     }
 
     void commandListener() {
-        //toggle player debug text
+        //toggle player debug debugText
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1)) {
 
 
         }
 
-        //toggle agent debug text
+        //toggle agent debug debugText
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2)) {
 
 

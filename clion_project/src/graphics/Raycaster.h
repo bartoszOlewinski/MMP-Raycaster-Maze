@@ -45,11 +45,16 @@ private:
 
     sf::Color greyColor;
 
-    sf::Text text;
-    sf::Font font;
     std::string stringText;
+    sf::Text debugText;
+
+    sf::Font font;
+
+
+
     sf::Text infoText;
-    std::string infoString;
+    std::string scoreString;
+    std::string timerString;
 
 
     double frameTime;
@@ -68,7 +73,8 @@ private:
     static const int singleTextureSize = 128;
 
     sf::Texture textureWallSheet;
-    sf::Texture spriteTexture;
+    sf::Texture bagTexture;
+    sf::Texture keyTexture;
 
 
 
@@ -76,11 +82,6 @@ private:
     Map mapObject;
     unsigned char mapInUse[Map::MAP_SIZE][Map::MAP_SIZE];
     std::vector<Sprite> loadedSpriteList;
-
-
-
-
-    void setupWindow();
 
 
     /**
@@ -106,11 +107,9 @@ private:
 
     void playerControls();
 
-    void getSpriteLocations();
+    void update(Actor *actor);
 
-    void update();
-
-    static void sortSprites(int* order, double* dist, int amount);
+    static void sortSprites(int* order, double* dist, unsigned int amount);
 
 };
 

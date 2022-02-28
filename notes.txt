@@ -69,3 +69,11 @@ to the sprite position.
 
 ====26/02/22====
 Created first working version of sprites, created a couple of textures and improved mapObject loading as well as mapObject's size.
+
+====28/02/22====
+Fixed all issues connected to sprites; the distance was calulated wrongly creating weird effect where when player would cross
+axis on which the sprites are displayed, the furthest away would be drawn in front of the rest.
+Fixed bug where sprites would draw on top of each other when using more than one, turned out to be an easy fix with clearing
+vertex buffer that caused the problem.
+
+Improved the map01, added golden key sprite, added point system, added timer.

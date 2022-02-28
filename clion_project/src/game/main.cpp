@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
+#include <utility>
 
 #include "../graphics/Raycaster.h"
 
@@ -12,12 +13,12 @@
 //#define RELEASE_MODE
 
 
-//#define MUSIC_MODE
+#define MUSIC_MODE
 
 
 
 
-void setUpActor(Actor* actor) {
+void setUpActor(Actor* actor, std::string name) {
     //set up actors parameters
     actor->directionX = -1.0f;
     actor->directionY = 0.0f;
@@ -26,6 +27,12 @@ void setUpActor(Actor* actor) {
     actor->planeX = 0.0f;
 
     actor->score = 0;
+
+    actor->time = sf::Time::Zero;
+
+    actor->hasFinished = false;
+
+    actor->name = std::move(name);
 }
 
 
@@ -34,7 +41,7 @@ int main() {
 
     std::string WINDOW_TITLE = "Raycaster Maze";
 
-    const std::string VERSION = "0.1.5.0";
+    const std::string VERSION = "0.1.5.3";
 
 
 #ifdef DEBUG_MODE
@@ -55,13 +62,13 @@ int main() {
     Actor player{};
     Actor agent{};
 
-    setUpActor(&player);
-    setUpActor(&agent);
+    setUpActor(&player, "PLAYER");
+    setUpActor(&agent, "AGENT");
 
 
 #ifdef MUSIC_MODE
     sf::SoundBuffer buffer;
-    if (!buffer.loadFromFile("../resources/sounds/into_sandys_city.flac"))
+    if (!buffer.loadFromFile("../resources/sounds/tyrian_theme.flac"))
         std::cout<<"music not loaded"<<std::endl;
 
     sf::Sound sound;

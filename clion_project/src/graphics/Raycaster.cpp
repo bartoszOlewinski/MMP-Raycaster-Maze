@@ -22,12 +22,11 @@
 
 
 void Raycaster::runGame(Actor *actor, Actor *actorAI) {
-    debugConsole = DebugConsole(windowPtr);
+    //debugConsole = DebugConsole(windowPtr);
 
     //pick random number, feed it to loading function,
     //switch case loads map
     mapObject.loadMapDetails();
-
     loadedSpriteList = mapObject.spriteList;
 
 
@@ -59,34 +58,39 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
     //load textures
     textureWallSheet.loadFromFile("../resources/textures/texture_sheet_test.png");
-    spriteTexture.loadFromFile("../resources/textures/bag_money.png");
+    bagTexture.loadFromFile("../resources/textures/bag_money.png");
+    keyTexture.loadFromFile("../resources/textures/golden_key.png");
 
-    sf::Clock clock;
+
+    //set up clocks and times for time step
+    sf::Clock fixedTimeStepClock;
     sf::Time timeSinceLastUpdate = sf::Time::Zero;
+
     sf::Event event{};
 
+    //load font and initialize variables for text displays
     font.loadFromFile("arial.ttf");
 
-    infoString = "PLAYER SCORE: " + std::to_string(player->score);
 
     infoText.setFont(font);
     infoText.setFillColor(sf::Color::White);
-    infoText.setString(infoString);
-    infoText.setPosition(660, 40);
+    infoText.setString(scoreString + timerString);
+    infoText.setPosition(660, 20);
     infoText.setCharacterSize(20);
 
 
 #ifdef PLAYER_DEBUG_DISPLAY
-    //set up text and font
-    text.setFont(font);
+    //set up debugText and font
+    debugText.setFont(font);
 
-    text.setCharacterSize(20);
-    text.setFillColor(sf::Color::White);
-    text.setPosition(20, 750);
+    debugText.setCharacterSize(20);
+    debugText.setFillColor(sf::Color::White);
+    debugText.setPosition(20, 750);
 #endif
 
 
 //=================MAIN GAME LOOP==========================
+
 
     while (windowPtr->isOpen()) {
 
@@ -97,29 +101,21 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
         }
 
         //fixed time step, put logic and updates inside while loop
-        timeSinceLastUpdate += clock.restart();
+        //first add up time to the timer
+        if (!player->hasFinished)
+            player->time += fixedTimeStepClock.getElapsedTime();
+
+        if(!agent->hasFinished)
+            agent->time += fixedTimeStepClock.getElapsedTime();
+
+        timeSinceLastUpdate += fixedTimeStepClock.restart();
+
 
         while (timeSinceLastUpdate > TimePerFrame) {
 
             timeSinceLastUpdate -= TimePerFrame;
 
-
-            if (mapInUse[(int)player->positionX][(int)player->positionY] == '!') {
-                mapInUse[(int)player->positionX][(int)player->positionY] = '.';
-                player->score += 100;
-                infoString = "PLAYER:SCORE: " + std::to_string(player->score);
-                infoText.setString(infoString);
-
-                //delete the sprite from sprite list
-                for(int i = 0; i < loadedSpriteList.size(); i++) {
-                    if((int)loadedSpriteList[i].posX == (int)player->positionX &&
-                            (int)loadedSpriteList[i].posY == (int)player->positionY) {
-                        loadedSpriteList.erase(loadedSpriteList.begin() + i);
-                    }
-                }
-            }
-
-
+            update(player);
 
             playerControls();
         }
@@ -147,8 +143,9 @@ void Raycaster::renderWindow() {
     //create info column
     //drawInfoColumn();
 
-    debugConsole.activateDebug();
-    debugConsole.commandOpener();
+
+    //debugConsole.activateDebug();
+    //debugConsole.commandOpener();
 
 
     oldTime = time;
@@ -157,7 +154,7 @@ void Raycaster::renderWindow() {
 
 
 #ifdef PLAYER_DEBUG_DISPLAY
-    windowPtr->draw(text);
+    windowPtr->draw(debugText);
 #endif
 
     windowPtr->draw(infoText);
@@ -185,13 +182,16 @@ void Raycaster::drawScreenPlayer() {
     sf::VertexArray lines (sf::Lines,  RENDER_WIDTH); //why use RENDER_WIDTH and resize to 0 after???
     lines.resize(0);
 
+
     sf::RenderStates state(&textureWallSheet);
-    sf::RenderStates spriteState(&spriteTexture);
+    sf::RenderStates bagState(&bagTexture);
+    sf::RenderStates goldKeyState(&keyTexture);
 
     double spriteBuffer[RENDER_WIDTH];
 
 
-    //START CASTING RAYS
+
+    //==================START CASTING RAYS=====================================
     for (int x = 0; x < RENDER_WIDTH; x++) {
         double cameraX = 2 * x / double(RENDER_WIDTH) - 1;
         double rayDirX = player->directionX + player->planeX * cameraX;
@@ -251,7 +251,8 @@ void Raycaster::drawScreenPlayer() {
                 //perpWallDist = (mapY - player->positionY + (1 - stepY) / 2) / rayDirY;
             }
             //if (mapInUse[mapX][mapY] != '.' && mapInUse[mapX][mapY] > 48 && mapInUse[mapX][mapY] < 58)
-            if (mapInUse[mapX][mapY] != '.' && mapInUse[mapX][mapY] != '#' && mapInUse[mapX][mapY] != '!') {
+            if (mapInUse[mapX][mapY] != '.' && mapInUse[mapX][mapY] != '#' && mapInUse[mapX][mapY] != '!'
+            && mapInUse[mapX][mapY] != '$') {
                 hit = 1;
             }
         }
@@ -369,6 +370,9 @@ void Raycaster::drawScreenPlayer() {
         //drawing on screen for textured version
         windowPtr->draw(lines, state);
     }
+    //========================================================================
+
+
 
 
     //SPRITE CASTING ==========================================================
@@ -382,21 +386,25 @@ void Raycaster::drawScreenPlayer() {
     double spriteDistance[numberOfSprites];
 
 
-    for (int i = 0; i <numberOfSprites; i++) {
+    for (int i = 0; i < numberOfSprites; i++) {
         spriteOrder[i] = i;
         spriteDistance[i] = ((player->positionX - loadedSpriteList[i].posX) * (player->positionX - loadedSpriteList[i].posX) +
-                             player->positionY - loadedSpriteList[i].posY) * (player->positionY - loadedSpriteList[i].posY);
-
+                (player->positionY - loadedSpriteList[i].posY) * (player->positionY - loadedSpriteList[i].posY));
 
     }
+
 
     //sort the sprites
     sortSprites(spriteOrder, spriteDistance, numberOfSprites);
 
     //draw the sprites
     for (int j = 0; j < numberOfSprites; j++) {
+        //clear vertex
+        spriteLines.clear();
+
         double spriteX = loadedSpriteList[spriteOrder[j]].posX - player->positionX;
         double spriteY = loadedSpriteList[spriteOrder[j]].posY - player->positionY;
+
 
 
         double invDet = 1.0 / (player->planeX * player->directionY - player->directionX * player->planeY);
@@ -422,20 +430,21 @@ void Raycaster::drawScreenPlayer() {
         int spriteWidth = abs(int(RENDER_HEIGHT / (transformY)));
 
         int drawStartX = -spriteWidth / 2 + spriteScreenX;
-        if (drawStartX < 10)
-            drawStartX = 10;
+        if (drawStartX < 0)
+            drawStartX = 0;
 
         int drawEndX = spriteWidth / 2 + spriteScreenX;
         if (drawEndX >= RENDER_WIDTH + 10)
             drawEndX = RENDER_WIDTH + 10 - 1;
 
 
+        unsigned char spriteHit = loadedSpriteList[spriteOrder[j]].textureChar;
 
 
         int i = 1;
         //loop through every stripe of screen that must draw a sprite
         for (int stripe = drawStartX; stripe < drawEndX; stripe++) {
-            int texX = int(256 *(stripe - (-spriteWidth / 2+ spriteScreenX)) * singleTextureSize / spriteWidth) / 256;
+            int texX = int(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * singleTextureSize / spriteWidth) / 256;
 
             if (transformY > 0 && stripe > 0 && stripe < RENDER_WIDTH && transformY < spriteBuffer[stripe]) {
 
@@ -447,7 +456,21 @@ void Raycaster::drawScreenPlayer() {
                                               sf::Vector2f((float) texX, (float) (singleTextureSize - 1))));
 
                 i++;
-                windowPtr->draw(spriteLines,spriteState);
+
+
+                switch (spriteHit) {
+                    case '!':
+                        windowPtr->draw(spriteLines, bagState);
+                        break;
+
+                    case '$':
+                        windowPtr->draw(spriteLines, goldKeyState);
+                        break;
+
+                    default:
+                        std::cout<<"Unknown map symbol"<<std::endl;
+                }
+
             }
         }
     }
@@ -545,8 +568,8 @@ void Raycaster::playerControls() {
 
 
 #ifdef PLAYER_DEBUG_DISPLAY
-        text.setString(stringText);
-        //windowPtr->draw(text);
+        debugText.setString(stringText);
+        //windowPtr->draw(debugText);
         //std::cout<<stringText<<std::endl;
 #endif
 
@@ -554,24 +577,42 @@ void Raycaster::playerControls() {
 
 }
 
-void Raycaster::setupWindow() {
+//update texts and handle item hit detection
+void Raycaster::update(Actor *actor) {
 
-}
+    if (mapInUse[(int)actor->positionX][(int)actor->positionY] == '!' ||
+            mapInUse[(int)actor->positionX][(int)actor->positionY] == '$') {
 
-void Raycaster::getSpriteLocations() {
+        if (mapInUse[(int)actor->positionX][(int)actor->positionY] == '!')
+            actor->score += 100;
 
-}
+        else if (mapInUse[(int)actor->positionX][(int)actor->positionY] == '$')
+            actor->collectedKeys.push_back('$');
 
-void Raycaster::update() {
+
+        mapInUse[(int)actor->positionX][(int)actor->positionY] = '.';
+
+        //delete the sprite from sprite list
+        for(int i = 0; i < loadedSpriteList.size(); i++) {
+            if((int)loadedSpriteList[i].posX == (int)actor->positionX &&
+               (int)loadedSpriteList[i].posY == (int)actor->positionY) {
+                loadedSpriteList.erase(loadedSpriteList.begin() + i);
+            }
+        }
+    }
+
+    scoreString = actor-> name + " SCORE\n" + std::to_string(actor->score);
+    timerString = "\n\n" + actor->name +" TIME\n" + std::to_string(actor->time.asSeconds()) + "s";
 
 
+    infoText.setString(scoreString + timerString);
 
 }
 
 
 
 //COPIED FROM TUTORIAL BY LODEV
-void Raycaster::sortSprites(int *order, double *dist, int amount) {
+void Raycaster::sortSprites(int *order, double *dist, unsigned int amount) {
     std::vector<std::pair<double, int>> sprites(amount);
     for(int i = 0; i < amount; i++) {
         sprites[i].first = dist[i];

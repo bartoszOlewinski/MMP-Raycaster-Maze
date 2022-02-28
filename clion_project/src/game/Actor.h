@@ -6,6 +6,10 @@
 #define RAYCASTER_ACTOR_H
 
 
+#include <SFML/System/Time.hpp>
+#include <string>
+#include <vector>
+
 class Actor {
 public:
     double positionX;
@@ -17,10 +21,14 @@ public:
     double planeX;
     double planeY;
 
-    int score;
-    double time;
+    std::string name;
 
-    bool hasWon = false;
+    int score;
+    sf::Time time;
+
+    std::vector<char> collectedKeys;
+
+    bool hasFinished;
 };
 
 
