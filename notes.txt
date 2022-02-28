@@ -77,3 +77,5 @@ Fixed bug where sprites would draw on top of each other when using more than one
 vertex buffer that caused the problem.
 
 Improved the map01, added golden key sprite, added point system, added timer.
+
+Created text equipment display, further improved map01.

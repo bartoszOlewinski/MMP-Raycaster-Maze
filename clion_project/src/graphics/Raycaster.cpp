@@ -52,6 +52,7 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
     greyColor.b = 105;
 
 
+
     //load textures
     textureWallSheet.loadFromFile("../resources/textures/texture_sheet_test.png");
     bagTexture.loadFromFile("../resources/textures/bag_money.png");
@@ -64,24 +65,39 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
     sf::Event event{};
 
+
+
+
     //load font and initialize variables for text displays
     font.loadFromFile("arial.ttf");
 
 
+    //information displays
     infoText.setFont(font);
-    infoText.setFillColor(sf::Color::White);
+    infoText.setFillColor(sf::Color::Yellow);
     infoText.setString(scoreString + timerString);
-    infoText.setPosition(660, 20);
+    infoText.setPosition(660, 15);
     infoText.setCharacterSize(20);
+
+
+
+    //equipment displays
+    equipmentText.setFont(font);
+    equipmentText.setFillColor(sf::Color::Yellow);
+    equipmentText.setString(eqString);
+    equipmentText.setPosition(20, 500);
+    equipmentText.setCharacterSize(20);
+
+
 
 
 #ifdef PLAYER_DEBUG_DISPLAY
     //set up debugText and font
     debugText.setFont(font);
 
-    debugText.setCharacterSize(20);
+    debugText.setCharacterSize(15);
     debugText.setFillColor(sf::Color::White);
-    debugText.setPosition(20, 750);
+    debugText.setPosition(20, 800);
 #endif
 
 
@@ -131,6 +147,13 @@ void Raycaster::renderWindow() {
     //clear before drawing next frame
     windowPtr->clear();
 
+    //draw menu========
+
+
+
+
+
+
 
     //RENDER GAME SCREENS
     drawScreenPlayer();
@@ -154,6 +177,9 @@ void Raycaster::renderWindow() {
 #endif
 
     windowPtr->draw(infoText);
+    windowPtr->draw(equipmentText);
+
+
     //display everything that's been drawn in draw functions
     windowPtr->display();
 }
@@ -575,6 +601,7 @@ void Raycaster::playerControls() {
 //update texts and handle item hit detection
 void Raycaster::update(Actor *actor) {
 
+    //information column update
     if (mapInUse[(int)actor->positionX][(int)actor->positionY] == '!' ||
             mapInUse[(int)actor->positionX][(int)actor->positionY] == '$') {
 
@@ -596,12 +623,29 @@ void Raycaster::update(Actor *actor) {
         }
     }
 
-    scoreString = actor-> name + " SCORE\n" + std::to_string(actor->score);
-    timerString = "\n\n" + actor->name +" TIME\n" + std::to_string(actor->time.asSeconds()) + "s";
+    scoreString = actor-> name + " Score\n" + std::to_string(actor->score);
+    timerString = "\n\n" + actor->name +" Time\n" + std::to_string(actor->time.asSeconds()) + "s";
 
 
     infoText.setString(scoreString + timerString);
 
+
+
+
+    //equipment text update
+    eqString = "empty";
+    for (char collectedKey : actor->collectedKeys) {
+        switch (collectedKey) {
+            case '$':
+                eqString = "golden key,";
+                break;
+
+            default:
+                eqString = "empty";
+        }
+    }
+
+    equipmentText.setString(eqDefaultString + eqString);
 }
 
 

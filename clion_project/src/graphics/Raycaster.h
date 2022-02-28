@@ -57,6 +57,11 @@ private:
     std::string timerString;
 
 
+    sf::Text equipmentText;
+    std::string eqDefaultString = "Equipment:\n";
+    std::string eqString;
+
+
     double frameTime;
 
     sf::Clock fpsClock;

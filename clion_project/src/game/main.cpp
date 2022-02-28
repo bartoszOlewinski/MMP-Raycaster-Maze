@@ -62,8 +62,8 @@ int main() {
     Actor player{};
     Actor agent{};
 
-    setUpActor(&player, "PLAYER");
-    setUpActor(&agent, "AGENT");
+    setUpActor(&player, "Player");
+    setUpActor(&agent, "Agent");
 
 
 #ifdef MUSIC_MODE
