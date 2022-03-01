@@ -13,13 +13,19 @@
 #include "../game/Map.h"
 
 
-const int WINDOW_WIDTH = 1600;
-const int WINDOW_HEIGHT = 900;
 
-//const int RENDER_WIDTH = 480;
-//const int RENDER_HEIGHT = 360;
-const int RENDER_WIDTH = 640;
-const int RENDER_HEIGHT = 480;
+const int WINDOW_WIDTH = 1280;
+const int WINDOW_HEIGHT = 720;
+//const int WINDOW_WIDTH = 1600;
+//const int WINDOW_HEIGHT = 900;
+
+
+const int RENDER_WIDTH = 480;
+const int RENDER_HEIGHT = 360;
+//const int RENDER_WIDTH = 640;
+//const int RENDER_HEIGHT = 480;
+
+
 
 
 const float ITEM_HIT_BOX = 0.5f;

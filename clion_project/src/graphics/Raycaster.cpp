@@ -29,6 +29,9 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
     //establish actors, get pointers
     player = actor;
     agent = actorAI;
+    player->loadedSpriteList = mapObject.spriteList;
+    agent->loadedSpriteList = mapObject.spriteList;
+
 
     //set up starting point
     player->positionX = mapObject.startingPosX;
@@ -40,7 +43,10 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
     //copy the mapObject to the raycaster
     for (int i = 0; i < Map::MAP_SIZE; i++) {
         for (int j = 0; j < Map::MAP_SIZE; j++) {
-            mapInUse[i][j] = mapObject.mapArray[i][j];
+            //mapInUse[i][j] = mapObject.mapArray[i][j];
+
+            player->mapInstance[i][j] = mapObject.mapArray[i][j];
+            agent->mapInstance[i][j] = mapObject.mapArray[i][j];
         }
     }
 
@@ -73,19 +79,19 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
 
     //information displays
-    player->setupStatsText(&font, 660, 15);
-    agent->setupStatsText(&font, 830, 365);
+    player->setupStatsText(&font, RENDER_WIDTH + 20, 15);
+    agent->setupStatsText(&font, WINDOW_WIDTH - RENDER_WIDTH - 130, RENDER_HEIGHT - 115);
 
 
 
     //equipment displays
-    player->setupEqText(&font, 20, 500);
-    agent->setupEqText(&font, 970, 500);
+    player->setupEqText(&font, 20, RENDER_HEIGHT + 20);
+    agent->setupEqText(&font, agent->renderX + 20, RENDER_HEIGHT + 20);
 
 
     //popup text
     player->setupPopupText(&font, 12, 12);
-    agent->setupPopupText(&font, 950, 12);
+    agent->setupPopupText(&font, RENDER_WIDTH + RENDER_WIDTH - 10, 12);
 
 
 
@@ -94,8 +100,8 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
     //set up debugText and font
     debugText.setFont(font);
     debugText.setCharacterSize(15);
-    debugText.setFillColor(sf::Color::White);
-    debugText.setPosition(20, 800);
+    debugText.setFillColor(sf::Color::Yellow);
+    debugText.setPosition(20, WINDOW_HEIGHT - 100);
 #endif
 
 
@@ -301,8 +307,8 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
                 //perpWallDist = (mapY - player->positionY + (1 - stepY) / 2) / rayDirY;
             }
             //if (mapInUse[mapX][mapY] != '.' && mapInUse[mapX][mapY] > 48 && mapInUse[mapX][mapY] < 58)
-            if (mapInUse[mapX][mapY] != '.' && mapInUse[mapX][mapY] != '#' && mapInUse[mapX][mapY] != '!'
-                && mapInUse[mapX][mapY] != '$') {
+            if (actor->mapInstance[mapX][mapY] != '.' && actor->mapInstance[mapX][mapY] != '#' && actor->mapInstance[mapX][mapY] != '!'
+                && actor->mapInstance[mapX][mapY] != '$') {
                 hit = 1;
             }
         }
@@ -364,7 +370,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 
 
         //getting the position of textureWallSheet in textureWallSheet sheet
-        int textureNumber = int(mapInUse[mapX][mapY]) - '0' - 1;
+        int textureNumber = int(actor->mapInstance[mapX][mapY]) - '0' - 1;
 
         int textureCoordX = textureNumber * singleTextureSize % textureSheetSize;
         int textureCoordY = textureNumber * singleTextureSize / textureSheetSize * singleTextureSize;
@@ -434,7 +440,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
     sf::VertexArray spriteLines(sf::Lines, RENDER_WIDTH);
     spriteLines.resize(0);
 
-    unsigned int numberOfSprites = loadedSpriteList.size();
+    unsigned int numberOfSprites = actor->loadedSpriteList.size();
 
     int spriteOrder[numberOfSprites];
     double spriteDistance[numberOfSprites];
@@ -442,8 +448,8 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 
     for (int i = 0; i < numberOfSprites; i++) {
         spriteOrder[i] = i;
-        spriteDistance[i] = ((actor->positionX - loadedSpriteList[i].posX) * (actor->positionX - loadedSpriteList[i].posX) +
-                             (actor->positionY - loadedSpriteList[i].posY) * (actor->positionY - loadedSpriteList[i].posY));
+        spriteDistance[i] = ((actor->positionX - actor->loadedSpriteList[i].posX) * (actor->positionX - actor->loadedSpriteList[i].posX) +
+                             (actor->positionY - actor->loadedSpriteList[i].posY) * (actor->positionY - actor->loadedSpriteList[i].posY));
 
     }
 
@@ -456,8 +462,8 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
         //clear vertex
         spriteLines.clear();
 
-        double spriteX = loadedSpriteList[spriteOrder[j]].posX - actor->positionX;
-        double spriteY = loadedSpriteList[spriteOrder[j]].posY - actor->positionY;
+        double spriteX = actor->loadedSpriteList[spriteOrder[j]].posX - actor->positionX;
+        double spriteY = actor->loadedSpriteList[spriteOrder[j]].posY - actor->positionY;
 
 
 
@@ -494,7 +500,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
             drawEndX = RENDER_WIDTH + actor->renderX - 1;
 
 
-        unsigned char spriteHit = loadedSpriteList[spriteOrder[j]].textureChar;
+        unsigned char spriteHit = actor->loadedSpriteList[spriteOrder[j]].textureChar;
 
 
         int i = 1;
@@ -633,11 +639,13 @@ void Raycaster::resetGame() {
     //reset loaded map and its sprites
     for (int i = 0; i < Map::MAP_SIZE; i++) {
         for (int j = 0; j < Map::MAP_SIZE; j++) {
-            mapInUse[i][j] = mapObject.mapArray[i][j];
+            player->mapInstance[i][j] = mapObject.mapArray[i][j];
+            agent->mapInstance[i][j] = mapObject.mapArray[i][j];
         }
     }
 
-    loadedSpriteList = mapObject.spriteList;
+    player->loadedSpriteList = mapObject.spriteList;
+    agent->loadedSpriteList = mapObject.spriteList;
 
 
 
@@ -1308,17 +1316,17 @@ void Raycaster::playerControls() {
         if (sf::Keyboard::isKeyPressed((sf::Keyboard::Up))) {
             stringText += "UP, ";
 
-            if (mapInUse[int(player->positionX + player->directionX * moveSpeed)][int(player->positionY)] <= '.')
+            if (player->mapInstance[int(player->positionX + player->directionX * moveSpeed)][int(player->positionY)] <= '.')
                 player->positionX += player->directionX * moveSpeed;
-            if (mapInUse[int(player->positionX)][int(player->positionY + player->directionY * moveSpeed)] <= '.')
+            if (player->mapInstance[int(player->positionX)][int(player->positionY + player->directionY * moveSpeed)] <= '.')
                 player->positionY += player->directionY * moveSpeed;
 
         } else if (sf::Keyboard::isKeyPressed((sf::Keyboard::Down))) {
             stringText += "DOWN, ";
 
-            if (mapInUse[int(player->positionX - player->directionX * moveSpeed)][int(player->positionY)] <= '.')
+            if (player->mapInstance[int(player->positionX - player->directionX * moveSpeed)][int(player->positionY)] <= '.')
                 player->positionX -= player->directionX * moveSpeed;
-            if (mapInUse[int(player->positionX)][int(player->positionY - player->directionY * moveSpeed)] <= '.')
+            if (player->mapInstance[int(player->positionX)][int(player->positionY - player->directionY * moveSpeed)] <= '.')
                 player->positionY -= player->directionY * moveSpeed;
         }
 
@@ -1326,17 +1334,17 @@ void Raycaster::playerControls() {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
             stringText += "LEFT, ALT, ";
 
-            if (mapInUse[int(player->positionX - player->planeX * moveSpeed)][int(player->positionY)] <= '.')
+            if (player->mapInstance[int(player->positionX - player->planeX * moveSpeed)][int(player->positionY)] <= '.')
                 player->positionX -= player->planeX * moveSpeed;
-            if (mapInUse[int(player->positionX)][int(player->positionY - player->planeY * moveSpeed)] <= '.')
+            if (player->mapInstance[int(player->positionX)][int(player->positionY - player->planeY * moveSpeed)] <= '.')
                 player->positionY -= player->planeY * moveSpeed;
 
         } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
             stringText += "RIGHT, ALT, ";
 
-            if (mapInUse[int(player->positionX + player->planeX * moveSpeed)][int(player->positionY)] <= '.')
+            if (player->mapInstance[int(player->positionX + player->planeX * moveSpeed)][int(player->positionY)] <= '.')
                 player->positionX += player->planeX * moveSpeed;
-            if (mapInUse[int(player->positionX)][int(player->positionY + player->planeY * moveSpeed)] <= '.')
+            if (player->mapInstance[int(player->positionX)][int(player->positionY + player->planeY * moveSpeed)] <= '.')
                 player->positionY += player->planeY * moveSpeed;
 
 
@@ -1370,16 +1378,16 @@ void Raycaster::update(Actor *actor) {
 
     //information column update===============================================
 
-    if (mapInUse[(int)actor->positionX][(int)actor->positionY] == '!' || mapInUse[(int)actor->positionX][(int)actor->positionY] == '$') {
+    if (actor->mapInstance[(int)actor->positionX][(int)actor->positionY] == '!' || actor->mapInstance[(int)actor->positionX][(int)actor->positionY] == '$') {
 
-        if (mapInUse[(int)actor->positionX][(int)actor->positionY] == '!') {
+        if (actor->mapInstance[(int)actor->positionX][(int)actor->positionY] == '!') {
 
             actor->score += 100;
 
             actor->popupString = "money bag picked up";
         }
 
-        else if (mapInUse[(int)actor->positionX][(int)actor->positionY] == '$') {
+        else if (actor->mapInstance[(int)actor->positionX][(int)actor->positionY] == '$') {
 
             actor->collectedKeys.push_back('$');
 
@@ -1393,13 +1401,13 @@ void Raycaster::update(Actor *actor) {
 
 
 
-        mapInUse[(int)actor->positionX][(int)actor->positionY] = '.';
+        actor->mapInstance[(int)actor->positionX][(int)actor->positionY] = '.';
 
         //delete the sprite from sprite list
-        for(int i = 0; i < loadedSpriteList.size(); i++) {
-            if((int)loadedSpriteList[i].posX == (int)actor->positionX && (int)loadedSpriteList[i].posY == (int)actor->positionY) {
+        for(int i = 0; i < actor->loadedSpriteList.size(); i++) {
+            if((int)actor->loadedSpriteList[i].posX == (int)actor->positionX && (int)actor->loadedSpriteList[i].posY == (int)actor->positionY) {
 
-                loadedSpriteList.erase(loadedSpriteList.begin() + i);
+                actor->loadedSpriteList.erase(actor->loadedSpriteList.begin() + i);
 
             }
         }

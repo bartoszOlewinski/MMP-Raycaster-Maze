@@ -47,6 +47,8 @@ public:
     sf::Text eqText;
     std::string eqString;
 
+    std::vector<Sprite> loadedSpriteList;
+
 
     unsigned char mapInstance[Map::MAP_SIZE][Map::MAP_SIZE];
 

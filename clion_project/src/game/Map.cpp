@@ -6,8 +6,9 @@
 
 
 
-#define TEST_MAP
-//#define MAP01
+
+//#define TEST_MAP
+#define MAP01
 //#define MAP02
 
 

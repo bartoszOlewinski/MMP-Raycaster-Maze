@@ -63,7 +63,7 @@ int main() {
     player.renderX = 10;
 
     Actor agent{};
-    agent.renderX = 950;
+    agent.renderX = RENDER_WIDTH + 10 + 300;
 
     setUpActor(&player, "Player");
     setUpActor(&agent, "Agent");

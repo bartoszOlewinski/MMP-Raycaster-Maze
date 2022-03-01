@@ -6,9 +6,9 @@
 
 void Actor::setupStatsText(sf::Font *font, int posX, int posY) {
     statsText.setFont(*font);
-    statsText.setFillColor(sf::Color::Yellow);
+    statsText.setFillColor(sf::Color::White);
     statsText.setString(scoreString + timerString);
-    statsText.setPosition(posX, (float) posY);
+    statsText.setPosition((float)posX, (float) posY);
     statsText.setCharacterSize(20);
 
 
@@ -27,7 +27,7 @@ void Actor::setupPopupText(sf::Font *font, int posX, int posY) {
 
 void Actor::setupEqText(sf::Font *font, int posX, int posY) {
     eqText.setFont(*font);
-    eqText.setFillColor(sf::Color::Yellow);
+    eqText.setFillColor(sf::Color::White);
     eqText.setString(eqString);
     eqText.setPosition((float) posX, (float) posY);
     eqText.setCharacterSize(20);
