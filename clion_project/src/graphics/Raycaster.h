@@ -43,6 +43,18 @@ private:
 
 
 
+    enum Mode{
+        MENU_MODE,
+        PLAY_MODE,
+    };
+
+    enum MenuOption {
+        PLAY,
+        QUIT,
+    };
+
+
+
     sf::Color greyColor;
 
     std::string stringText;
@@ -108,12 +120,13 @@ private:
      * depending on whether it is AI or not
      * the image is rendered in different places
      */
-    void raycastingRenderer(Actor * actor);
+    void raycastingRenderer(Actor * actor, sf::RenderStates texState, sf::RenderStates bagState,
+                            sf::RenderStates goldKeyState);
 
     /**
-     * draws information column
+     * draws menu
      */
-    void drawInfoColumn();
+    void drawMenu(Raycaster::Mode *mode, Raycaster::MenuOption *menuOption, sf::RectangleShape *indicator);
 
     void drawScreenAI();
 

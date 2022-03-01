@@ -29,6 +29,10 @@ public:
     std::vector<char> collectedKeys;
 
     bool hasFinished;
+
+
+    int renderX;
+    int renderY = 10;
 };
 
 

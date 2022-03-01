@@ -41,7 +41,7 @@ int main() {
 
     std::string WINDOW_TITLE = "Raycaster Maze";
 
-    const std::string VERSION = "0.1.5.3";
+    const std::string VERSION = "0.2";
 
 
 #ifdef DEBUG_MODE
@@ -60,7 +60,10 @@ int main() {
 
 
     Actor player{};
+    player.renderX = 10;
+
     Actor agent{};
+    agent.renderX = 950;
 
     setUpActor(&player, "Player");
     setUpActor(&agent, "Agent");

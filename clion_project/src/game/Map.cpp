@@ -4,8 +4,13 @@
 
 #include "Map.h"
 
-//#define MAP testMap
-#define MAP map01
+
+
+//#define TEST_MAP
+#define MAP01
+//#define MAP02
+
+
 
 
 void Map::loadMapDetails() {
@@ -13,12 +18,15 @@ void Map::loadMapDetails() {
         for (int j = 0; j < MAP_SIZE; j++) {
 
 
-#if MAP == testMap
+#ifdef TEST_MAP
             mapArray[i][j] = testMap[i][j];
 #endif
 
-#if MAP == map01
+#ifdef MAP01
             mapArray[i][j] = map01[i][j];
+#endif
+#ifdef MAP02
+            mapArray[i][j] = map02[i][j];
 #endif
 
 

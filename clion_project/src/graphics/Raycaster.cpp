@@ -104,7 +104,6 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 #ifdef PLAYER_DEBUG_DISPLAY
     //set up debugText and font
     debugText.setFont(font);
-
     debugText.setCharacterSize(15);
     debugText.setFillColor(sf::Color::White);
     debugText.setPosition(20, 800);
@@ -113,8 +112,25 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
 //=================MAIN GAME LOOP==========================
 
+    MenuOption menuOption = PLAY;
+    Mode mode = MENU_MODE;
+    sf::RectangleShape indicator(sf::Vector2f(20,20));
+    indicator.setPosition(230, 360);
+    indicator.setFillColor(sf::Color::Yellow);
+    indicator.setOutlineColor(sf::Color::Black);
+    indicator.setOutlineThickness(1.0);
+    indicator.setRotation(45.0);
+
+
 
     while (windowPtr->isOpen()) {
+
+        //MENU====================
+
+        if (mode == MENU_MODE && windowPtr->hasFocus())
+            drawMenu(&mode, &menuOption, &indicator);
+
+        //==========================
 
 
         while(windowPtr->pollEvent(event)) {
@@ -122,28 +138,31 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
                 windowPtr->close();
         }
 
-        //fixed time step, put logic and updates inside while loop
-        //first add time to the timer
-        if (!player->hasFinished)
-            player->time += fixedTimeStepClock.getElapsedTime();
+        if (mode == PLAY_MODE) {
 
-        if(!agent->hasFinished)
-            agent->time += fixedTimeStepClock.getElapsedTime();
+            //fixed time step, put logic and updates inside while loop
+            //first add time to the timer
+            if (!player->hasFinished)
+                player->time += fixedTimeStepClock.getElapsedTime();
 
-        timeSinceLastUpdate += fixedTimeStepClock.restart();
+            if (!agent->hasFinished)
+                agent->time += fixedTimeStepClock.getElapsedTime();
+
+            timeSinceLastUpdate += fixedTimeStepClock.restart();
 
 
-        while (timeSinceLastUpdate > TimePerFrame) {
+            while (timeSinceLastUpdate > TimePerFrame) {
 
-            timeSinceLastUpdate -= TimePerFrame;
+                timeSinceLastUpdate -= TimePerFrame;
 
-            update(player);
+                update(player);
 
-            playerControls();
+                playerControls();
+            }
+
+            //raycaster
+            renderWindow();
         }
-
-        //raycaster
-        renderWindow();
     }
     //========================================================
 }
@@ -155,22 +174,24 @@ void Raycaster::renderWindow() {
 
     //RENDERING ============================
     //clear before drawing next frame
-    windowPtr->clear();
-
-    //draw menu========
+    windowPtr->clear(sf::Color::Black);
 
 
 
+
+
+    //RAYCASTING VARIABLES
+    sf::RenderStates wallState(&textureWallSheet);
+    sf::RenderStates bagState(&bagTexture);
+    sf::RenderStates goldKeyState(&keyTexture);
 
 
 
 
     //RENDER GAME SCREENS
-    drawScreenPlayer();
-    drawScreenAI();
-
-    //create info column
-    //drawInfoColumn();
+    //might need to rework sprite textures to put them into single state
+    raycastingRenderer(player, wallState, bagState,goldKeyState);
+    //raycastingRenderer(agent, wallState,bagState, goldKeyState);
 
 
     //debugConsole.activateDebug();
@@ -199,15 +220,386 @@ void Raycaster::renderWindow() {
 
 
 
-void Raycaster::raycastingRenderer(Actor * actor) {
+void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf::RenderStates bagState,
+                                   sf::RenderStates goldKeyState) {
+    sf::VertexArray lines (sf::Lines,  RENDER_WIDTH); //why use RENDER_WIDTH and resize to 0 after???
+    lines.resize(0);
 
+    double spriteBuffer[RENDER_WIDTH];
+
+
+
+    //==================START CASTING RAYS=====================================
+    for (int x = 0; x < RENDER_WIDTH; x++) {
+        double cameraX = 2 * x / double(RENDER_WIDTH) - 1;
+        double rayDirX = actor->directionX + actor->planeX * cameraX;
+        double rayDirY = actor->directionY + actor->planeY * cameraX;
+
+
+        int mapX = (int) actor->positionX;
+        int mapY = (int) actor->positionY;
+
+
+        double sideDistX;
+        double sideDistY;
+
+
+        //is fine without the giant number :)
+        double deltaDistX = std::abs(1/rayDirX);
+        double deltaDistY = std::abs(1/rayDirY);
+
+
+        double perpWallDist;
+
+        int stepX;
+        int stepY;
+
+        int hit = 0;
+        int side;
+
+
+        if (rayDirX < 0) {
+            stepX = -1;
+            sideDistX = (actor->positionX - mapX) * deltaDistX;
+        } else {
+            stepX = 1;
+            sideDistX = (mapX + 1.0 - actor->positionX) * deltaDistX;
+        }
+        if (rayDirY < 0) {
+            stepY = -1;
+            sideDistY = (actor->positionY - mapY) * deltaDistY;
+        } else {
+            stepY = 1;
+            sideDistY = (mapY + 1.0 - actor->positionY) * deltaDistY;
+        }
+
+
+        while (hit == 0) {
+            if (sideDistX < sideDistY) {
+                sideDistX += deltaDistX;
+                mapX += stepX;
+                side = 0;
+
+                //perpWallDist = (mapX - player->positionX + (1 - stepX) / 2) / rayDirX;
+            } else {
+                sideDistY += deltaDistY;
+                mapY += stepY;
+                side = 1;
+
+                //perpWallDist = (mapY - player->positionY + (1 - stepY) / 2) / rayDirY;
+            }
+            //if (mapInUse[mapX][mapY] != '.' && mapInUse[mapX][mapY] > 48 && mapInUse[mapX][mapY] < 58)
+            if (mapInUse[mapX][mapY] != '.' && mapInUse[mapX][mapY] != '#' && mapInUse[mapX][mapY] != '!'
+                && mapInUse[mapX][mapY] != '$') {
+                hit = 1;
+            }
+        }
+
+
+        if(side == 0)
+            perpWallDist = (sideDistX - deltaDistX);
+        else
+            perpWallDist = (sideDistY - deltaDistY);
+
+
+
+
+
+        //height of line to draw on screen
+        int lineHeight = (int) (RENDER_HEIGHT / perpWallDist);
+
+        //drawing ceiling======================================================
+        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, 10), greyColor,
+                                sf::Vector2f( 640.0f,  128.0f)));
+
+        int drawStart = int((float)-lineHeight * (1.0f - 0.5f) + RENDER_HEIGHT * 0.5f);
+        int overflownPixels = -drawStart;
+
+
+        if (drawStart < 0) {
+            drawStart = 0;
+        }
+
+        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float) drawStart + 10), greyColor,
+                                sf::Vector2f( 640.0f,  128.0f)));
+        //======================================================================
+
+
+
+
+
+        //drawing floor=============================================
+        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float) RENDER_HEIGHT + 10), greyColor,
+                                sf::Vector2f( 640.0f,  128.0f)));
+
+        int drawEnd = int((float)lineHeight * 0.5f + RENDER_HEIGHT * 0.5f);
+
+        int pixelAdjustment = 0;
+
+        if (drawEnd > RENDER_HEIGHT) {
+            drawEnd = RENDER_HEIGHT - 1;
+
+            //simple ratio of total pixels to be rendered and single textureWallSheet pixel height
+            pixelAdjustment = overflownPixels * singleTextureSize / (overflownPixels + overflownPixels + RENDER_HEIGHT);
+        }
+
+        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float) drawEnd + 10), greyColor,
+                                sf::Vector2f( 640.0f,  128.0f)));
+        //==============================================================
+
+
+
+
+
+        //getting the position of textureWallSheet in textureWallSheet sheet
+        int textureNumber = int(mapInUse[mapX][mapY]) - '0' - 1;
+
+        int textureCoordX = textureNumber * singleTextureSize % textureSheetSize;
+        int textureCoordY = textureNumber * singleTextureSize / textureSheetSize * singleTextureSize;
+
+
+
+
+        //calculate where wall was hit
+        double wallX;
+        if (side == 0)
+            wallX = actor->positionY + perpWallDist * rayDirY;
+        else
+            wallX = actor->positionX + perpWallDist * rayDirX;
+        wallX -= floor(wallX);
+
+
+        //get x coordinate
+        int textureX = int(wallX * double(singleTextureSize));
+
+        //flip textureWallSheet
+        if (!side && rayDirX > 0)
+            textureX = singleTextureSize - textureX - 1;
+        if (side && rayDirY <= 0)
+            textureX = singleTextureSize - textureX - 1;
+
+        textureCoordX += textureX;
+
+        //shading
+        sf::Color color = sf::Color::White;
+        if (side == 0) {
+            color.r /= 2;
+            color.g /= 2;
+            color.b /= 2;
+        }
+
+
+
+
+        //drawing textured lines==================================
+        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float)drawStart + 10),color,
+                                sf::Vector2f((float)textureCoordX, (float)(textureCoordY + 1 + pixelAdjustment))));
+
+        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float)(drawEnd + 10)),color,
+                                sf::Vector2f((float)textureCoordX, (float)(textureCoordY + singleTextureSize - 1 - pixelAdjustment))));
+        //=======================================================
+
+
+
+
+
+
+        //some distance buffers for sprites
+        spriteBuffer[x] = perpWallDist;
+
+
+
+        //drawing on screen for textured version
+        windowPtr->draw(lines, texState);
+    }
+    //========================================================================
+
+
+
+
+    //SPRITE CASTING ==========================================================
+
+    sf::VertexArray spriteLines(sf::Lines, RENDER_WIDTH);
+    spriteLines.resize(0);
+
+    unsigned int numberOfSprites = loadedSpriteList.size();
+
+    int spriteOrder[numberOfSprites];
+    double spriteDistance[numberOfSprites];
+
+
+    for (int i = 0; i < numberOfSprites; i++) {
+        spriteOrder[i] = i;
+        spriteDistance[i] = ((actor->positionX - loadedSpriteList[i].posX) * (actor->positionX - loadedSpriteList[i].posX) +
+                             (actor->positionY - loadedSpriteList[i].posY) * (actor->positionY - loadedSpriteList[i].posY));
+
+    }
+
+
+    //sort the sprites
+    sortSprites(spriteOrder, spriteDistance, numberOfSprites);
+
+    //draw the sprites
+    for (int j = 0; j < numberOfSprites; j++) {
+        //clear vertex
+        spriteLines.clear();
+
+        double spriteX = loadedSpriteList[spriteOrder[j]].posX - actor->positionX;
+        double spriteY = loadedSpriteList[spriteOrder[j]].posY - actor->positionY;
+
+
+
+        double invDet = 1.0 / (actor->planeX * player->directionY - actor->directionX * player->planeY);
+
+        double transformX = invDet * (actor->directionY * spriteX - actor->directionX * spriteY);
+        double transformY = invDet * (-actor->planeY * spriteX + actor->planeX * spriteY);
+
+        int spriteScreenX = int(( (float) RENDER_WIDTH / 2) * (1 + transformX / transformY));
+
+
+        //calculating Y axis variables
+        int spriteHeight = abs(int(RENDER_HEIGHT / (transformY)));
+
+        int drawStartY = -spriteHeight / 2 + RENDER_HEIGHT / 2;
+        if(drawStartY < 10)
+            drawStartY = 10;
+
+        int drawEndY = spriteHeight / 2 + RENDER_HEIGHT / 2;
+        if (drawEndY >= RENDER_HEIGHT + 10) {
+            drawEndY = RENDER_HEIGHT + 10 - 1;
+        }
+
+
+        //calculating X axis variables
+        int spriteWidth = abs(int(RENDER_HEIGHT / (transformY)));
+
+        int drawStartX = -spriteWidth / 2 + spriteScreenX;
+        if (drawStartX < 0)
+            drawStartX = actor->renderX;
+
+        int drawEndX = spriteWidth / 2 + spriteScreenX;
+        if (drawEndX >= RENDER_WIDTH + 10)
+            drawEndX = RENDER_WIDTH + actor->renderX - 1;
+
+
+        unsigned char spriteHit = loadedSpriteList[spriteOrder[j]].textureChar;
+
+
+        int i = 1;
+        //loop through every stripe of screen that must draw a sprite
+        for (int stripe = drawStartX; stripe < drawEndX; stripe++) {
+            int texX = int(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * singleTextureSize / spriteWidth) / 256;
+
+            if (transformY > 0 && stripe > 0 && stripe < RENDER_WIDTH && transformY < spriteBuffer[stripe]) {
+
+
+                //check for symbols and what to render
+                spriteLines.append(sf::Vertex(sf::Vector2f((float) stripe + (float)actor->renderX, (float) drawStartY),
+                                              sf::Vector2f((float) texX, (float) (1))));
+
+                spriteLines.append(sf::Vertex(sf::Vector2f((float) stripe + (float)actor->renderX, (float) drawEndY),
+                                              sf::Vector2f((float) texX, (float) (singleTextureSize - 1))));
+
+                i++;
+
+
+                switch (spriteHit) {
+                    case '!':
+                        windowPtr->draw(spriteLines, bagState);
+                        break;
+
+                    case '$':
+                        windowPtr->draw(spriteLines, goldKeyState);
+                        break;
+
+                    default:
+                        std::cout<<"Unknown map symbol"<<std::endl;
+                }
+
+            }
+        }
+    }
+
+
+
+
+
+    //=========================================================================
 
 
 }
 
-void Raycaster::drawInfoColumn() {
 
+void Raycaster::drawMenu(Raycaster::Mode *mode, Raycaster::MenuOption *menuOption, sf::RectangleShape *indicator) {
+        //draw menu==================
+        sf::Text titleText;
+        std::string titleString = "Raycaster Maze";
+
+        titleText.setFont(font);
+        titleText.setString(titleString);
+        titleText.setCharacterSize(80);
+        titleText.setFillColor(sf::Color::White);
+        titleText.setOutlineThickness(1.0);
+        titleText.setOutlineColor(sf::Color::Black);
+        titleText.setPosition(220, 200);
+
+
+
+        sf::Text menuText;
+        std::string menuString = "PLAY\n\nQUIT";
+
+        menuText.setFont(font);
+        menuText.setString(menuString);
+        menuText.setCharacterSize(40);
+        menuText.setFillColor(sf::Color::White);
+        menuText.setOutlineThickness(1.0);
+        menuText.setOutlineColor(sf::Color::Black);
+        menuText.setPosition(250, 350);
+
+
+        windowPtr->clear(greyColor);
+        windowPtr->setKeyRepeatEnabled(false);
+
+
+        // handling input
+        switch (*menuOption) {
+            case PLAY:
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+
+                    indicator->setPosition(230, 455);
+                    *menuOption = QUIT;
+                }
+
+                else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
+                    *mode = PLAY_MODE;
+                }
+                break;
+
+            case QUIT:
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+                    indicator->setPosition(230, 360);
+                    *menuOption = PLAY;
+                }
+
+
+                else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
+                    windowPtr->close();
+                }
+                break;
+
+            default:
+                std::cout<<"Error menu switch"<<std::endl;
+        }
+
+        windowPtr->draw(*indicator);
+        windowPtr->draw(menuText);
+        windowPtr->draw(titleText);
+        windowPtr->display();
 }
+
+
+
+
 
 void Raycaster::drawScreenAI() {
     sf::VertexArray lines (sf::Lines,  RENDER_WIDTH); //why use RENDER_WIDTH and resize to 0 after???
@@ -520,6 +912,7 @@ void Raycaster::drawScreenAI() {
     //=========================================================================
 }
 
+
 void Raycaster::drawScreenPlayer() {
     sf::VertexArray lines (sf::Lines,  RENDER_WIDTH); //why use RENDER_WIDTH and resize to 0 after???
     lines.resize(0);
@@ -828,12 +1221,15 @@ void Raycaster::drawScreenPlayer() {
 }
 
 
+
+
+
 //PROTOTYPE ONLY, NEED PROPER INTERFACE ||| OR ||| another function that handles AI's inputs
 void Raycaster::playerControls() {
 
 #ifdef PLAYER_DEBUG_DISPLAY
-    stringText = "PLAYER SCREEN DEBUG:\nFPS: " + std::to_string((int) std::round(1.0f/frameTime))
-                 + "\nFrame time: " + std::to_string( frameTime) + "s\nInputs: ";
+    stringText = "DEBUG:\nFPS: " + std::to_string((int) std::round(1.0f/frameTime))
+                 + "\nFrame time: " + std::to_string( frameTime) + "s\nPlayer inputs: ";
 #endif
 
 
@@ -973,15 +1369,8 @@ void Raycaster::update(Actor *actor) {
     }
 
 
-
-
-
-
-
-
-
     scoreString = actor-> name + " Score\n" + std::to_string(actor->score);
-    timerString = "\n\n" + actor->name +" Time\n" + std::to_string(actor->time.asSeconds()) + "s";
+    timerString = "\n\n" + actor->name +" Time\n" + std::to_string(std::round(actor->time.asSeconds() * 100.0) / 100.0) + "s";
 
 
     infoText.setString(scoreString + timerString);
@@ -1011,7 +1400,6 @@ void Raycaster::update(Actor *actor) {
     //==================================================================
 
 }
-
 
 
 //COPIED FROM TUTORIAL BY LODEV
