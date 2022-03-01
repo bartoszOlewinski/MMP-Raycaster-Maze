@@ -8,15 +8,35 @@
 
 
 //#define TEST_MAP
-#define MAP01
+//#define MAP01
 //#define MAP02
 
 
 
 
-void Map::loadMapDetails() {
+void Map::loadMapDetails(int mapNumber) {
+    //first empty map details
+    numOfSprites = 0;
+    maxPoints = 0;
+    spriteList.clear();
+
+
     for (int i = 0; i < MAP_SIZE; i++) {
         for (int j = 0; j < MAP_SIZE; j++) {
+
+
+            //load map
+            switch(mapNumber) {
+                case 0:
+                    mapArray[i][j] = map01[i][j];
+                    break;
+                case 1:
+                    mapArray[i][j] = map02[i][j];
+                    break;
+                default:
+                    mapArray[i][j] = testMap[i][j];
+            }
+
 
 
 #ifdef TEST_MAP

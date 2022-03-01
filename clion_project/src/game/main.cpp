@@ -41,17 +41,25 @@ int main() {
 
     std::string WINDOW_TITLE = "Raycaster Maze";
 
-    const std::string VERSION = "0.2.2";
+    const std::string VERSION = "0.2.3.2";
 
 
 #ifdef DEBUG_MODE
     WINDOW_TITLE += " - " + VERSION;
+    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_TITLE, sf::Style::Default);
+#endif
+
+#ifdef RELEASE_MODE
+    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_TITLE, sf::Style::Fullscreen);
 #endif
 
 
 
-    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_TITLE, sf::Style::Default);
+
+
     window.clear(sf::Color::Black);
+
+    window.setMouseCursorVisible(false);
 
     window.setVerticalSyncEnabled(true);
 

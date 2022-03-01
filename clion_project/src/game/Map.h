@@ -98,7 +98,7 @@ public:
 
     std::vector<Sprite> spriteList;
 
-    void loadMapDetails();
+    void loadMapDetails(int mapNumber);
 
 
 };

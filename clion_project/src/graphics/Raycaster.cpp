@@ -15,27 +15,23 @@
 
 #include <cmath>
 #include <iostream>
+#include <time.h>
 
 
 void Raycaster::runGame(Actor *actor, Actor *actorAI) {
+
     //debugConsole = DebugConsole(windowPtr);
-
-    //pick random number, feed it to loading function,
-    //switch case loads map
-    mapObject.loadMapDetails();
-    loadedSpriteList = mapObject.spriteList;
-
 
     //establish actors, get pointers
     player = actor;
     agent = actorAI;
-    player->loadedSpriteList = mapObject.spriteList;
-    agent->loadedSpriteList = mapObject.spriteList;
 
+    pickAndLoadMap();
 
     //set up starting point
     player->positionX = mapObject.startingPosX;
     player->positionY = mapObject.startingPosY;
+
     agent->positionX = mapObject.startingPosX;
     agent->positionY = mapObject.startingPosY;
 
@@ -110,7 +106,7 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
     MenuOption menuOption = PLAY;
     Mode mode = MENU_MODE;
     sf::RectangleShape indicator(sf::Vector2f(20,20));
-    indicator.setPosition(230, 360);
+    indicator.setPosition(230, 260);
     indicator.setFillColor(sf::Color::Yellow);
     indicator.setOutlineColor(sf::Color::Black);
     indicator.setOutlineThickness(1.0);
@@ -182,7 +178,7 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
 void Raycaster::renderWindow() {
     //get time before the render
-    time = fpsClock.getElapsedTime();
+    fpsStartTime = fpsClock.getElapsedTime();
 
     //RENDERING ============================
     //clear before drawing next frame
@@ -210,9 +206,9 @@ void Raycaster::renderWindow() {
     //debugConsole.commandOpener();
 
 
-    oldTime = time;
-    time = fpsClock.getElapsedTime();
-    frameTime = (time.asMilliseconds() - oldTime.asMilliseconds()) / 1000.0;
+    oldTime = fpsStartTime;
+    fpsStartTime = fpsClock.getElapsedTime();
+    frameTime = (fpsStartTime.asMilliseconds() - oldTime.asMilliseconds()) / 1000.0;
 
 
 #ifdef PLAYER_DEBUG_DISPLAY
@@ -348,7 +344,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 
         //drawing floor=============================================
         lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float) RENDER_HEIGHT + 10), greyColor,
-                                sf::Vector2f( 640.0f,  128.0f)));
+                                sf::Vector2f( 640.0f,  127.0f)));
 
         int drawEnd = int((float)lineHeight * 0.5f + RENDER_HEIGHT * 0.5f);
 
@@ -362,7 +358,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
         }
 
         lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float) drawEnd + 10), greyColor,
-                                sf::Vector2f( 640.0f,  128.0f)));
+                                sf::Vector2f( 640.0f,  127.0f)));
         //==============================================================
 
 
@@ -560,6 +556,7 @@ void Raycaster::drawMenu(Raycaster::Mode *mode, Raycaster::MenuOption *menuOptio
         titleText.setOutlineThickness(1.0);
         titleText.setOutlineColor(sf::Color::Black);
         titleText.setPosition(220, 200);
+        titleText.setLetterSpacing(3.0f);
 
 
 
@@ -572,11 +569,10 @@ void Raycaster::drawMenu(Raycaster::Mode *mode, Raycaster::MenuOption *menuOptio
         menuText.setFillColor(sf::Color::White);
         menuText.setOutlineThickness(1.0);
         menuText.setOutlineColor(sf::Color::Black);
-        menuText.setPosition(250, 350);
+        menuText.setPosition(250, 250);
 
 
         windowPtr->clear(greyColor);
-        windowPtr->setKeyRepeatEnabled(false);
 
 
         // handling input
@@ -584,7 +580,7 @@ void Raycaster::drawMenu(Raycaster::Mode *mode, Raycaster::MenuOption *menuOptio
             case PLAY:
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
 
-                    indicator->setPosition(230, 455);
+                    indicator->setPosition(230, 355);
                     *menuOption = QUIT;
                 }
 
@@ -596,7 +592,7 @@ void Raycaster::drawMenu(Raycaster::Mode *mode, Raycaster::MenuOption *menuOptio
 
             case QUIT:
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-                    indicator->setPosition(230, 360);
+                    indicator->setPosition(230, 260);
                     *menuOption = PLAY;
                 }
 
@@ -610,9 +606,21 @@ void Raycaster::drawMenu(Raycaster::Mode *mode, Raycaster::MenuOption *menuOptio
                 std::cout<<"Error menu switch"<<std::endl;
         }
 
+
+
+        sf::Texture titleTexture;
+        titleTexture.loadFromFile("../resources/textures/title_card.png");
+
+        sf::Sprite spriteTitle;
+        spriteTitle.setTexture(titleTexture, true);
+
+
+
+
+        //windowPtr->draw(titleText);
+        windowPtr->draw(spriteTitle);
         windowPtr->draw(*indicator);
         windowPtr->draw(menuText);
-        windowPtr->draw(titleText);
         windowPtr->display();
 }
 
@@ -622,18 +630,34 @@ void Raycaster::resetGame() {
     player->time = sf::Time::Zero;
     agent->time = sf::Time::Zero;
 
+    player->directionX = -1.0f;
+    player->directionY = 0.0f;
+
+    player->planeY = 0.66f;
+    player->planeX = 0.0f;
+
+    agent->directionX = -1.0f;
+    agent->directionY = 0.0f;
+
+    agent->planeX = 0.0f;
+    agent->planeY = 0.66f;
+
     player->score = 0;
     agent->score = 0;
 
     player->collectedKeys.clear();
     agent->collectedKeys.clear();
 
+
+    //pick next map at random
+    pickAndLoadMap();
+
+
     player->positionX = mapObject.startingPosX;
     player->positionY = mapObject.startingPosY;
+
     agent->positionX = mapObject.startingPosX;
     agent->positionY = mapObject.startingPosY;
-
-
 
 
     //reset loaded map and its sprites
@@ -644,17 +668,28 @@ void Raycaster::resetGame() {
         }
     }
 
+    player->loadedSpriteList.clear();
+    agent->loadedSpriteList.clear();
+
     player->loadedSpriteList = mapObject.spriteList;
     agent->loadedSpriteList = mapObject.spriteList;
 
+}
 
+void Raycaster::pickAndLoadMap() {
+    srand(time(NULL));
 
+    int mapNumber = rand() % 2;
 
+    //pick random number, feed it to loading function,
+    //switch case loads map
+    mapObject.loadMapDetails(mapNumber);
 
+    player->loadedSpriteList.clear();
+    agent->loadedSpriteList.clear();
 
-
-
-
+    player->loadedSpriteList = mapObject.spriteList;
+    agent->loadedSpriteList = mapObject.spriteList;
 }
 
 
@@ -1284,7 +1319,7 @@ void Raycaster::drawScreenPlayer() {
 void Raycaster::playerControls() {
 
 #ifdef PLAYER_DEBUG_DISPLAY
-    stringText = "DEBUG:\nFPS: " + std::to_string((int) std::round(1.0f/frameTime))
+    stringText = "Raycaster Maze v. 0.2.3.2\nDEBUG:\nFPS: " + std::to_string((int) std::round(1.0f/frameTime))
                  + "\nFrame time: " + std::to_string( frameTime) + "s\nPlayer inputs: ";
 #endif
 

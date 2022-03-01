@@ -3,6 +3,7 @@ project(Raycaster)
 
 set(CMAKE_CXX_STANDARD 14)
 
+
 set(SFML_DIR "${PROJECT_SOURCE_DIR}/resources/SFML32/lib/cmake/SFML")
 
 find_package(SFML COMPONENTS graphics audio REQUIRED)

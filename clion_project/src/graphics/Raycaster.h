@@ -85,7 +85,7 @@ private:
     double frameTime;
 
     sf::Clock fpsClock;
-    sf::Time time;
+    sf::Time fpsStartTime;
     sf::Time oldTime;
 
 
@@ -111,6 +111,8 @@ private:
     //just for testing purposes
     Map mapObject;
     unsigned char mapInUse[Map::MAP_SIZE][Map::MAP_SIZE];
+
+    //not used currently
     std::vector<Sprite> loadedSpriteList;
 
 
@@ -143,6 +145,8 @@ private:
     static void sortSprites(int* order, double* dist, unsigned int amount);
 
     void resetGame();
+
+    void pickAndLoadMap();
 };
 
 
