@@ -16,8 +16,11 @@
 const int WINDOW_WIDTH = 1600;
 const int WINDOW_HEIGHT = 900;
 
+//const int RENDER_WIDTH = 480;
+//const int RENDER_HEIGHT = 360;
 const int RENDER_WIDTH = 640;
 const int RENDER_HEIGHT = 480;
+
 
 const float ITEM_HIT_BOX = 0.5f;
 
@@ -63,19 +66,7 @@ private:
     sf::Font font;
 
 
-
-    sf::Text infoText;
-    std::string scoreString;
-    std::string timerString;
-
-
-    sf::Text equipmentText;
     std::string eqDefaultString = "Equipment:\n";
-    std::string eqString;
-
-
-    sf::Text popUpText;
-    std::string popUpString;
 
 
     double frameTime;
@@ -138,6 +129,7 @@ private:
 
     static void sortSprites(int* order, double* dist, unsigned int amount);
 
+    void resetGame();
 };
 
 

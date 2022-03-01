@@ -9,6 +9,8 @@
 #include <SFML/System/Time.hpp>
 #include <string>
 #include <vector>
+#include <SFML/Graphics/Text.hpp>
+#include "Map.h"
 
 class Actor {
 public:
@@ -33,6 +35,27 @@ public:
 
     int renderX;
     int renderY = 10;
+
+
+    sf::Text statsText;
+    std::string timerString;
+    std::string scoreString;
+
+    sf::Text popupText;
+    std::string popupString;
+
+    sf::Text eqText;
+    std::string eqString;
+
+
+    unsigned char mapInstance[Map::MAP_SIZE][Map::MAP_SIZE];
+
+
+    void setupStatsText(sf::Font *font, int posX, int posY);
+
+    void setupPopupText(sf::Font *font, int posX, int posY);
+
+    void setupEqText(sf::Font *font, int posX, int posY);
 };
 
 

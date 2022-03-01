@@ -73,30 +73,19 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
 
     //information displays
-    infoText.setFont(font);
-    infoText.setFillColor(sf::Color::Yellow);
-    infoText.setString(scoreString + timerString);
-    infoText.setPosition(660, 15);
-    infoText.setCharacterSize(20);
+    player->setupStatsText(&font, 660, 15);
+    agent->setupStatsText(&font, 830, 365);
 
 
 
     //equipment displays
-    equipmentText.setFont(font);
-    equipmentText.setFillColor(sf::Color::Yellow);
-    equipmentText.setString(eqString);
-    equipmentText.setPosition(20, 500);
-    equipmentText.setCharacterSize(20);
+    player->setupEqText(&font, 20, 500);
+    agent->setupEqText(&font, 970, 500);
 
 
     //popup text
-    popUpText.setFont(font);
-    popUpText.setFillColor(sf::Color::Yellow);
-    popUpText.setOutlineColor(sf::Color::Black);
-    popUpText.setOutlineThickness(1.0);
-    popUpText.setString(popUpString);
-    popUpText.setPosition(12, 12);
-    popUpText.setCharacterSize(20);
+    player->setupPopupText(&font, 12, 12);
+    agent->setupPopupText(&font, 950, 12);
 
 
 
@@ -127,8 +116,14 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
         //MENU====================
 
-        if (mode == MENU_MODE && windowPtr->hasFocus())
+        if (mode == MENU_MODE && windowPtr->hasFocus()) {
+
+
+
             drawMenu(&mode, &menuOption, &indicator);
+            fixedTimeStepClock.restart();
+        }
+
 
         //==========================
 
@@ -155,13 +150,24 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
                 timeSinceLastUpdate -= TimePerFrame;
 
+
                 update(player);
+                update(agent);
 
                 playerControls();
             }
 
             //raycaster
             renderWindow();
+
+            //if escape pressed reset
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
+
+                resetGame();
+
+
+                mode = MENU_MODE;
+            }
         }
     }
     //========================================================
@@ -191,7 +197,7 @@ void Raycaster::renderWindow() {
     //RENDER GAME SCREENS
     //might need to rework sprite textures to put them into single state
     raycastingRenderer(player, wallState, bagState,goldKeyState);
-    //raycastingRenderer(agent, wallState,bagState, goldKeyState);
+    raycastingRenderer(agent, wallState,bagState, goldKeyState);
 
 
     //debugConsole.activateDebug();
@@ -209,9 +215,15 @@ void Raycaster::renderWindow() {
 
 
     //essential text displays
-    windowPtr->draw(infoText);
-    windowPtr->draw(equipmentText);
-    windowPtr->draw(popUpText);
+    windowPtr->draw(player->statsText);
+    windowPtr->draw(agent->statsText);
+
+
+    windowPtr->draw(player->popupText);
+    windowPtr->draw(agent->popupText);
+
+    windowPtr->draw(player->eqText);
+    windowPtr->draw(agent->eqText);
 
 
     //display everything that's been drawn in draw functions
@@ -449,7 +461,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 
 
 
-        double invDet = 1.0 / (actor->planeX * player->directionY - actor->directionX * player->planeY);
+        double invDet = 1.0 / (actor->planeX * actor->directionY - actor->directionX * actor->planeY);
 
         double transformX = invDet * (actor->directionY * spriteX - actor->directionX * spriteY);
         double transformY = invDet * (-actor->planeY * spriteX + actor->planeX * spriteY);
@@ -572,6 +584,7 @@ void Raycaster::drawMenu(Raycaster::Mode *mode, Raycaster::MenuOption *menuOptio
 
                 else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
                     *mode = PLAY_MODE;
+
                 }
                 break;
 
@@ -598,6 +611,43 @@ void Raycaster::drawMenu(Raycaster::Mode *mode, Raycaster::MenuOption *menuOptio
 }
 
 
+void Raycaster::resetGame() {
+    //reset actors
+    player->time = sf::Time::Zero;
+    agent->time = sf::Time::Zero;
+
+    player->score = 0;
+    agent->score = 0;
+
+    player->collectedKeys.clear();
+    agent->collectedKeys.clear();
+
+    player->positionX = mapObject.startingPosX;
+    player->positionY = mapObject.startingPosY;
+    agent->positionX = mapObject.startingPosX;
+    agent->positionY = mapObject.startingPosY;
+
+
+
+
+    //reset loaded map and its sprites
+    for (int i = 0; i < Map::MAP_SIZE; i++) {
+        for (int j = 0; j < Map::MAP_SIZE; j++) {
+            mapInUse[i][j] = mapObject.mapArray[i][j];
+        }
+    }
+
+    loadedSpriteList = mapObject.spriteList;
+
+
+
+
+
+
+
+
+
+}
 
 
 
@@ -911,8 +961,6 @@ void Raycaster::drawScreenAI() {
 
     //=========================================================================
 }
-
-
 void Raycaster::drawScreenPlayer() {
     sf::VertexArray lines (sf::Lines,  RENDER_WIDTH); //why use RENDER_WIDTH and resize to 0 after???
     lines.resize(0);
@@ -1328,20 +1376,20 @@ void Raycaster::update(Actor *actor) {
 
             actor->score += 100;
 
-            popUpString = "money bag picked up";
+            actor->popupString = "money bag picked up";
         }
 
         else if (mapInUse[(int)actor->positionX][(int)actor->positionY] == '$') {
 
             actor->collectedKeys.push_back('$');
 
-            popUpString = "golden key picked up";
+            actor->popupString = "golden key picked up";
 
         }
         startPopUp = fpsClock.getElapsedTime();
 
         newItem = true;
-        popUpText.setString(popUpString);
+        actor->popupText.setString(actor->popupString);
 
 
 
@@ -1359,47 +1407,48 @@ void Raycaster::update(Actor *actor) {
 
 
     sf::Time finishPopUp = fpsClock.getElapsedTime();
-    if (finishPopUp.asSeconds() - startPopUp.asSeconds() > 2 && !popUpString.empty() && newItem) {
+    if (finishPopUp.asSeconds() - startPopUp.asSeconds() > 2 && !actor->popupString.empty() && newItem) {
 
-        popUpString.clear();
-        popUpText.setString(popUpString);
+        actor->popupString.clear();
+        actor->popupText.setString(actor->popupString);
         newItem = false;
 
         startPopUp = sf::Time::Zero;
     }
 
 
-    scoreString = actor-> name + " Score\n" + std::to_string(actor->score);
-    timerString = "\n\n" + actor->name +" Time\n" + std::to_string(std::round(actor->time.asSeconds() * 100.0) / 100.0) + "s";
+    actor->scoreString = actor-> name + " Score\n" + std::to_string(actor->score);
+    actor->timerString = "\n\n" + actor->name +" Time\n" + std::to_string(std::round(actor->time.asSeconds() * 100.0) / 100.0) + "s";
 
 
-    infoText.setString(scoreString + timerString);
+    actor->statsText.setString(actor->scoreString + actor->timerString);
     //===================================================
 
 
 
     //equipment text update================================================
-    eqString = "empty";
+    actor->eqString = "empty";
     for (char collectedKey : actor->collectedKeys) {
         switch (collectedKey) {
             case '$':
-                eqString = "golden key,";
+                actor->eqString = "golden key,";
                 break;
             case '%':
-                eqString = "silver key,";
+                actor->eqString = "silver key,";
 
             default:
-                eqString = "empty";
+                actor->eqString = "empty";
         }
     }
 
 
 
-    equipmentText.setString(eqDefaultString + eqString);
+    actor->eqText.setString(eqDefaultString + actor->eqString);
 
     //==================================================================
 
 }
+
 
 
 //COPIED FROM TUTORIAL BY LODEV

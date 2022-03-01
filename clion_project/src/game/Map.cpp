@@ -1,13 +1,13 @@
 //
-// Created by barto on 21/02/2022.
+// Created by Bartosz Olewinski on 21/02/2022.
 //
 
 #include "Map.h"
 
 
 
-//#define TEST_MAP
-#define MAP01
+#define TEST_MAP
+//#define MAP01
 //#define MAP02
 
 
