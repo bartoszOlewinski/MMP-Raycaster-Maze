@@ -36,12 +36,12 @@ void setUpActor(Actor* actor, std::string name) {
 }
 
 
-
 int main() {
 
     std::string WINDOW_TITLE = "Raycaster Maze";
 
-    const std::string VERSION = "0.2.3.2";
+    std::string VERSION = "0.2.4";
+
 
 
 #ifdef DEBUG_MODE

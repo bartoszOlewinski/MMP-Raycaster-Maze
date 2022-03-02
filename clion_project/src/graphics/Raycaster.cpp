@@ -113,6 +113,11 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
     indicator.setRotation(45.0);
 
 
+    //for keyboard delay
+    menuClock.restart();
+    menuTime = sf::Time::Zero;
+    choiceMenuTime = sf::Time::Zero;
+
 
     while (windowPtr->isOpen()) {
 
@@ -591,36 +596,42 @@ void Raycaster::drawMenu(Raycaster::Mode *mode, Raycaster::MenuOption *menuOptio
 
         windowPtr->clear(greyColor);
 
+        menuTime = menuClock.getElapsedTime();
 
-        // handling input
-        switch (*menuOption) {
-            case PLAY:
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+        if (menuTime.asSeconds() - choiceMenuTime.asSeconds() > 0.1) {
 
-                    indicator->setPosition(230, 355);
-                    *menuOption = QUIT;
-                }
-
-                else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
-                    *mode = PLAY_MODE;
-
-                }
-                break;
-
-            case QUIT:
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-                    indicator->setPosition(230, 260);
-                    *menuOption = PLAY;
-                }
+            // handling input
+            switch (*menuOption) {
+                case PLAY:
+                    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ||
+                        sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+                        choiceMenuTime = menuClock.getElapsedTime();
 
 
-                else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
-                    windowPtr->close();
-                }
-                break;
+                        indicator->setPosition(230, 355);
+                        *menuOption = QUIT;
+                    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
+                        *mode = PLAY_MODE;
 
-            default:
-                std::cout<<"Error menu switch"<<std::endl;
+                    }
+                    break;
+
+                case QUIT:
+                    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ||
+                        sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+                        choiceMenuTime = menuClock.getElapsedTime();
+
+
+                        indicator->setPosition(230, 260);
+                        *menuOption = PLAY;
+                    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
+                        windowPtr->close();
+                    }
+                    break;
+
+                default:
+                    std::cout << "Error menu switch" << std::endl;
+            }
         }
 
 
@@ -714,7 +725,7 @@ void Raycaster::pickAndLoadMap() {
 void Raycaster::playerControls() {
 
 #ifdef PLAYER_DEBUG_DISPLAY
-    stringText = "Raycaster Maze v. 0.2.3.2\nDEBUG:\nFPS: " + std::to_string((int) std::round(1.0f/frameTime))
+    stringText = "Raycaster Maze v. +" + gameVersion + "\nDEBUG:\nFPS: " + std::to_string((int) std::round(1.0f / frameTime))
                  + "\nFrame time: " + std::to_string( frameTime) + "s\nPlayer inputs: ";
 #endif
 

@@ -34,7 +34,6 @@ const int RENDER_HEIGHT = 480;
 
 
 
-
 const float ITEM_HIT_BOX = 0.5f;
 
 class Raycaster {
@@ -59,6 +58,11 @@ private:
 
 
 
+    std::string gameVersion = "0.2.4";
+
+
+
+
     enum Mode{
         MENU_MODE,
         PLAY_MODE,
@@ -80,6 +84,12 @@ private:
 
 
     std::string eqDefaultString = "Equipment:\n";
+
+
+
+    sf::Clock menuClock;
+    sf::Time menuTime = menuClock.getElapsedTime();
+    sf::Time choiceMenuTime = sf::Time::Zero;
 
 
     double frameTime;
