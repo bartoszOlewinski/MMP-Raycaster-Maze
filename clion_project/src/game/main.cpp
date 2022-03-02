@@ -53,6 +53,11 @@ int main() {
     sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_TITLE, sf::Style::Fullscreen);
 #endif
 
+    sf::Image icon;
+    icon.loadFromFile("../resources/textures/icon.png");
+
+    window.setIcon(100, 100, icon.getPixelsPtr());
+
 
 
 
