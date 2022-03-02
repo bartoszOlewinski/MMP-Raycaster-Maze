@@ -58,7 +58,7 @@ private:
 
 
 
-    std::string gameVersion = "0.2.4";
+    std::string gameVersion = "0.2.5";
 
 
 

@@ -298,19 +298,34 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
                 sideDistX += deltaDistX;
                 mapX += stepX;
                 side = 0;
-
-                //perpWallDist = (mapX - player->positionX + (1 - stepX) / 2) / rayDirX;
             } else {
                 sideDistY += deltaDistY;
                 mapY += stepY;
                 side = 1;
-
-                //perpWallDist = (mapY - player->positionY + (1 - stepY) / 2) / rayDirY;
             }
+
             //if (mapInUse[mapX][mapY] != '.' && mapInUse[mapX][mapY] > 48 && mapInUse[mapX][mapY] < 58)
+
             if (actor->mapInstance[mapX][mapY] != '.' && actor->mapInstance[mapX][mapY] != '#' && actor->mapInstance[mapX][mapY] != '!'
                 && actor->mapInstance[mapX][mapY] != '$') {
                 hit = 1;
+
+                //if it's not the door
+                if (actor->mapInstance[mapX][mapY] == '5') {
+                    double distance = sqrt((actor->positionX - mapX) * (actor->positionX - mapX) + (actor->positionY - mapY) * (actor->positionY - mapY));
+
+                    if (distance < 1.2) {
+                        actor->isCloseToDoor = true;
+                        actor->doorX = mapX;
+                        actor->doorY = mapY;
+                    }
+                    else  {
+                        actor->isCloseToDoor = false;
+                        actor->doorX = -1;
+                        actor->doorY = -1;
+                    }
+
+                }
             }
         }
 
@@ -478,7 +493,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 
         //stuff for scaling and moving sprites to the floor
 #define vMove 128.0
-#define SpriteScale 1.5
+#define SpriteScale 1.3
         int vMoveScreen = int(vMove / transformY);
 
         //stuff for scaling sprite in Y axis
@@ -801,7 +816,10 @@ void Raycaster::playerControls() {
         //action button
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
             stringText += "SPACE, ";
+            if (player->isCloseToDoor) {
+                player->mapInstance[player->doorX][player->doorY] = '.';
 
+            }
         }
 
 
@@ -818,23 +836,27 @@ void Raycaster::playerControls() {
 void Raycaster::update(Actor *actor) {
 
     //information column update===============================================
+    unsigned char currentCell = actor->mapInstance[(int)actor->positionX][(int)actor->positionY];
 
-    if (actor->mapInstance[(int)actor->positionX][(int)actor->positionY] == '!' || actor->mapInstance[(int)actor->positionX][(int)actor->positionY] == '$') {
+    if ( currentCell != '#' && currentCell != '.') {
+        switch (currentCell) {
+            case '!':
+                actor->score += 100;
 
-        if (actor->mapInstance[(int)actor->positionX][(int)actor->positionY] == '!') {
+                actor->popupString = "money bag picked up";
+                break;
 
-            actor->score += 100;
+            case '$':
+                actor->collectedKeys.push_back('$');
 
-            actor->popupString = "money bag picked up";
+                actor->popupString = "golden key picked up";
+                break;
+            default:
+                std::cout<<"Hit detection encountered unknown instance"<<std::endl;
         }
 
-        else if (actor->mapInstance[(int)actor->positionX][(int)actor->positionY] == '$') {
 
-            actor->collectedKeys.push_back('$');
 
-            actor->popupString = "golden key picked up";
-
-        }
         startPopUp = fpsClock.getElapsedTime();
 
         newItem = true;
@@ -856,7 +878,7 @@ void Raycaster::update(Actor *actor) {
 
 
     sf::Time finishPopUp = fpsClock.getElapsedTime();
-    if (finishPopUp.asSeconds() - startPopUp.asSeconds() > 2 && !actor->popupString.empty() && newItem) {
+    if (finishPopUp.asSeconds() - startPopUp.asSeconds() > 1.2f && !actor->popupString.empty() && newItem) {
 
         actor->popupString.clear();
         actor->popupText.setString(actor->popupString);

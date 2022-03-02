@@ -36,6 +36,9 @@ public:
     int renderX;
     int renderY = 10;
 
+    bool isCloseToDoor;
+    int doorX;
+    int doorY;
 
     sf::Text statsText;
     std::string timerString;
