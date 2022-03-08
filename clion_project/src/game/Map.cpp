@@ -84,6 +84,18 @@ void Map::loadMapDetails(int mapNumber) {
 
                 spriteList.push_back(tempSprite);
             }
+                //SILVER KEY
+            else if (mapArray[i][j] == '&') {
+                Map::numOfSprites++;
+
+                Sprite tempSprite{};
+                tempSprite.posX = (float)i + 0.5f;
+                tempSprite.posY = (float)j + 0.5f;
+                tempSprite.textureChar = '&';
+
+
+                spriteList.push_back(tempSprite);
+            }
             // FURTHER ELSE IF FOR OTHER TYPES OF ITEMS
 
         }

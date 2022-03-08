@@ -66,11 +66,19 @@ private:
     enum Mode{
         MENU_MODE,
         PLAY_MODE,
+        LEVEL_SUMMARY
     };
 
     enum MenuOption {
         PLAY,
         QUIT,
+    };
+
+
+    enum AgentOption{
+        HARD,
+        MEDIUM,
+        EASY,
     };
 
 
@@ -114,7 +122,8 @@ private:
 
     sf::Texture textureWallSheet;
     sf::Texture bagTexture;
-    sf::Texture keyTexture;
+    sf::Texture goldKeyTexture;
+    sf::Texture silverKeyTexture;
 
 
 
@@ -137,16 +146,12 @@ private:
      * the image is rendered in different places
      */
     void raycastingRenderer(Actor * actor, sf::RenderStates texState, sf::RenderStates bagState,
-                            sf::RenderStates goldKeyState);
+                            sf::RenderStates goldKeyState, sf::RenderStates silverKeyState);
 
     /**
      * draws menu
      */
     void drawMenu(Raycaster::Mode *mode, Raycaster::MenuOption *menuOption, sf::RectangleShape *indicator);
-
-    void drawScreenAI();
-
-    void drawScreenPlayer();
 
     void playerControls();
 

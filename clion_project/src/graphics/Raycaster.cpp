@@ -49,16 +49,17 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
 
     //floor and ceiling colour
-    greyColor.r = 105;
-    greyColor.g = 105;
-    greyColor.b = 105;
+    greyColor.r = 120;
+    greyColor.g = 120;
+    greyColor.b = 120;
 
 
 
     //load textures
     textureWallSheet.loadFromFile("../resources/textures/texture_sheet_test.png");
     bagTexture.loadFromFile("../resources/textures/bag_money.png");
-    keyTexture.loadFromFile("../resources/textures/golden_key.png");
+    goldKeyTexture.loadFromFile("../resources/textures/golden_key.png");
+    silverKeyTexture.loadFromFile("../resources/textures/silver_key.png");
 
 
     //set up clocks and times for time step
@@ -196,15 +197,16 @@ void Raycaster::renderWindow() {
     //RAYCASTING VARIABLES
     sf::RenderStates wallState(&textureWallSheet);
     sf::RenderStates bagState(&bagTexture);
-    sf::RenderStates goldKeyState(&keyTexture);
+    sf::RenderStates goldKeyState(&goldKeyTexture);
+    sf::RenderStates silverKeyState(&silverKeyTexture);
 
 
 
 
     //RENDER GAME SCREENS
     //might need to rework sprite textures to put them into single state
-    raycastingRenderer(player, wallState, bagState,goldKeyState);
-    raycastingRenderer(agent, wallState,bagState, goldKeyState);
+    raycastingRenderer(player, wallState, bagState,goldKeyState, silverKeyState);
+    raycastingRenderer(agent, wallState,bagState, goldKeyState, silverKeyState);
 
 
     //debugConsole.activateDebug();
@@ -240,7 +242,7 @@ void Raycaster::renderWindow() {
 
 
 void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf::RenderStates bagState,
-                                   sf::RenderStates goldKeyState) {
+                                   sf::RenderStates goldKeyState, sf::RenderStates silverKeyState) {
     sf::VertexArray lines (sf::Lines,  RENDER_WIDTH); //why use RENDER_WIDTH and resize to 0 after???
     lines.resize(0);
 
@@ -293,6 +295,13 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
         }
 
 
+
+
+        bool hitDoor = false;
+
+        double doorDistY;
+        double doorDistX;
+
         while (hit == 0) {
             if (sideDistX < sideDistY) {
                 sideDistX += deltaDistX;
@@ -307,25 +316,26 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
             //if (mapInUse[mapX][mapY] != '.' && mapInUse[mapX][mapY] > 48 && mapInUse[mapX][mapY] < 58)
 
             if (actor->mapInstance[mapX][mapY] != '.' && actor->mapInstance[mapX][mapY] != '#' && actor->mapInstance[mapX][mapY] != '!'
-                && actor->mapInstance[mapX][mapY] != '$') {
-                hit = 1;
+                && actor->mapInstance[mapX][mapY] != '$' && actor->mapInstance[mapX][mapY] != '&') {
 
-                //if it's not the door
-                if (actor->mapInstance[mapX][mapY] == '5') {
-                    double distance = sqrt((actor->positionX - mapX) * (actor->positionX - mapX) + (actor->positionY - mapY) * (actor->positionY - mapY));
+                //if it's door calculate distances
+                if (actor->mapInstance[mapX][mapY] == '5' || actor->mapInstance[mapX][mapY] == '7') {
 
-                    if (distance < 1.2) {
+                    double distance = sqrt((actor->positionX - mapX - 0.5f) * (actor->positionX - mapX - 0.5f) +
+                                           (actor->positionY - mapY - 0.5f) * (actor->positionY - mapY - 0.5f));
+
+                    if (distance < 1.5) {
                         actor->isCloseToDoor = true;
                         actor->doorX = mapX;
                         actor->doorY = mapY;
-                    }
-                    else  {
+                    } else {
                         actor->isCloseToDoor = false;
                         actor->doorX = -1;
                         actor->doorY = -1;
                     }
-
                 }
+
+                hit = 1;
             }
         }
 
@@ -344,7 +354,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 
         //drawing ceiling======================================================
         lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, 10), greyColor,
-                                sf::Vector2f( 640.0f,  128.0f)));
+                                sf::Vector2f( 640.0f,  0.0f)));
 
         int drawStart = int((float)-lineHeight * (1.0f - 0.5f) + RENDER_HEIGHT * 0.5f);
         int overflownPixels = -drawStart;
@@ -355,7 +365,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
         }
 
         lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float) drawStart + 10), greyColor,
-                                sf::Vector2f( 640.0f,  128.0f)));
+                                sf::Vector2f( 640.0f,  0.0f)));
         //======================================================================
 
 
@@ -364,7 +374,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 
         //drawing floor=============================================
         lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float) RENDER_HEIGHT + 10), greyColor,
-                                sf::Vector2f( 640.0f,  126.0f)));
+                                sf::Vector2f( 640.0f,  0.0f)));
 
         int drawEnd = int((float)lineHeight * 0.5f + RENDER_HEIGHT * 0.5f);
 
@@ -378,7 +388,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
         }
 
         lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float) drawEnd + 10), greyColor,
-                                sf::Vector2f( 640.0f,  127.0f)));
+                                sf::Vector2f( 640.0f,  0.0f)));
         //==============================================================
 
 
@@ -563,6 +573,10 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
                         windowPtr->draw(spriteLines, goldKeyState);
                         break;
 
+                    case '&':
+                        windowPtr->draw(spriteLines, silverKeyState);
+                        break;
+
                     default:
                         std::cout<<"Unknown map symbol"<<std::endl;
                 }
@@ -719,6 +733,7 @@ void Raycaster::resetGame() {
 
 }
 
+
 void Raycaster::pickAndLoadMap() {
     srand(time(NULL));
 
@@ -740,7 +755,7 @@ void Raycaster::pickAndLoadMap() {
 void Raycaster::playerControls() {
 
 #ifdef PLAYER_DEBUG_DISPLAY
-    stringText = "Raycaster Maze v. +" + gameVersion + "\nDEBUG:\nFPS: " + std::to_string((int) std::round(1.0f / frameTime))
+    stringText = "Raycaster Maze v. " + gameVersion + "\nDEBUG:\nFPS: " + std::to_string((int) std::round(1.0f / frameTime))
                  + "\nFrame time: " + std::to_string( frameTime) + "s\nPlayer inputs: ";
 #endif
 
@@ -817,8 +832,25 @@ void Raycaster::playerControls() {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
             stringText += "SPACE, ";
             if (player->isCloseToDoor) {
-                player->mapInstance[player->doorX][player->doorY] = '.';
+                unsigned char tile =  player->mapInstance[player->doorX][player->doorY];
 
+                switch (tile) {
+                    case '5':
+                        for (char collectedKey : player->collectedKeys) {
+                            if (collectedKey == '$') {
+                                player->mapInstance[player->doorX][player->doorY] = '.';
+                            }
+                        }
+                        break;
+
+                    case '7':
+                        for (char collectedKey : player->collectedKeys) {
+                            if (collectedKey == '&') {
+                                player->mapInstance[player->doorX][player->doorY] = '.';
+                            }
+                        }
+                        break;
+                }
             }
         }
 
@@ -851,8 +883,15 @@ void Raycaster::update(Actor *actor) {
 
                 actor->popupString = "golden key picked up";
                 break;
+
+            case '&':
+                actor->collectedKeys.push_back('&');
+
+                actor->popupString = "silver key picked up";
+                break;
+
             default:
-                std::cout<<"Hit detection encountered unknown instance"<<std::endl;
+                std::cout<<"Hit detection encountered unknown instance."<<std::endl;
         }
 
 
@@ -898,19 +937,23 @@ void Raycaster::update(Actor *actor) {
 
 
     //equipment text update================================================
-    actor->eqString = "empty";
+    actor->eqString = "";
     for (char collectedKey : actor->collectedKeys) {
         switch (collectedKey) {
             case '$':
-                actor->eqString = "golden key,";
+                actor->eqString += "golden key, ";
                 break;
-            case '%':
-                actor->eqString = "silver key,";
+            case '&':
+                actor->eqString += "silver key, ";
+                break;
 
             default:
                 actor->eqString = "empty";
         }
     }
+
+    if (actor->eqString.empty())
+        actor->eqString = "empty";
 
 
 
@@ -919,7 +962,6 @@ void Raycaster::update(Actor *actor) {
     //==================================================================
 
 }
-
 
 
 //COPIED FROM TUTORIAL BY LODEV
