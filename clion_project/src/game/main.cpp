@@ -40,7 +40,7 @@ int main() {
 
     std::string WINDOW_TITLE = "Raycaster Maze";
 
-    std::string VERSION = "0.2.6";
+    std::string VERSION = "0.3.1";
 
 
 

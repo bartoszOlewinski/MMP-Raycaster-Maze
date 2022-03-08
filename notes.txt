@@ -83,3 +83,5 @@ Created text equipment display.
 ====08/03/22====
 Scrapped door rendering, instead the game will use simple system I implemented earlier where when cast ray hits a door
 symbol, it calculates the distances and based on that it decides whether the player is close enough to open it.
+
+Added little level summary bit.

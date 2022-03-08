@@ -58,7 +58,19 @@ private:
 
 
 
-    std::string gameVersion = "0.2.6";
+
+    sf::Time playerPrevTime;
+    sf::Time agentPrevTime;
+
+    int playerPrevScore;
+    int agentPrevScore;
+
+    bool playerHasFinished;
+    bool agentHasFinished;
+
+
+
+    std::string gameVersion = "0.3.1";
 
 
 
@@ -155,7 +167,7 @@ private:
     /**
      * draws menu
      */
-    void drawMenu(Raycaster::Mode *mode, Raycaster::MenuOption *menuOption, sf::RectangleShape *indicator);
+    void drawMenu(sf::RectangleShape *indicator);
 
     void playerControls();
 

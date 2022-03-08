@@ -124,12 +124,12 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
         //MENU====================
 
-        if (mode == MENU_MODE && windowPtr->hasFocus()) {
+        if ((mode == MENU_MODE || mode == LEVEL_SUMMARY) && windowPtr->hasFocus()) {
 
 
-
-            drawMenu(&mode, &menuOption, &indicator);
+            drawMenu(&indicator);
             fixedTimeStepClock.restart();
+
         }
 
 
@@ -150,6 +150,7 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
             if (!agent->hasFinished)
                 agent->time += fixedTimeStepClock.getElapsedTime();
+
 
             timeSinceLastUpdate += fixedTimeStepClock.restart();
 
@@ -176,6 +177,9 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
                 mode = MENU_MODE;
             }
+
+            if (mode == LEVEL_SUMMARY)
+                resetGame();
         }
     }
     //========================================================
@@ -595,7 +599,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 }
 
 
-void Raycaster::drawMenu(Raycaster::Mode *mode, Raycaster::MenuOption *menuOption, sf::RectangleShape *indicator) {
+void Raycaster::drawMenu(sf::RectangleShape *indicator) {
         //draw menu==================
         sf::Text titleText;
         std::string titleString = "Raycaster Maze";
@@ -612,7 +616,32 @@ void Raycaster::drawMenu(Raycaster::Mode *mode, Raycaster::MenuOption *menuOptio
 
 
         sf::Text menuText;
-        std::string menuString = "PLAY\n\nQUIT";
+        std::string menuString;
+        menuString = "PLAY\n\nQUIT";
+
+        std::string summaryString;
+        sf::Text summaryText;
+
+        if (mode == LEVEL_SUMMARY) {
+            summaryString = "\n==previous level stats==\n"
+                            "==PLAYER==\nplayer has finished: " + std::to_string(playerHasFinished) + "\nplayer time: " +
+                            std::to_string(playerPrevTime.asSeconds()) + "s\nplayer score: " +
+                            std::to_string(playerPrevScore) +
+                            "\n==AGENT==\nagent has finished: " + std::to_string(agentHasFinished) + "\nagent time: " +
+                            std::to_string(agentPrevTime.asSeconds()) + "s\nagent score: " +
+                            std::to_string(agentPrevScore);
+
+
+            summaryText.setFont(font);
+            summaryText.setString(summaryString);
+            summaryText.setCharacterSize(22);
+            summaryText.setFillColor(sf::Color::Yellow);
+            summaryText.setOutlineThickness(1.0);
+            summaryText.setOutlineColor(sf::Color::Black);
+            summaryText.setPosition(800, 250);
+
+
+        }
 
         menuText.setFont(font);
         menuText.setString(menuString);
@@ -630,7 +659,7 @@ void Raycaster::drawMenu(Raycaster::Mode *mode, Raycaster::MenuOption *menuOptio
         if (menuTime.asSeconds() - choiceMenuTime.asSeconds() > 0.1) {
 
             // handling input
-            switch (*menuOption) {
+            switch (menuOption) {
                 case PLAY:
                     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ||
                         sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
@@ -638,9 +667,9 @@ void Raycaster::drawMenu(Raycaster::Mode *mode, Raycaster::MenuOption *menuOptio
 
 
                         indicator->setPosition(230, 355);
-                        *menuOption = QUIT;
+                        menuOption = QUIT;
                     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
-                        *mode = PLAY_MODE;
+                        mode = PLAY_MODE;
 
                     }
                     break;
@@ -652,7 +681,7 @@ void Raycaster::drawMenu(Raycaster::Mode *mode, Raycaster::MenuOption *menuOptio
 
 
                         indicator->setPosition(230, 260);
-                        *menuOption = PLAY;
+                        menuOption = PLAY;
                     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
                         windowPtr->close();
                     }
@@ -678,6 +707,7 @@ void Raycaster::drawMenu(Raycaster::Mode *mode, Raycaster::MenuOption *menuOptio
         windowPtr->draw(spriteTitle);
         windowPtr->draw(*indicator);
         windowPtr->draw(menuText);
+        windowPtr->draw(summaryText);
         windowPtr->display();
 }
 
@@ -701,6 +731,9 @@ void Raycaster::resetGame() {
 
     player->score = 0;
     agent->score = 0;
+
+    player->hasFinished = false;
+    agent->hasFinished = false;
 
     player->collectedKeys.clear();
     agent->collectedKeys.clear();
@@ -852,8 +885,26 @@ void Raycaster::playerControls() {
                         break;
 
                     case '6':
-                        mode = MENU_MODE;
-                        resetGame();
+                        //get extra info for summary
+
+                        playerPrevScore = player->score;
+                        agentPrevScore = agent->score;
+
+
+                        playerPrevTime = player->time;
+                        agentPrevTime = agent->time;
+
+                        player->hasFinished = true;
+
+                        playerHasFinished = player->hasFinished;
+                        agentHasFinished = agent->hasFinished;
+
+
+
+
+
+                        mode = LEVEL_SUMMARY;
+
                         break;
                 }
             }
@@ -933,6 +984,7 @@ void Raycaster::update(Actor *actor) {
 
 
     actor->scoreString = actor-> name + " Score\n" + std::to_string(actor->score);
+
     actor->timerString = "\n\n" + actor->name +" Time\n" + std::to_string(std::round(actor->time.asSeconds() * 100.0) / 100.0) + "s";
 
 
