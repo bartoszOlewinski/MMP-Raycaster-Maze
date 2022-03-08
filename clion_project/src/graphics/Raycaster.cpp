@@ -104,8 +104,8 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
 //=================MAIN GAME LOOP==========================
 
-    MenuOption menuOption = PLAY;
-    Mode mode = MENU_MODE;
+    menuOption = PLAY;
+    mode = MENU_MODE;
     sf::RectangleShape indicator(sf::Vector2f(20,20));
     indicator.setPosition(230, 260);
     indicator.setFillColor(sf::Color::Yellow);
@@ -319,7 +319,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
                 && actor->mapInstance[mapX][mapY] != '$' && actor->mapInstance[mapX][mapY] != '&') {
 
                 //if it's door calculate distances
-                if (actor->mapInstance[mapX][mapY] == '5' || actor->mapInstance[mapX][mapY] == '7') {
+                if (actor->mapInstance[mapX][mapY] == '5' || actor->mapInstance[mapX][mapY] == '6' || actor->mapInstance[mapX][mapY] == '7') {
 
                     double distance = sqrt((actor->positionX - mapX - 0.5f) * (actor->positionX - mapX - 0.5f) +
                                            (actor->positionY - mapY - 0.5f) * (actor->positionY - mapY - 0.5f));
@@ -849,6 +849,11 @@ void Raycaster::playerControls() {
                                 player->mapInstance[player->doorX][player->doorY] = '.';
                             }
                         }
+                        break;
+
+                    case '6':
+                        mode = MENU_MODE;
+                        resetGame();
                         break;
                 }
             }

@@ -58,7 +58,7 @@ private:
 
 
 
-    std::string gameVersion = "0.2.5";
+    std::string gameVersion = "0.2.6";
 
 
 
@@ -80,6 +80,10 @@ private:
         MEDIUM,
         EASY,
     };
+
+
+    MenuOption menuOption;
+    Mode mode;
 
 
 
