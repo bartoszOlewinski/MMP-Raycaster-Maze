@@ -111,7 +111,7 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
 
                 switch (agentOption) {
                     case HARD:
-                        indicator->setPosition(400, 260);
+                        indicator->setPosition(400, 265);
                         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
                             choiceMenuTime = menuClock.getElapsedTime();
 
@@ -131,7 +131,7 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
                         break;
 
                     case MEDIUM:
-                        indicator->setPosition(400, 305);
+                        indicator->setPosition(400, 310);
                         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
                             choiceMenuTime = menuClock.getElapsedTime();
 
@@ -150,7 +150,7 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
                         break;
 
                     case EASY:
-                        indicator->setPosition(400, 355);
+                        indicator->setPosition(400, 360);
                         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
                             choiceMenuTime = menuClock.getElapsedTime();
 

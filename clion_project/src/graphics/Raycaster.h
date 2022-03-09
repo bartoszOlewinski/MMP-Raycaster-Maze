@@ -12,6 +12,7 @@
 #include "../game/DebugConsole.cpp"
 #include "../game/Map.h"
 #include "Menu.h"
+#include "../game/GameSetup.h"
 
 
 #define RESOLUTION_720P
@@ -55,25 +56,17 @@ private:
     Actor* agent{};
     Actor* player{};
 
-    DebugConsole debugConsole = DebugConsole(nullptr);
+    Map mapObject;
+
+    //DebugConsole debugConsole = DebugConsole(nullptr);
 
 
-
-
-    sf::Time playerPrevTime;
-    sf::Time agentPrevTime;
-
-    int playerPrevScore;
-    int agentPrevScore;
-
-    bool playerHasFinished;
-    bool agentHasFinished;
+    GameSetup gameSetup;
+    Menu menuObject;
 
 
 
     std::string gameVersion = "0.3.2";
-
-
 
 
     enum Mode{
@@ -81,7 +74,6 @@ private:
         PLAY_MODE,
         LEVEL_SUMMARY
     };
-
 
     Mode mode;
 
@@ -94,12 +86,12 @@ private:
     std::string stringText;
     sf::Text debugText;
 
+
+
+
     sf::Font font;
 
-
     std::string eqDefaultString = "Equipment:\n";
-
-
 
     sf::Clock menuClock;
 
@@ -132,7 +124,7 @@ private:
 
 
     //just for testing purposes
-    Map mapObject;
+
     unsigned char mapInUse[Map::MAP_SIZE][Map::MAP_SIZE];
 
     //not used currently
@@ -160,9 +152,6 @@ private:
 
     static void sortSprites(int* order, double* dist, unsigned int amount);
 
-    void resetGame();
-
-    void pickAndLoadMap();
 };
 
 

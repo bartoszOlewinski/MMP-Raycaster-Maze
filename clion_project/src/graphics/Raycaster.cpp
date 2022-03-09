@@ -28,7 +28,9 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
     player = actor;
     agent = actorAI;
 
-    pickAndLoadMap();
+    gameSetup.setUpAttriubutes(&mapObject, player, agent);
+
+    gameSetup.pickAndLoadMap();
 
     //set up starting point
     player->positionX = mapObject.startingPosX;
@@ -48,7 +50,9 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
         }
     }
 
-    Menu menuObject(this->windowPtr, mapObject.maxPoints);
+    //Menu menuObject(this->windowPtr, mapObject.maxPoints);
+    menuObject.windowPtr = windowPtr;
+    menuObject.maxPoints = mapObject.maxPoints;
 
 
 
@@ -181,14 +185,14 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
             //if escape pressed reset
             if(sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
 
-                resetGame();
+                gameSetup.resetAttributes();
 
 
                 mode = MENU_MODE;
             }
 
             if (mode == LEVEL_SUMMARY)
-                resetGame();
+                gameSetup.resetAttributes();
         }
     }
     //========================================================
@@ -608,78 +612,6 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 }
 
 
-void Raycaster::resetGame() {
-    //reset actors
-    player->time = sf::Time::Zero;
-    agent->time = sf::Time::Zero;
-
-    player->directionX = -1.0f;
-    player->directionY = 0.0f;
-
-    player->planeY = 0.66f;
-    player->planeX = 0.0f;
-
-    agent->directionX = -1.0f;
-    agent->directionY = 0.0f;
-
-    agent->planeX = 0.0f;
-    agent->planeY = 0.66f;
-
-    player->score = 0;
-    agent->score = 0;
-
-    player->hasFinished = false;
-    agent->hasFinished = false;
-
-    player->collectedKeys.clear();
-    agent->collectedKeys.clear();
-
-
-    //pick next map at random
-    pickAndLoadMap();
-
-
-    player->positionX = mapObject.startingPosX;
-    player->positionY = mapObject.startingPosY;
-
-    agent->positionX = mapObject.startingPosX;
-    agent->positionY = mapObject.startingPosY;
-
-
-    //reset loaded map and its sprites
-    for (int i = 0; i < Map::MAP_SIZE; i++) {
-        for (int j = 0; j < Map::MAP_SIZE; j++) {
-            player->mapInstance[i][j] = mapObject.mapArray[i][j];
-            agent->mapInstance[i][j] = mapObject.mapArray[i][j];
-        }
-    }
-
-    player->loadedSpriteList.clear();
-    agent->loadedSpriteList.clear();
-
-    player->loadedSpriteList = mapObject.spriteList;
-    agent->loadedSpriteList = mapObject.spriteList;
-
-}
-
-
-void Raycaster::pickAndLoadMap() {
-    srand(time(NULL));
-
-    int mapNumber = rand() % 3;
-
-    //pick random number, feed it to loading function,
-    //switch case loads map
-    mapObject.loadMapDetails(mapNumber);
-
-    player->loadedSpriteList.clear();
-    agent->loadedSpriteList.clear();
-
-    player->loadedSpriteList = mapObject.spriteList;
-    agent->loadedSpriteList = mapObject.spriteList;
-}
-
-
 //PROTOTYPE ONLY, NEED PROPER INTERFACE ||| OR ||| another function that handles AI's inputs
 void Raycaster::playerControls() {
 
@@ -783,17 +715,17 @@ void Raycaster::playerControls() {
                     case '6':
                         //get extra info for summary
 
-                        playerPrevScore = player->score;
-                        agentPrevScore = agent->score;
+                        menuObject.playerPrevScore = player->score;
+                        menuObject.agentPrevScore = agent->score;
 
 
-                        playerPrevTime = player->time;
-                        agentPrevTime = agent->time;
+                        menuObject.playerPrevTime = player->time;
+                        menuObject.agentPrevTime = agent->time;
 
                         player->hasFinished = true;
 
-                        playerHasFinished = player->hasFinished;
-                        agentHasFinished = agent->hasFinished;
+                        menuObject.playerHasFinished = player->hasFinished;
+                        menuObject.agentHasFinished = agent->hasFinished;
 
 
 

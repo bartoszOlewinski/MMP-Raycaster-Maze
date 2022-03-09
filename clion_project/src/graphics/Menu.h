@@ -13,10 +13,7 @@
 class Menu {
 
 public:
-    explicit Menu(sf::RenderWindow *windowPtr, int maxPoints) {
-        this->windowPtr = windowPtr;
-        this->maxPoints = maxPoints;
-
+    explicit Menu() {
         menuOption = PLAY;
 
         greyColor.r = 120;
@@ -24,6 +21,18 @@ public:
         greyColor.b = 120;
     }
 
+    sf::RenderWindow *windowPtr;
+
+    int maxPoints;
+
+    sf::Time playerPrevTime;
+    sf::Time agentPrevTime;
+
+    int playerPrevScore{};
+    int agentPrevScore{};
+
+    bool playerHasFinished{};
+    bool agentHasFinished{};
 
 
     enum AgentOption{
@@ -36,9 +45,8 @@ public:
 
     AgentOption getAgentOption();
 
-private:
-    sf::RenderWindow *windowPtr;
 
+private:
     sf::Color greyColor;
 
 
@@ -55,18 +63,6 @@ private:
 
     MenuOption menuOption;
     AgentOption agentOption;
-
-    int maxPoints;
-
-    sf::Time playerPrevTime;
-    sf::Time agentPrevTime;
-
-    int playerPrevScore{};
-    int agentPrevScore{};
-
-    bool playerHasFinished{};
-    bool agentHasFinished{};
-
 
 
 };
