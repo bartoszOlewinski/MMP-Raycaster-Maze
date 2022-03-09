@@ -11,6 +11,7 @@
 #include "../game/Actor.h"
 #include "../game/DebugConsole.cpp"
 #include "../game/Map.h"
+#include "Menu.h"
 
 
 #define RESOLUTION_720P
@@ -70,7 +71,7 @@ private:
 
 
 
-    std::string gameVersion = "0.3.1";
+    std::string gameVersion = "0.3.2";
 
 
 
@@ -81,21 +82,10 @@ private:
         LEVEL_SUMMARY
     };
 
-    enum MenuOption {
-        PLAY,
-        QUIT,
-    };
 
-
-    enum AgentOption{
-        HARD,
-        MEDIUM,
-        EASY,
-    };
-
-
-    MenuOption menuOption;
     Mode mode;
+
+    Menu::AgentOption agentOption;
 
 
 
@@ -112,8 +102,6 @@ private:
 
 
     sf::Clock menuClock;
-    sf::Time menuTime = menuClock.getElapsedTime();
-    sf::Time choiceMenuTime = sf::Time::Zero;
 
 
     double frameTime;
@@ -164,10 +152,7 @@ private:
     void raycastingRenderer(Actor * actor, sf::RenderStates texState, sf::RenderStates bagState,
                             sf::RenderStates goldKeyState, sf::RenderStates silverKeyState);
 
-    /**
-     * draws menu
-     */
-    void drawMenu(sf::RectangleShape *indicator);
+
 
     void playerControls();
 

@@ -7,9 +7,10 @@
 
 
 
-//#define TEST_MAP
+#define TEST_MAP
 //#define MAP01
 //#define MAP02
+//#define MAP03
 
 
 
@@ -33,6 +34,9 @@ void Map::loadMapDetails(int mapNumber) {
                 case 1:
                     mapArray[i][j] = map02[i][j];
                     break;
+                case 2:
+                    mapArray[i][j] = map03[i][j];
+                    break;
                 default:
                     mapArray[i][j] = testMap[i][j];
             }
@@ -48,6 +52,9 @@ void Map::loadMapDetails(int mapNumber) {
 #endif
 #ifdef MAP02
             mapArray[i][j] = map02[i][j];
+#endif
+#ifdef MAP03
+            mapArray[i][j] = map03[i][j];
 #endif
 
 

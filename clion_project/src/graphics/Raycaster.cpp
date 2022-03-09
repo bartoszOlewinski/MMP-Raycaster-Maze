@@ -11,6 +11,7 @@
 #include <SFML/Audio.hpp>
 
 #include "Raycaster.h"
+#include "Menu.h"
 
 
 #include <cmath>
@@ -21,6 +22,7 @@
 void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
     //debugConsole = DebugConsole(windowPtr);
+
 
     //establish actors, get pointers
     player = actor;
@@ -45,6 +47,8 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
             agent->mapInstance[i][j] = mapObject.mapArray[i][j];
         }
     }
+
+    Menu menuObject(this->windowPtr, mapObject.maxPoints);
 
 
 
@@ -104,7 +108,6 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
 //=================MAIN GAME LOOP==========================
 
-    menuOption = PLAY;
     mode = MENU_MODE;
     sf::RectangleShape indicator(sf::Vector2f(20,20));
     indicator.setPosition(230, 260);
@@ -116,8 +119,7 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
     //for keyboard delay
     menuClock.restart();
-    menuTime = sf::Time::Zero;
-    choiceMenuTime = sf::Time::Zero;
+
 
 
     while (windowPtr->isOpen()) {
@@ -126,9 +128,16 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
         if ((mode == MENU_MODE || mode == LEVEL_SUMMARY) && windowPtr->hasFocus()) {
 
+            //drawMenu(&indicator);
 
-            drawMenu(&indicator);
+            if (menuObject.drawMenu(&indicator, font, mode == LEVEL_SUMMARY)) {
+                mode = PLAY_MODE;
+                agentOption = menuObject.getAgentOption();
+            }
+
+
             fixedTimeStepClock.restart();
+
 
         }
 
@@ -599,119 +608,6 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 }
 
 
-void Raycaster::drawMenu(sf::RectangleShape *indicator) {
-        //draw menu==================
-        sf::Text titleText;
-        std::string titleString = "Raycaster Maze";
-
-        titleText.setFont(font);
-        titleText.setString(titleString);
-        titleText.setCharacterSize(80);
-        titleText.setFillColor(sf::Color::White);
-        titleText.setOutlineThickness(1.0);
-        titleText.setOutlineColor(sf::Color::Black);
-        titleText.setPosition(220, 200);
-        titleText.setLetterSpacing(3.0f);
-
-
-
-        sf::Text menuText;
-        std::string menuString;
-        menuString = "PLAY\n\nQUIT";
-
-        std::string summaryString;
-        sf::Text summaryText;
-
-        if (mode == LEVEL_SUMMARY) {
-            summaryString = "\n==previous level stats==\n"
-                            "==PLAYER==\nplayer has finished: " + std::to_string(playerHasFinished) + "\nplayer time: " +
-                            std::to_string(playerPrevTime.asSeconds()) + "s\nplayer score: " +
-                            std::to_string(playerPrevScore) +
-                            "\n==AGENT==\nagent has finished: " + std::to_string(agentHasFinished) + "\nagent time: " +
-                            std::to_string(agentPrevTime.asSeconds()) + "s\nagent score: " +
-                            std::to_string(agentPrevScore);
-
-
-            summaryText.setFont(font);
-            summaryText.setString(summaryString);
-            summaryText.setCharacterSize(22);
-            summaryText.setFillColor(sf::Color::Yellow);
-            summaryText.setOutlineThickness(1.0);
-            summaryText.setOutlineColor(sf::Color::Black);
-            summaryText.setPosition(800, 250);
-
-
-        }
-
-        menuText.setFont(font);
-        menuText.setString(menuString);
-        menuText.setCharacterSize(40);
-        menuText.setFillColor(sf::Color::White);
-        menuText.setOutlineThickness(1.0);
-        menuText.setOutlineColor(sf::Color::Black);
-        menuText.setPosition(250, 250);
-
-
-        windowPtr->clear(greyColor);
-
-        menuTime = menuClock.getElapsedTime();
-
-        if (menuTime.asSeconds() - choiceMenuTime.asSeconds() > 0.1) {
-
-            // handling input
-            switch (menuOption) {
-                case PLAY:
-                    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ||
-                        sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-                        choiceMenuTime = menuClock.getElapsedTime();
-
-
-                        indicator->setPosition(230, 355);
-                        menuOption = QUIT;
-                    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
-                        mode = PLAY_MODE;
-
-                    }
-                    break;
-
-                case QUIT:
-                    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ||
-                        sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-                        choiceMenuTime = menuClock.getElapsedTime();
-
-
-                        indicator->setPosition(230, 260);
-                        menuOption = PLAY;
-                    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
-                        windowPtr->close();
-                    }
-                    break;
-
-                default:
-                    std::cout << "Error menu switch" << std::endl;
-            }
-        }
-
-
-
-        sf::Texture titleTexture;
-        titleTexture.loadFromFile("../resources/textures/title_card.png");
-
-        sf::Sprite spriteTitle;
-        spriteTitle.setTexture(titleTexture, true);
-
-
-
-
-        //windowPtr->draw(titleText);
-        windowPtr->draw(spriteTitle);
-        windowPtr->draw(*indicator);
-        windowPtr->draw(menuText);
-        windowPtr->draw(summaryText);
-        windowPtr->display();
-}
-
-
 void Raycaster::resetGame() {
     //reset actors
     player->time = sf::Time::Zero;
@@ -770,7 +666,7 @@ void Raycaster::resetGame() {
 void Raycaster::pickAndLoadMap() {
     srand(time(NULL));
 
-    int mapNumber = rand() % 2;
+    int mapNumber = rand() % 3;
 
     //pick random number, feed it to loading function,
     //switch case loads map
