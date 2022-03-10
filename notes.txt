@@ -85,3 +85,18 @@ Scrapped door rendering, instead the game will use simple system I implemented e
 symbol, it calculates the distances and based on that it decides whether the actor is close enough to open it.
 
 Added little level summary bit.
+
+====10/03/22====
+Started refactoring and breaking down the biggest class, Raycaster. Menu, controlling, setting up game code have been
+extracted and put into own classes.
+Fixed a couple of issues with Agent's display.
+
+Managed to remove around 300 lines of code from Raycaster class by moving it and creating extra classes.
+
+
+Latest bug - moved setting up and randomizing map in Raycaster runGame() to GameSetup and Map classes, also moved the
+the loading itself from top of the runGame() to if statement in a while loop below.
+
+====11/03/22====
+Fixed the bug, the runGame() needs to load in map details first thing before entering loop, otherwise it won't load
+the map details properly and will fail to render any stuff.

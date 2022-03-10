@@ -4,6 +4,7 @@
 
 #include <SFML/Graphics/RectangleShape.hpp>
 #include "Menu.h"
+#include "../game/Actor.h"
 #include <cstdio>
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/Text.hpp>
@@ -200,6 +201,13 @@ Menu::AgentOption Menu::getAgentOption() {
     return agentOption;
 }
 
-void Menu::copyPreviousSessionDetails() {
+void Menu::copyPreviousSessionDetails(Actor *player, Actor *agent) {
+    this->playerPrevScore = player->score;
+    this->agentPrevScore = agent->score;
 
+    this->playerPrevTime = player->time;
+    this->agentPrevTime = agent->time;
+
+    this->playerHasFinished = player->hasFinished;
+    this->agentHasFinished = agent->hasFinished;
 }

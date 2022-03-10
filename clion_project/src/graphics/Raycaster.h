@@ -70,7 +70,7 @@ private:
 
 
 
-    std::string gameVersion = "0.3.2.2";
+    std::string gameVersion = "0.3.2.4";
 
 
 
@@ -144,9 +144,6 @@ private:
     void raycastingRenderer(Actor * actor, sf::RenderStates texState, sf::RenderStates bagState,
                             sf::RenderStates goldKeyState, sf::RenderStates silverKeyState);
 
-
-
-    void playerControls();
 
     void update(Actor *actor);
 

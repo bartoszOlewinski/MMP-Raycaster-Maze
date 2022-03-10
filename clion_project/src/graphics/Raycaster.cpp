@@ -29,18 +29,9 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
     gameSetup.pickAndLoadMap();
 
-    //set up starting point
-    player->positionX = mapObject.startingPosX;
-    player->positionY = mapObject.startingPosY;
-
-    agent->positionX = mapObject.startingPosX;
-    agent->positionY = mapObject.startingPosY;
-
-
     //copy the mapObject to the raycaster
     for (int i = 0; i < Map::MAP_SIZE; i++) {
         for (int j = 0; j < Map::MAP_SIZE; j++) {
-            //mapInUse[i][j] = mapObject.mapArray[i][j];
 
             player->mapInstance[i][j] = mapObject.mapArray[i][j];
             agent->mapInstance[i][j] = mapObject.mapArray[i][j];
@@ -123,10 +114,11 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
         //MENU====================
 
-        if ((mode == MENU_MODE) && windowPtr->hasFocus()) {
+        if ((mode == MENU_MODE || mode == LEVEL_SUMMARY) && windowPtr->hasFocus()) {
 
 
             if (menuObject.drawMenu(&indicator, font, mode == LEVEL_SUMMARY)) {
+
                 mode = PLAY_MODE;
                 agentOption = menuObject.getAgentOption();
             }
@@ -169,9 +161,8 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
                 update(agent);
 
                 controllerObject.actorControls(player);
-                controllerObject.actorControls(agent);
+                //controllerObject.actorControls(agent);
 
-                //playerControls();
             }
 
             //raycaster
@@ -181,7 +172,7 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
             if(sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
 
                 gameSetup.resetAttributes();
-
+                gameSetup.pickAndLoadMap();
 
                 mode = MENU_MODE;
             }
@@ -609,143 +600,6 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 }
 
 
-//PROTOTYPE ONLY, NEED PROPER INTERFACE ||| OR ||| another function that handles AI's inputs
-void Raycaster::playerControls() {
-
-#ifdef PLAYER_DEBUG_DISPLAY
-    stringText = "Raycaster Maze v. " + gameVersion + "\nDEBUG:\nFPS: " + std::to_string((int) std::round(1.0f / frameTime))
-                 + "\nFrame time: " + std::to_string( frameTime) + "s\nPlayer inputs: ";
-#endif
-
-
-    if (windowPtr->hasFocus()) {
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && !sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
-            stringText += "RIGHT, ";
-
-            double oldDirX = player->directionX;
-            player->directionX = player->directionX * cos(-rotSpeed) - player->directionY * sin(-rotSpeed);
-            player->directionY = oldDirX * sin(-rotSpeed) + player->directionY * cos(-rotSpeed);
-
-            double oldPlaneX = player->planeX;
-            player->planeX = player->planeX * cos(-rotSpeed) - player->planeY * sin(-rotSpeed);
-            player->planeY = oldPlaneX * sin(-rotSpeed) + player->planeY * cos(-rotSpeed);
-
-        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && !sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
-            stringText += "LEFT, ";
-
-            double oldDirX = player->directionX;
-            player->directionX = player->directionX * cos(rotSpeed) - player->directionY * sin(rotSpeed);
-            player->directionY = oldDirX * sin(rotSpeed) + player->directionY * cos(rotSpeed);
-
-            double oldPlaneX = player->planeX;
-            player->planeX = player->planeX * cos(rotSpeed) - player->planeY * sin(rotSpeed);
-            player->planeY = oldPlaneX * sin(rotSpeed) + player->planeY * cos(rotSpeed);
-
-        }
-        if (sf::Keyboard::isKeyPressed((sf::Keyboard::Up))) {
-            stringText += "UP, ";
-
-            if (player->mapInstance[int(player->positionX + player->directionX * moveSpeed)][int(player->positionY)] <= '.')
-                player->positionX += player->directionX * moveSpeed;
-            if (player->mapInstance[int(player->positionX)][int(player->positionY + player->directionY * moveSpeed)] <= '.')
-                player->positionY += player->directionY * moveSpeed;
-
-        } else if (sf::Keyboard::isKeyPressed((sf::Keyboard::Down))) {
-            stringText += "DOWN, ";
-
-            if (player->mapInstance[int(player->positionX - player->directionX * moveSpeed)][int(player->positionY)] <= '.')
-                player->positionX -= player->directionX * moveSpeed;
-            if (player->mapInstance[int(player->positionX)][int(player->positionY - player->directionY * moveSpeed)] <= '.')
-                player->positionY -= player->directionY * moveSpeed;
-        }
-
-        //strafing
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
-            stringText += "LEFT, ALT, ";
-
-            if (player->mapInstance[int(player->positionX - player->planeX * moveSpeed)][int(player->positionY)] <= '.')
-                player->positionX -= player->planeX * moveSpeed;
-            if (player->mapInstance[int(player->positionX)][int(player->positionY - player->planeY * moveSpeed)] <= '.')
-                player->positionY -= player->planeY * moveSpeed;
-
-        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
-            stringText += "RIGHT, ALT, ";
-
-            if (player->mapInstance[int(player->positionX + player->planeX * moveSpeed)][int(player->positionY)] <= '.')
-                player->positionX += player->planeX * moveSpeed;
-            if (player->mapInstance[int(player->positionX)][int(player->positionY + player->planeY * moveSpeed)] <= '.')
-                player->positionY += player->planeY * moveSpeed;
-
-
-        }
-
-        /*
-        //sprinting; currently can break actor out of bounds
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
-            moveSpeed *= 1.4;
-        }
-         */
-
-        //action button
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-            stringText += "SPACE, ";
-            if (player->isCloseToDoor) {
-                unsigned char tile =  player->mapInstance[player->doorX][player->doorY];
-
-                switch (tile) {
-                    case '5':
-                        for (char collectedKey : player->collectedKeys) {
-                            if (collectedKey == '$') {
-                                player->mapInstance[player->doorX][player->doorY] = '.';
-                            }
-                        }
-                        break;
-
-                    case '7':
-                        for (char collectedKey : player->collectedKeys) {
-                            if (collectedKey == '&') {
-                                player->mapInstance[player->doorX][player->doorY] = '.';
-                            }
-                        }
-                        break;
-
-                    case '6':
-                        //get extra info for summary
-
-                        menuObject.playerPrevScore = player->score;
-                        menuObject.agentPrevScore = agent->score;
-
-
-                        menuObject.playerPrevTime = player->time;
-                        menuObject.agentPrevTime = agent->time;
-
-                        player->hasFinished = true;
-
-                        menuObject.playerHasFinished = player->hasFinished;
-                        menuObject.agentHasFinished = agent->hasFinished;
-
-
-                        mode = LEVEL_SUMMARY;
-
-                        break;
-
-                    default:
-                        ;
-                        //std::cout<<"Action key switch case unknown symbol"<<std::endl;
-                }
-            }
-        }
-
-
-#ifdef PLAYER_DEBUG_DISPLAY
-        debugText.setString(stringText);
-        //windowPtr->draw(debugText);
-#endif
-
-    }
-
-}
-
 //update texts and handle item hit detection
 void Raycaster::update(Actor *actor) {
 
@@ -862,6 +716,13 @@ void Raycaster::update(Actor *actor) {
     actor->eqText.setString(eqDefaultString + actor->eqString);
 
     //==================================================================
+
+    if (actor->hasFinished) {
+        menuObject.copyPreviousSessionDetails(player, agent);
+
+        mode = LEVEL_SUMMARY;
+    }
+
 
 }
 

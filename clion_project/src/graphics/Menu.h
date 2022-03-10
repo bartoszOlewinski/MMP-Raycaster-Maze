@@ -9,6 +9,7 @@
 #include <SFML/System/Clock.hpp>
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include "../game/Actor.h"
 
 class Menu {
 
@@ -47,6 +48,7 @@ public:
 
     AgentOption getAgentOption();
 
+    void copyPreviousSessionDetails(Actor *player, Actor *agent);
 
 private:
     sf::Color greyColor;
@@ -67,7 +69,7 @@ private:
     AgentOption agentOption;
 
 
-    void copyPreviousSessionDetails();
+
 };
 
 

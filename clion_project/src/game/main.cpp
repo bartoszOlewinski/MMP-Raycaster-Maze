@@ -13,7 +13,7 @@
 //#define RELEASE_MODE
 
 
-#define MUSIC_MODE
+//#define MUSIC_MODE
 
 
 
@@ -40,7 +40,7 @@ int main() {
 
     std::string WINDOW_TITLE = "Raycaster Maze";
 
-    std::string VERSION = "0.3.2.2";
+    std::string VERSION = "0.3.2.4";
 
 
 

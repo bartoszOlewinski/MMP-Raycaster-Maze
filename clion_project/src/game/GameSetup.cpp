@@ -50,6 +50,7 @@ void GameSetup::resetAttributes() {
         }
     }
 
+
     player->loadedSpriteList.clear();
     agent->loadedSpriteList.clear();
 
@@ -71,6 +72,13 @@ void GameSetup::pickAndLoadMap() {
 
     player->loadedSpriteList = map->spriteList;
     agent->loadedSpriteList = map->spriteList;
+
+    //set up starting point
+    player->positionX = map->startingPosX;
+    player->positionY = map->startingPosY;
+
+    agent->positionX = map->startingPosX;
+    agent->positionY = map->startingPosY;
 }
 
 void GameSetup::setUpAttriubutes(Map *mapObject, Actor *player, Actor *agent) {
