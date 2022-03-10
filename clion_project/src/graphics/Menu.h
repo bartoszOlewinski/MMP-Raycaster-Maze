@@ -23,7 +23,16 @@ public:
 
     sf::RenderWindow *windowPtr;
 
+    enum AgentOption{
+        HARD,
+        MEDIUM,
+        EASY,
+    };
+
+
     int maxPoints;
+
+    AgentOption prevDifficulty;
 
     sf::Time playerPrevTime;
     sf::Time agentPrevTime;
@@ -33,13 +42,6 @@ public:
 
     bool playerHasFinished{};
     bool agentHasFinished{};
-
-
-    enum AgentOption{
-        HARD,
-        MEDIUM,
-        EASY,
-    };
 
     bool drawMenu(sf::RectangleShape *indicator, const sf::Font& font, bool isSummary);
 
@@ -65,6 +67,7 @@ private:
     AgentOption agentOption;
 
 
+    void copyPreviousSessionDetails();
 };
 
 

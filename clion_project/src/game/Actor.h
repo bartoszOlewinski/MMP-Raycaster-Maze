@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <SFML/Graphics/Text.hpp>
+#include <SFML/Window/Keyboard.hpp>
 #include "Map.h"
 
 class Actor {
@@ -54,6 +55,7 @@ public:
 
 
     unsigned char mapInstance[Map::MAP_SIZE][Map::MAP_SIZE];
+
 
 
     void setupStatsText(sf::Font *font, int posX, int posY);

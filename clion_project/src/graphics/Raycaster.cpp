@@ -8,15 +8,12 @@
 
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics.hpp>
-#include <SFML/Audio.hpp>
 
 #include "Raycaster.h"
-#include "Menu.h"
 
 
 #include <cmath>
 #include <iostream>
-#include <time.h>
 
 
 void Raycaster::runGame(Actor *actor, Actor *actorAI) {
@@ -50,7 +47,6 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
         }
     }
 
-    //Menu menuObject(this->windowPtr, mapObject.maxPoints);
     menuObject.windowPtr = windowPtr;
     menuObject.maxPoints = mapObject.maxPoints;
 
@@ -96,7 +92,7 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
     //popup text
     player->setupPopupText(&font, 12, 12);
-    agent->setupPopupText(&font, RENDER_WIDTH + RENDER_WIDTH - 10, 12);
+    agent->setupPopupText(&font, agent->renderX + 12, 12);
 
 
 
@@ -121,18 +117,14 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
     indicator.setRotation(45.0);
 
 
-    //for keyboard delay
-    menuClock.restart();
-
 
 
     while (windowPtr->isOpen()) {
 
         //MENU====================
 
-        if ((mode == MENU_MODE || mode == LEVEL_SUMMARY) && windowPtr->hasFocus()) {
+        if ((mode == MENU_MODE) && windowPtr->hasFocus()) {
 
-            //drawMenu(&indicator);
 
             if (menuObject.drawMenu(&indicator, font, mode == LEVEL_SUMMARY)) {
                 mode = PLAY_MODE;
@@ -176,7 +168,10 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
                 update(player);
                 update(agent);
 
-                playerControls();
+                controllerObject.actorControls(player);
+                controllerObject.actorControls(agent);
+
+                //playerControls();
             }
 
             //raycaster
@@ -370,7 +365,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
         int lineHeight = (int) (RENDER_HEIGHT / perpWallDist);
 
         //drawing ceiling======================================================
-        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, 10), greyColor,
+        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float)actor->renderY), greyColor,
                                 sf::Vector2f( 640.0f,  0.0f)));
 
         int drawStart = int((float)-lineHeight * (1.0f - 0.5f) + RENDER_HEIGHT * 0.5f);
@@ -381,7 +376,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
             drawStart = 0;
         }
 
-        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float) drawStart + 10), greyColor,
+        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float) drawStart + (float)actor->renderY), greyColor,
                                 sf::Vector2f( 640.0f,  0.0f)));
         //======================================================================
 
@@ -390,7 +385,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 
 
         //drawing floor=============================================
-        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float) RENDER_HEIGHT + 10), greyColor,
+        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float) RENDER_HEIGHT + (float)actor->renderY), greyColor,
                                 sf::Vector2f( 640.0f,  0.0f)));
 
         int drawEnd = int((float)lineHeight * 0.5f + RENDER_HEIGHT * 0.5f);
@@ -404,7 +399,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
             pixelAdjustment = overflownPixels * singleTextureSize / (overflownPixels + overflownPixels + RENDER_HEIGHT);
         }
 
-        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float) drawEnd + 10), greyColor,
+        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float) drawEnd + (float)actor->renderY), greyColor,
                                 sf::Vector2f( 640.0f,  0.0f)));
         //==============================================================
 
@@ -453,10 +448,10 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 
 
         //drawing textured lines==================================
-        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float)drawStart + 10),color,
+        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float)drawStart + (float)actor->renderY),color,
                                 sf::Vector2f((float)textureCoordX, (float)(textureCoordY + 1 + pixelAdjustment))));
 
-        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float)(drawEnd + 10)),color,
+        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float)drawEnd + (float)actor->renderY),color,
                                 sf::Vector2f((float)textureCoordX, (float)(textureCoordY + singleTextureSize - 1 - pixelAdjustment))));
         //=======================================================
 
@@ -498,7 +493,9 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 
 
     //sort the sprites
-    sortSprites(spriteOrder, spriteDistance, numberOfSprites);
+    Sprite spriteSorter{};
+    spriteSorter.sortSprites(spriteOrder, spriteDistance, numberOfSprites);
+
 
     //draw the sprites
     for (int j = 0; j < numberOfSprites; j++) {
@@ -532,18 +529,18 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
         int spriteHeight = abs(int(RENDER_HEIGHT / (transformY))) / SpriteScale;
 
         int drawStartY = -spriteHeight / 2 + RENDER_HEIGHT / 2 + vMoveScreen;
-        if(drawStartY < 10) {
-            drawStartY = 10;
+        if(drawStartY < actor->renderY) {
+            drawStartY = actor->renderY;
         }
 
         int drawEndY = spriteHeight / 2 + RENDER_HEIGHT / 2 + vMoveScreen;
-        if (drawEndY >= RENDER_HEIGHT + 10) {
-            overflowPixels = drawEndY - RENDER_HEIGHT - 10;
+        if (drawEndY >= RENDER_HEIGHT + actor->renderY) {
+            overflowPixels = drawEndY - RENDER_HEIGHT - actor->renderY;
 
             pixelAdjustment = singleTextureSize * overflowPixels / RENDER_HEIGHT;
 
 
-            drawEndY = RENDER_HEIGHT + 10 - 1;
+            drawEndY = RENDER_HEIGHT + actor->renderY;
 
         }
 
@@ -556,7 +553,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
             drawStartX = actor->renderX;
 
         int drawEndX = spriteWidth / 2 + spriteScreenX;
-        if (drawEndX >= RENDER_WIDTH + 10)
+        if (drawEndX >= RENDER_WIDTH + actor->renderX)
             drawEndX = RENDER_WIDTH + actor->renderX - 1;
 
 
@@ -683,7 +680,7 @@ void Raycaster::playerControls() {
         }
 
         /*
-        //sprinting; currently can break player out of bounds
+        //sprinting; currently can break actor out of bounds
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
             moveSpeed *= 1.4;
         }
@@ -728,12 +725,13 @@ void Raycaster::playerControls() {
                         menuObject.agentHasFinished = agent->hasFinished;
 
 
-
-
-
                         mode = LEVEL_SUMMARY;
 
                         break;
+
+                    default:
+                        ;
+                        //std::cout<<"Action key switch case unknown symbol"<<std::endl;
                 }
             }
         }
@@ -778,11 +776,19 @@ void Raycaster::update(Actor *actor) {
                 std::cout<<"Hit detection encountered unknown instance."<<std::endl;
         }
 
+        //std::cout<<actor->name<<" - item picked up, showing popup" <<std::endl;
 
 
         startPopUp = fpsClock.getElapsedTime();
 
-        newItem = true;
+        //std::cout<<actor->name<<" - time of start popup: "<<std::to_string(startPopUp.asSeconds()) <<std::endl;
+
+
+        if (agent->name == "Player")
+            playerNewItem = true;
+        else
+            agentNewItem = true;
+
         actor->popupText.setString(actor->popupString);
 
 
@@ -801,11 +807,22 @@ void Raycaster::update(Actor *actor) {
 
 
     sf::Time finishPopUp = fpsClock.getElapsedTime();
-    if (finishPopUp.asSeconds() - startPopUp.asSeconds() > 1.2f && !actor->popupString.empty() && newItem) {
+
+
+    if (finishPopUp.asSeconds() - startPopUp.asSeconds() > 1.2f && (playerNewItem || agentNewItem)) {
+        /*
+        std::cout<<actor->name<<" - time of end popup: "<<std::to_string(finishPopUp.asSeconds()) <<std::endl;
+        std::cout<<actor->name<<" - difference "<<std::to_string(finishPopUp.asSeconds() - startPopUp.asSeconds()) <<std::endl;
+
+        std::cout<<actor->name<<" - popup show, now erased." <<std::endl;
+         */
 
         actor->popupString.clear();
         actor->popupText.setString(actor->popupString);
-        newItem = false;
+
+        if (actor->name == "Player")
+            playerNewItem = false;
+        else agentNewItem = false;
 
         startPopUp = sf::Time::Zero;
     }
@@ -847,22 +864,4 @@ void Raycaster::update(Actor *actor) {
     //==================================================================
 
 }
-
-
-//COPIED FROM TUTORIAL BY LODEV
-void Raycaster::sortSprites(int *order, double *dist, unsigned int amount) {
-    std::vector<std::pair<double, int>> sprites(amount);
-    for(int i = 0; i < amount; i++) {
-        sprites[i].first = dist[i];
-        sprites[i].second = order[i];
-    }
-    std::sort(sprites.begin(), sprites.end());
-    // restore in reverse order to go from farthest to nearest
-    for(int i = 0; i < amount; i++) {
-        dist[i] = sprites[amount - i - 1].first;
-        order[i] = sprites[amount - i - 1].second;
-    }
-}
-
-
 

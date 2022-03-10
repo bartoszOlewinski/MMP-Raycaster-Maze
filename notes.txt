@@ -71,7 +71,7 @@ to the sprite position.
 Created first working version of sprites, created a couple of textures and improved mapObject loading as well as mapObject's size.
 
 ====28/02/22====
-Fixed all issues connected to sprites; the distance was calculated wrongly creating weird effect where when player would cross
+Fixed all issues connected to sprites; the distance was calculated wrongly creating weird effect where when actor would cross
 axis on which the sprites are displayed, the furthest away would be drawn in front of the rest.
 Fixed bug where sprites would draw on top of each other when using more than one, turned out to be an easy fix with clearing
 vertex buffer that caused the problem.
@@ -82,6 +82,6 @@ Created text equipment display.
 
 ====08/03/22====
 Scrapped door rendering, instead the game will use simple system I implemented earlier where when cast ray hits a door
-symbol, it calculates the distances and based on that it decides whether the player is close enough to open it.
+symbol, it calculates the distances and based on that it decides whether the actor is close enough to open it.
 
 Added little level summary bit.

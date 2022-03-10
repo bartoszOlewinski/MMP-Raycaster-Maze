@@ -15,7 +15,7 @@ private:
     sf::Font font;
     sf::RectangleShape rectangleShape;
 
-    std::string optionListStr = "\n1. player debug on/off.\n2. agent debug on/off.\n"
+    std::string optionListStr = "\n1. actor debug on/off.\n2. agent debug on/off.\n"
                                 "3. music on/off.";
 
 
@@ -64,7 +64,7 @@ public:
     }
 
     void commandListener() {
-        //toggle player debug debugText
+        //toggle actor debug debugText
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1)) {
 
 

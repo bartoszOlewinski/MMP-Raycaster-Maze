@@ -13,6 +13,7 @@
 #include "../game/Map.h"
 #include "Menu.h"
 #include "../game/GameSetup.h"
+#include "../game/Controller.h"
 
 
 #define RESOLUTION_720P
@@ -54,19 +55,23 @@ public:
 
 private:
     Actor* agent{};
+
     Actor* player{};
 
     Map mapObject;
 
+    GameSetup gameSetup;
+
+    Menu menuObject;
+
+    Controller controllerObject;
+
     //DebugConsole debugConsole = DebugConsole(nullptr);
 
 
-    GameSetup gameSetup;
-    Menu menuObject;
 
+    std::string gameVersion = "0.3.2.2";
 
-
-    std::string gameVersion = "0.3.2";
 
 
     enum Mode{
@@ -75,10 +80,10 @@ private:
         LEVEL_SUMMARY
     };
 
+
     Mode mode;
 
     Menu::AgentOption agentOption;
-
 
 
     sf::Color greyColor;
@@ -87,13 +92,9 @@ private:
     sf::Text debugText;
 
 
-
-
     sf::Font font;
 
     std::string eqDefaultString = "Equipment:\n";
-
-    sf::Clock menuClock;
 
 
     double frameTime;
@@ -104,7 +105,10 @@ private:
 
 
     sf::Time startPopUp;
-    bool newItem = false;
+    bool playerNewItem = false;
+    bool agentNewItem = false;
+
+
 
 
     const sf::Time TimePerFrame = sf::seconds(1.f / 60.f);
@@ -113,22 +117,18 @@ private:
     double moveSpeed = TimePerFrame.asSeconds() * 4.0;
 
 
+
+
+
     static const int textureSheetSize = 896;
     static const int singleTextureSize = 128;
+
 
     sf::Texture textureWallSheet;
     sf::Texture bagTexture;
     sf::Texture goldKeyTexture;
     sf::Texture silverKeyTexture;
 
-
-
-    //just for testing purposes
-
-    unsigned char mapInUse[Map::MAP_SIZE][Map::MAP_SIZE];
-
-    //not used currently
-    std::vector<Sprite> loadedSpriteList;
 
 
     /**
@@ -149,8 +149,6 @@ private:
     void playerControls();
 
     void update(Actor *actor);
-
-    static void sortSprites(int* order, double* dist, unsigned int amount);
 
 };
 

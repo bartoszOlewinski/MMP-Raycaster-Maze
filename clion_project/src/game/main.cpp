@@ -40,7 +40,7 @@ int main() {
 
     std::string WINDOW_TITLE = "Raycaster Maze";
 
-    std::string VERSION = "0.3.2";
+    std::string VERSION = "0.3.2.2";
 
 
 
@@ -90,7 +90,7 @@ int main() {
     sf::Sound sound;
     sound.setBuffer(buffer);
     sound.play();
-    sound.setVolume(20.f);
+    sound.setVolume(10.f);
     sound.setLoop(true);
 #endif
 

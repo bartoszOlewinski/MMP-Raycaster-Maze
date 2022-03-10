@@ -16,7 +16,7 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
     //draw menu==================
     sf::Text agentMenuText;
     std::string agentString;
-    agentString = "hard\nmedium\neasy";
+    agentString = "easy\nmedium\nhard";
 
     agentMenuText.setFont(font);
     agentMenuText.setOutlineColor(sf::Color::Black);
@@ -36,8 +36,8 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
 
     if (isSummary) {
         summaryString = "\n==previous level stats==\n"
-                        "==PLAYER==\nplayer has finished: " + std::to_string(playerHasFinished) + "\nplayer time: " +
-                        std::to_string(playerPrevTime.asSeconds()) + "s\nplayer score: " +
+                        "==PLAYER==\nactor has finished: " + std::to_string(playerHasFinished) + "\nactor time: " +
+                        std::to_string(playerPrevTime.asSeconds()) + "s\nactor score: " +
                         std::to_string(playerPrevScore) + " / " + std::to_string(maxPoints) +
                         "\n==AGENT==\nagent has finished: " + std::to_string(agentHasFinished) + "\nagent time: " +
                         std::to_string(agentPrevTime.asSeconds()) + "s\nagent score: " +
@@ -68,7 +68,7 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
 
     menuTime = menuClock.getElapsedTime();
 
-    if (menuTime.asSeconds() - choiceMenuTime.asSeconds() > 0.1) {
+    if (menuTime.asSeconds() - choiceMenuTime.asSeconds() > 0.11) {
 
         // handling input
         switch (menuOption) {
@@ -85,7 +85,7 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
                     choiceMenuTime = menuClock.getElapsedTime();
                     //choose agents
                     menuOption = AGENT;
-                    agentOption = HARD;
+                    agentOption = EASY;
                     windowPtr->draw(agentMenuText);
 
                 }
@@ -110,7 +110,7 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
                 }
 
                 switch (agentOption) {
-                    case HARD:
+                    case EASY:
                         indicator->setPosition(400, 265);
                         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
                             choiceMenuTime = menuClock.getElapsedTime();
@@ -135,12 +135,12 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
                         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
                             choiceMenuTime = menuClock.getElapsedTime();
 
-                            agentOption = HARD;
+                            agentOption = EASY;
 
                         } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
                             choiceMenuTime = menuClock.getElapsedTime();
 
-                            agentOption = EASY;
+                            agentOption = HARD;
 
                         } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
                             //return enum to let raycaster know to change into play mode and which agent to load in
@@ -149,7 +149,7 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
                         }
                         break;
 
-                    case EASY:
+                    case HARD:
                         indicator->setPosition(400, 360);
                         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
                             choiceMenuTime = menuClock.getElapsedTime();
@@ -159,7 +159,7 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
                         } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
                             choiceMenuTime = menuClock.getElapsedTime();
 
-                            agentOption = HARD;
+                            agentOption = EASY;
 
                         } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
                             //return enum to let raycaster know to change into play mode and which agent to load in
@@ -198,4 +198,8 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
 
 Menu::AgentOption Menu::getAgentOption() {
     return agentOption;
+}
+
+void Menu::copyPreviousSessionDetails() {
+
 }
