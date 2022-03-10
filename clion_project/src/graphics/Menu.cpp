@@ -37,10 +37,10 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
 
     if (isSummary) {
         summaryString = "\n==previous level stats==\n"
-                        "==PLAYER==\nactor has finished: " + std::to_string(playerHasFinished) + "\nactor time: " +
-                        std::to_string(playerPrevTime.asSeconds()) + "s\nactor score: " +
+                        "\n==PLAYER==\nplayer has finished: " + std::to_string(playerHasFinished) + "\nplayer time: " +
+                        std::to_string(playerPrevTime.asSeconds()) + "s\nplayer score: " +
                         std::to_string(playerPrevScore) + " / " + std::to_string(maxPoints) +
-                        "\n==AGENT==\nagent has finished: " + std::to_string(agentHasFinished) + "\nagent time: " +
+                        "\n\n==AGENT==\nagent has finished: " + std::to_string(agentHasFinished) + "\nagent time: " +
                         std::to_string(agentPrevTime.asSeconds()) + "s\nagent score: " +
                         std::to_string(agentPrevScore) + " / " + std::to_string(maxPoints);
 

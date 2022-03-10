@@ -61,7 +61,7 @@ void GameSetup::resetAttributes() {
 void GameSetup::pickAndLoadMap() {
     srand(time(NULL));
 
-    int mapNumber = rand() % 3;
+    int mapNumber = rand() % 4;
 
     //pick random number, feed it to loading function,
     //switch case loads map
