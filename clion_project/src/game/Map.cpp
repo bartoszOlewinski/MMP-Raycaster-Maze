@@ -12,6 +12,7 @@
 //#define MAP02
 //#define MAP03
 //#define MAP04
+//#define MAP05
 
 
 
@@ -41,6 +42,9 @@ void Map::loadMapDetails(int mapNumber) {
                 case 3:
                     mapArray[i][j] = map04[i][j];
                     break;
+                case 4:
+                    mapArray[i][j] = map05[i][j];
+                    break;
                 default:
                     mapArray[i][j] = testMap[i][j];
             }
@@ -63,7 +67,9 @@ void Map::loadMapDetails(int mapNumber) {
 #ifdef MAP04
             mapArray[i][j] = map04[i][j];
 #endif
-
+#ifdef MAP05
+            mapArray[i][j] = map05[i][j];
+#endif
 
 
             // + 0.5f to move the positions into center of the cell they occupy

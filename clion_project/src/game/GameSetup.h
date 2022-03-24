@@ -16,12 +16,14 @@ public:
 
     void resetAttributes();
 
-    void pickAndLoadMap();
+    void pickAndLoadMap(int mapId);
 
 private:
     Map* map;
     Actor* player;
     Actor* agent;
+
+    const int NUMBER_OF_MAPS = 5;
 };
 
 

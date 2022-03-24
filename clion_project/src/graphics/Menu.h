@@ -1,5 +1,5 @@
 //
-// Created by barto on 09/03/2022.
+// Created by Bartosz Olewinski on 09/03/2022.
 //
 
 #ifndef RAYCASTER_MENU_H
@@ -30,10 +30,28 @@ public:
         EASY,
     };
 
+    enum LevelOption{
+        MAP01,
+        MAP02,
+        MAP03,
+        MAP04,
+        MAP05,
+    };
+
+    enum MenuOption {
+        PLAY,
+        AGENT,
+        LEVEL,
+        QUIT,
+    };
+
+    MenuOption menuOption;
+    LevelOption levelOption;
+    AgentOption agentOption;
+
+
 
     int maxPoints;
-
-    AgentOption prevDifficulty;
 
     sf::Time playerPrevTime;
     sf::Time agentPrevTime;
@@ -44,11 +62,18 @@ public:
     bool playerHasFinished{};
     bool agentHasFinished{};
 
+    std::string prevLevelString;
+    std::string prevDifficultyString;
+
+
+
     bool drawMenu(sf::RectangleShape *indicator, const sf::Font& font, bool isSummary);
 
     AgentOption getAgentOption();
 
-    void copyPreviousSessionDetails(Actor *player, Actor *agent);
+    LevelOption getLevelOption();
+
+    void copyPreviousSessionDetails(Actor *player, Actor *agent, int maxPoints, AgentOption difficulty, LevelOption level);
 
 private:
     sf::Color greyColor;
@@ -58,15 +83,6 @@ private:
     sf::Time menuTime = menuClock.getElapsedTime();
     sf::Time choiceMenuTime = sf::Time::Zero;
 
-
-    enum MenuOption {
-        PLAY,
-        AGENT,
-        QUIT,
-    };
-
-    MenuOption menuOption;
-    AgentOption agentOption;
 
 
 

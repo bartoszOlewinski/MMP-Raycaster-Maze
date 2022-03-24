@@ -21,3 +21,17 @@ void Sprite::sortSprites(int *order, double *dist, unsigned int amount) {
         order[i] = sprites[amount - i - 1].second;
     }
 }
+
+void Sprite::sortSprites2(std::vector<int>* order, std::vector<double>* dist, unsigned int amount) {
+    std::vector<std::pair<double, int>> sprites(amount);
+    for(int i = 0; i < amount; i++) {
+        sprites[i].first = dist->at(i);
+        sprites[i].second = order->at(i);
+    }
+    std::sort(sprites.begin(), sprites.end());
+    // restore in reverse order to go from farthest to nearest
+    for(int i = 0; i < amount; i++) {
+        dist->at(i) = sprites[amount - i - 1].first;
+        order->at(i) = sprites[amount - i - 1].second;
+    }
+}
