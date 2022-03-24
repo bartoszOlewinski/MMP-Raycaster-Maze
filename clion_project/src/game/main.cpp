@@ -9,6 +9,7 @@
 
 
 
+
 #define DEBUG_MODE
 //#define RELEASE_MODE
 
@@ -40,7 +41,7 @@ int main() {
 
     std::string WINDOW_TITLE = "Raycaster Maze";
 
-    std::string VERSION = "0.3.2.5";
+    std::string VERSION = "0.3.3.1";
 
 
 
@@ -55,6 +56,7 @@ int main() {
 
     sf::Image icon;
     icon.loadFromFile("../resources/textures/icon.png");
+
 
     window.setIcon(100, 100, icon.getPixelsPtr());
 
@@ -96,8 +98,11 @@ int main() {
 
 
 
-    //MAIN LOOP INSIDE
+    //MAIN LOOP INSIDE=====================================================
+
     raycaster.runGame(&player, &agent);
+
+    //=====================================================================
 
 
 

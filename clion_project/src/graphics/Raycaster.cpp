@@ -27,7 +27,16 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
     gameSetup.setUpAttriubutes(&mapObject, player, agent);
 
-    gameSetup.pickAndLoadMap();
+    /*
+    gameSetup.pickAndLoadMap(static_cast<std::underlying_type_t<Menu::LevelOption>>(levelOption));
+
+    player->positionX = mapObject.startingPosX;
+    player->positionY = mapObject.startingPosY;
+    agent->positionX = mapObject.startingPosX;
+    agent->positionY = mapObject.startingPosY;
+
+    player->loadedSpriteList = mapObject.spriteList;
+    agent->loadedSpriteList = mapObject.spriteList;
 
     //copy the mapObject to the raycaster
     for (int i = 0; i < Map::MAP_SIZE; i++) {
@@ -37,6 +46,8 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
             agent->mapInstance[i][j] = mapObject.mapArray[i][j];
         }
     }
+
+     */
 
     menuObject.windowPtr = windowPtr;
     menuObject.maxPoints = mapObject.maxPoints;
@@ -118,9 +129,12 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
 
             if (menuObject.drawMenu(&indicator, font, mode == LEVEL_SUMMARY)) {
-
                 mode = PLAY_MODE;
+
                 agentOption = menuObject.getAgentOption();
+                levelOption = menuObject.getLevelOption();
+
+                gameSetup.pickAndLoadMap(static_cast<std::underlying_type_t<Menu::LevelOption>>(levelOption));
             }
 
 
@@ -172,9 +186,11 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
             if(sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
 
                 gameSetup.resetAttributes();
-                gameSetup.pickAndLoadMap();
+
+                menuObject.maxPoints = mapObject.maxPoints;
 
                 mode = MENU_MODE;
+                menuObject.menuOption = Menu::PLAY;
             }
 
             if (mode == LEVEL_SUMMARY)
@@ -469,23 +485,47 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
     sf::VertexArray spriteLines(sf::Lines, RENDER_WIDTH);
     spriteLines.resize(0);
 
+
+
     unsigned int numberOfSprites = actor->loadedSpriteList.size();
 
-    int spriteOrder[numberOfSprites];
-    double spriteDistance[numberOfSprites];
 
 
+
+    //Visual Studio's compiler doesn't allow for variable length arrays, MinGW is fine with it
+
+    //int spriteOrder[numberOfSprites];
+    //double spriteDistance[numberOfSprites];
+
+    std::vector<int> spriteOrder(numberOfSprites);
+    std::vector<double> spriteDistance(numberOfSprites);
+
+
+
+
+
+    /*
     for (int i = 0; i < numberOfSprites; i++) {
         spriteOrder[i] = i;
         spriteDistance[i] = ((actor->positionX - actor->loadedSpriteList[i].posX) * (actor->positionX - actor->loadedSpriteList[i].posX) +
                              (actor->positionY - actor->loadedSpriteList[i].posY) * (actor->positionY - actor->loadedSpriteList[i].posY));
 
     }
+     */
+    for (int i = 0; i < numberOfSprites; i++) {
+        spriteOrder.at(i) = i;
+        spriteDistance.at(i) = ((actor->positionX - actor->loadedSpriteList[i].posX) * (actor->positionX - actor->loadedSpriteList[i].posX) +
+                             (actor->positionY - actor->loadedSpriteList[i].posY) * (actor->positionY - actor->loadedSpriteList[i].posY));
+
+    }
+
 
 
     //sort the sprites
     Sprite spriteSorter{};
-    spriteSorter.sortSprites(spriteOrder, spriteDistance, numberOfSprites);
+
+    spriteSorter.sortSprites2(&spriteOrder, &spriteDistance, numberOfSprites);
+    // spriteSorter.sortSprites(spriteOrder, spriteDistance, numberOfSprites);
 
 
     //draw the sprites
@@ -718,7 +758,7 @@ void Raycaster::update(Actor *actor) {
     //==================================================================
 
     if (actor->hasFinished) {
-        menuObject.copyPreviousSessionDetails(player, agent);
+        menuObject.copyPreviousSessionDetails(player, agent, mapObject.maxPoints, agentOption, levelOption);
 
         mode = LEVEL_SUMMARY;
     }

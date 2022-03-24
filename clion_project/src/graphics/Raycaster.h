@@ -70,7 +70,7 @@ private:
 
 
 
-    std::string gameVersion = "0.3.2.5";
+    std::string gameVersion = "0.3.3.1";
 
 
 
@@ -84,6 +84,7 @@ private:
     Mode mode;
 
     Menu::AgentOption agentOption;
+    Menu::LevelOption levelOption;
 
 
     sf::Color greyColor;

@@ -31,6 +31,9 @@ void GameSetup::resetAttributes() {
     agent->collectedKeys.clear();
 
 
+    //COMMENTED OUT CODE IS OLD
+
+    /*
     //pick next map at random
     pickAndLoadMap();
 
@@ -49,23 +52,29 @@ void GameSetup::resetAttributes() {
             agent->mapInstance[i][j] = map->mapArray[i][j];
         }
     }
+     */
 
 
     player->loadedSpriteList.clear();
     agent->loadedSpriteList.clear();
 
+    /*
     player->loadedSpriteList = map->spriteList;
     agent->loadedSpriteList = map->spriteList;
+     */
 }
 
-void GameSetup::pickAndLoadMap() {
-    srand(time(NULL));
+void GameSetup::pickAndLoadMap(int mapId) {
+    //srand(time(NULL));
 
-    int mapNumber = rand() % 4;
+    //int mapNumber = rand() % NUMBER_OF_MAPS;
 
     //pick random number, feed it to loading function,
     //switch case loads map
-    map->loadMapDetails(mapNumber);
+
+    map->loadMapDetails(mapId);
+
+
 
     player->loadedSpriteList.clear();
     agent->loadedSpriteList.clear();
@@ -79,6 +88,16 @@ void GameSetup::pickAndLoadMap() {
 
     agent->positionX = map->startingPosX;
     agent->positionY = map->startingPosY;
+
+
+    //copy the mapObject to the raycaster
+    for (int i = 0; i < Map::MAP_SIZE; i++) {
+        for (int j = 0; j < Map::MAP_SIZE; j++) {
+
+            player->mapInstance[i][j] = map->mapArray[i][j];
+            agent->mapInstance[i][j] = map->mapArray[i][j];
+        }
+    }
 }
 
 void GameSetup::setUpAttriubutes(Map *mapObject, Actor *player, Actor *agent) {

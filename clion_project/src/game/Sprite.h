@@ -18,6 +18,8 @@ public:
     char textureChar;
     //int texture;
     int score;
+
+    void sortSprites2(std::vector<int>* order, std::vector<double>* dist, unsigned int amount);
 };
 
 
