@@ -36,6 +36,7 @@ public:
         MAP03,
         MAP04,
         MAP05,
+        MAP06,
     };
 
     enum MenuOption {
@@ -69,9 +70,9 @@ public:
 
     bool drawMenu(sf::RectangleShape *indicator, const sf::Font& font, bool isSummary);
 
-    AgentOption getAgentOption();
+    AgentOption getAgentOption() const;
 
-    LevelOption getLevelOption();
+    LevelOption getLevelOption() const;
 
     void copyPreviousSessionDetails(Actor *player, Actor *agent, int maxPoints, AgentOption difficulty, LevelOption level);
 

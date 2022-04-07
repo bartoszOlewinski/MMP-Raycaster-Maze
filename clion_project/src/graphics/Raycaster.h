@@ -14,6 +14,7 @@
 #include "Menu.h"
 #include "../game/GameSetup.h"
 #include "../game/Controller.h"
+#include "../torch/PythonRunner.h"
 
 
 #define RESOLUTION_720P
@@ -67,6 +68,8 @@ private:
     Controller controllerObject;
 
     //DebugConsole debugConsole = DebugConsole(nullptr);
+
+    PythonRunner pyRunner;
 
 
 

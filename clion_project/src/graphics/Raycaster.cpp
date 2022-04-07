@@ -175,7 +175,11 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
                 update(agent);
 
                 controllerObject.actorControls(player);
-                //controllerObject.actorControls(agent);
+
+                std::srand(std::time(nullptr));
+                int randomInt = std::rand() % 5;
+
+                controllerObject.agentControls(agent, randomInt);
 
             }
 

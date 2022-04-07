@@ -34,7 +34,7 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
     //level selection text for submenu
     sf::Text levelMenuText;
     std::string levelString;
-    levelString = "map01\nmap02\nmap03\nmap04\nmap05";
+    levelString = "map01\nmap02\nmap03\nmap04\nmap05\nmap06";
 
     levelMenuText.setFont(font);
     levelMenuText.setOutlineColor(sf::Color::Black);
@@ -88,7 +88,7 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
 
     menuTime = menuClock.getElapsedTime();
 
-    if (menuTime.asSeconds() - choiceMenuTime.asSeconds() > 0.08) {
+    if (menuTime.asSeconds() - choiceMenuTime.asSeconds() > 0.1) {
 
         // handling input
         switch (menuOption) {
@@ -127,6 +127,7 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
             case AGENT:
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
                     choiceMenuTime = menuClock.getElapsedTime();
+
                     menuOption = PLAY;
                 }
 
@@ -148,8 +149,8 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
 
                         } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
                             choiceMenuTime = menuClock.getElapsedTime();
-                            menuOption = LEVEL;
 
+                            menuOption = LEVEL;
                         }
 
                         break;
@@ -168,6 +169,7 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
 
                         } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
                             choiceMenuTime = menuClock.getElapsedTime();
+
                             menuOption = LEVEL;
 
                         }
@@ -187,6 +189,7 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
 
                         } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
                             choiceMenuTime = menuClock.getElapsedTime();
+
                             menuOption = LEVEL;
 
                         }
@@ -206,7 +209,7 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
                         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
                             choiceMenuTime = menuClock.getElapsedTime();
 
-                            levelOption = MAP05;
+                            levelOption = MAP06;
 
                         } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
                             choiceMenuTime = menuClock.getElapsedTime();
@@ -287,6 +290,25 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
                         } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
                             choiceMenuTime = menuClock.getElapsedTime();
 
+                            levelOption = MAP06;
+
+                        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
+                            //return enum to let raycaster know to change into play mode and which agent and level to load in
+                            return true;
+
+                        }
+
+                        break;
+                    case MAP06:
+                        indicator->setPosition(620, 490);
+                        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+                            choiceMenuTime = menuClock.getElapsedTime();
+
+                            levelOption = MAP05;
+
+                        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+                            choiceMenuTime = menuClock.getElapsedTime();
+
                             levelOption = MAP01;
 
                         } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
@@ -330,11 +352,11 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
     return false;
 }
 
-Menu::AgentOption Menu::getAgentOption() {
+Menu::AgentOption Menu::getAgentOption() const {
     return agentOption;
 }
 
-Menu::LevelOption Menu::getLevelOption() {
+Menu::LevelOption Menu::getLevelOption() const {
     return levelOption;
 }
 
@@ -378,6 +400,9 @@ void Menu::copyPreviousSessionDetails(Actor *player, Actor *agent, int maxPoints
             break;
         case MAP05:
             prevLevelString = "map05";
+            break;
+        case MAP06:
+            prevLevelString = "map06";
             break;
     }
 }

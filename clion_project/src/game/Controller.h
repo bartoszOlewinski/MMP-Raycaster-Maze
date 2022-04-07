@@ -13,8 +13,20 @@ class Menu;
 class Controller {
 
 public:
+    enum Controls {
+        UP,
+        DOWN,
+        TURN_LEFT,
+        TURN_RIGHT,
+        STRAFE_LEFT,
+        STRAFE_RIGHT,
+        ACTION,
+        EMPTY,
+    };
 
     void actorControls(Actor *actor);
+
+    void agentControls(Actor *agent, int controls);
 
 
 
@@ -26,16 +38,7 @@ private:
 
     double moveSpeed = TimePerFrame.asSeconds() * 4.0;
 
-    enum Controls {
-    UP,
-    DOWN,
-    TURN_LEFT,
-    TURN_RIGHT,
-    STRAFE_LEFT,
-    STRAFE_RIGHT,
-    ACTION,
-    EMPTY,
-};
+
 
 
     std::tuple<sf::Keyboard::Key, Controls> playerKeyBindArray[7];
