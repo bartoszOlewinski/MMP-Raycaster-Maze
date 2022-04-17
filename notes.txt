@@ -124,3 +124,7 @@ Quick note, https://www.remove.bg/ <- using this site for removing background fr
 Will add subsection of choosing a level in menu, rand is too unreliable.
 Added first version of level selection. Works fine, cleaned up some useless map loading code from Raycaster, it's
 replaced with loading those details in pickAndLoad map function.
+
+
+====17/04=22====
+need to try 64bit versions of mingw, sfml, pytorch and python. Mingw supposedly doesnt suppor python in 32 bits.

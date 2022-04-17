@@ -12,7 +12,11 @@ find_package(SFML COMPONENTS graphics audio REQUIRED)
 #find_package(Torch REQUIRED)
 #include_directories(SYSTEM ${TORCH_INCLUDE_DIRS})
 
-find_package(Python REQUIRED)
+
+set(PYTHON_INCLUDE_DIR "C:/Users/barto/AppData/Local/Programs/Python/Python310-32/include")
+set(PYTHON_LIBRARY "C:/Users/barto/AppData/Local/Programs/Python/Python310-32/libs/python310.lib")
+
+find_package(PythonLibs REQUIRED)
 include_directories(${PYTHON_INCLUDE_DIRS})
 
 

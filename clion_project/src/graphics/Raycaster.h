@@ -135,6 +135,8 @@ private:
 
 
 
+    void aiThreadHandlder();
+
     /**
      * handles window entity
      */
@@ -150,6 +152,7 @@ private:
 
 
     void update(Actor *actor);
+
 
 };
 

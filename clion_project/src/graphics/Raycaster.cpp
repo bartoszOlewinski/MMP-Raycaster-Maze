@@ -14,7 +14,17 @@
 
 #include <cmath>
 #include <iostream>
+#include <thread>
 
+void Raycaster::aiThreadHandlder() {
+
+    int randomInt = -1;
+
+    pyRunner.getPyAction(&randomInt);
+
+    controllerObject.agentControls(agent, randomInt);
+
+}
 
 void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
@@ -176,10 +186,17 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
                 controllerObject.actorControls(player);
 
-                std::srand(std::time(nullptr));
-                int randomInt = std::rand() % 5;
 
-                controllerObject.agentControls(agent, randomInt);
+
+                //==============================================
+
+
+                //need to create another thread for python script running
+                //std::thread aiThread (aiThreadHandlder);
+
+
+
+                //===============================================
 
             }
 
@@ -769,4 +786,6 @@ void Raycaster::update(Actor *actor) {
 
 
 }
+
+
 

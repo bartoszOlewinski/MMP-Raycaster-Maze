@@ -2,9 +2,11 @@
 // Created by Bartosz Olewinski on 28/03/2022.
 //
 
+
 #include <map>
 #include <vector>
 #include <iostream>
+
 
 #include "PythonRunner.h"
 
@@ -16,8 +18,8 @@ bool PythonRunner::checkPyGlobals() {
     return false;
 }
 
-/*
-int PythonRunner::getPyAction() {
+
+void PythonRunner::getPyAction(int *value) {
     int action = -1;
 
     FILE* PGlobalVariablesFile = fopen("Actions.py", "r");
@@ -25,12 +27,17 @@ int PythonRunner::getPyAction() {
     PyObject *dict;
 
 
+    //NEED TO SET '2PYTHONHOME' VARIABLE MANUALLY BECAUSE CLION SETS THEM TO SOME DIRECTORY INSIDE MINGW
+    Py_SetPythonHome(L"C:\\Users\\barto\\AppData\\Local\\Programs\\Python\\Python310-32");
+
+
+
     Py_Initialize();
 
 
     PyObject *pName, *pModule, *pDict, *pFunc, *pArgs, *pValue;
 
-    pName = PyUnicode_FromString((char*)"Agent");
+    pName = PyUnicode_FromString((char*)"Test");
 
     pModule = PyImport_Import(pName);
 
@@ -38,7 +45,8 @@ int PythonRunner::getPyAction() {
 
     pArgs = PyTuple_Pack(0);
 
-    pValue = PyObject_CallObject(pFunc, pArgs);
+    PyObject_CallObject(pFunc, pArgs);
+
 
 
     if (PGlobalVariablesFile) {
@@ -64,10 +72,12 @@ int PythonRunner::getPyAction() {
     }
 
 
+    Py_Finalize();
 
+    *value = action;
 
-    return action;
+    //return action;
 }
- */
+
 
 

@@ -5,14 +5,15 @@
 #ifndef RAYCASTER_PYTHONRUNNER_H
 #define RAYCASTER_PYTHONRUNNER_H
 
-//#include <Python.h>
+#define PY_SSIZE_T_CLEAN
+#include <Python.h>
 
 class PythonRunner {
 
 public:
     bool checkPyGlobals();
 
-    int getPyAction();
+    void getPyAction(int *value);
 
 
 private:
