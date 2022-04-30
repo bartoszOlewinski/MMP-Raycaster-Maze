@@ -128,3 +128,7 @@ replaced with loading those details in pickAndLoad map function.
 
 ====17/04=22====
 need to try 64bit versions of mingw, sfml, pytorch and python. Mingw supposedly doesnt suppor python in 32 bits.
+
+
+====18/04/22====
+Started drafting threading, python is semi working now, it crashes when calling function inside of a module.

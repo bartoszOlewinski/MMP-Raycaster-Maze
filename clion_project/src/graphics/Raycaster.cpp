@@ -14,15 +14,14 @@
 
 #include <cmath>
 #include <iostream>
-#include <thread>
+
 
 void Raycaster::aiThreadHandlder() {
 
-    int randomInt = -1;
 
-    pyRunner.getPyAction(&randomInt);
+    //run the python scripts
+    pyRunner.runPyAI();
 
-    controllerObject.agentControls(agent, randomInt);
 
 }
 
@@ -37,30 +36,13 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
     gameSetup.setUpAttriubutes(&mapObject, player, agent);
 
-    /*
-    gameSetup.pickAndLoadMap(static_cast<std::underlying_type_t<Menu::LevelOption>>(levelOption));
-
-    player->positionX = mapObject.startingPosX;
-    player->positionY = mapObject.startingPosY;
-    agent->positionX = mapObject.startingPosX;
-    agent->positionY = mapObject.startingPosY;
-
-    player->loadedSpriteList = mapObject.spriteList;
-    agent->loadedSpriteList = mapObject.spriteList;
-
-    //copy the mapObject to the raycaster
-    for (int i = 0; i < Map::MAP_SIZE; i++) {
-        for (int j = 0; j < Map::MAP_SIZE; j++) {
-
-            player->mapInstance[i][j] = mapObject.mapArray[i][j];
-            agent->mapInstance[i][j] = mapObject.mapArray[i][j];
-        }
-    }
-
-     */
 
     menuObject.windowPtr = windowPtr;
     menuObject.maxPoints = mapObject.maxPoints;
+
+
+    //setup py env bool
+    pyEnvRunning = false;
 
 
 
@@ -120,7 +102,10 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
 //=================MAIN GAME LOOP==========================
 
+//set up yellow menu indicator and mode
     mode = MENU_MODE;
+
+
     sf::RectangleShape indicator(sf::Vector2f(20,20));
     indicator.setPosition(230, 260);
     indicator.setFillColor(sf::Color::Yellow);
@@ -130,14 +115,16 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
 
 
-
+//while window's open GAME LOOP OPEN :)
     while (windowPtr->isOpen()) {
 
         //MENU====================
-
         if ((mode == MENU_MODE || mode == LEVEL_SUMMARY) && windowPtr->hasFocus()) {
 
+            //set python flag
+            pyEnvRunning = false;
 
+            //draw menu
             if (menuObject.drawMenu(&indicator, font, mode == LEVEL_SUMMARY)) {
                 mode = PLAY_MODE;
 
@@ -147,21 +134,17 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
                 gameSetup.pickAndLoadMap(static_cast<std::underlying_type_t<Menu::LevelOption>>(levelOption));
             }
 
-
             fixedTimeStepClock.restart();
-
-
         }
-
-
         //==========================
 
-
+        //handle 'x' in the window frame
         while(windowPtr->pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 windowPtr->close();
         }
 
+        //PLAY MODE IS FUN
         if (mode == PLAY_MODE) {
 
             //fixed time step, put logic and updates inside while loop
@@ -172,39 +155,66 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
             if (!agent->hasFinished)
                 agent->time += fixedTimeStepClock.getElapsedTime();
 
-
             timeSinceLastUpdate += fixedTimeStepClock.restart();
 
 
+            //if python's not working yet then set it up and run the thread
+            if (!pyEnvRunning) {
+                pyRunner.setUpPyEnv();
+                pyEnvRunning = true;
+
+                stopThread = false;
+                aiThread = std::thread(&Raycaster::aiThreadHandlder, this);
+                //aiThread.detach();
+            }
+
+
+            //UPDATE LOOP
             while (timeSinceLastUpdate > TimePerFrame) {
 
                 timeSinceLastUpdate -= TimePerFrame;
 
-
+                //updates for item collection, timers and points
                 update(player);
                 update(agent);
 
+                //controller for player
                 controllerObject.actorControls(player);
-
 
 
                 //==============================================
 
+                /*
+                //game gets the INT from Python file by accessing global
+                //variables and passing them into ai's in-game controller
+                 */
+                int randomInt = -1; //-1 is default for no action taken
+                pyRunner.getPyAction(&randomInt);
 
-                //need to create another thread for python script running
-                //std::thread aiThread (aiThreadHandlder);
-
-
-
+                //if action has been taken then call controller
+                if (randomInt != -1)
+                    controllerObject.agentControls(agent, randomInt);
+                /*
+                 */
                 //===============================================
 
             }
 
-            //raycaster
+
+
+            //======================
+            //RAYCASTING MAGIC
+
             renderWindow();
 
-            //if escape pressed reset
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
+
+            //======================
+
+
+
+
+            //if escape pressed return to menu and reset everything
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
 
                 gameSetup.resetAttributes();
 
@@ -212,10 +222,28 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
                 mode = MENU_MODE;
                 menuObject.menuOption = Menu::PLAY;
+
+                //get python thread joined, close the py env and set flag
+
+
+                aiThread.join();
+                pyRunner.releaseLock();
+                pyRunner.closePyEnv();
+
+
+                pyEnvRunning = false;
             }
 
-            if (mode == LEVEL_SUMMARY)
+            if (mode == LEVEL_SUMMARY) {
+                //if level was finished then reset attributes
                 gameSetup.resetAttributes();
+
+                //reset python stuff
+
+                pyRunner.closePyEnv();
+
+                pyEnvRunning = false;
+            }
         }
     }
     //========================================================
@@ -225,6 +253,8 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 void Raycaster::renderWindow() {
     //get time before the render
     fpsStartTime = fpsClock.getElapsedTime();
+
+
 
     //RENDERING ============================
     //clear before drawing next frame

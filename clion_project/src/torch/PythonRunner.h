@@ -15,10 +15,20 @@ public:
 
     void getPyAction(int *value);
 
+    void setUpPyEnv();
+
+    void closePyEnv();
+
+    void runPyAI();
+
+    void releaseLock();
+
 
 private:
 
+    PyGILState_STATE gstate;
 
+    bool stopThread;
 
 
 };

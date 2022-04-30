@@ -6,6 +6,8 @@
 #include <map>
 #include <vector>
 #include <iostream>
+#include <string>
+#include <fstream>
 
 
 #include "PythonRunner.h"
@@ -20,20 +22,61 @@ bool PythonRunner::checkPyGlobals() {
 
 
 void PythonRunner::getPyAction(int *value) {
-    int action = -1;
-
-    FILE* PGlobalVariablesFile = fopen("Actions.py", "r");
-
-    PyObject *dict;
+    int action;
 
 
-    //NEED TO SET '2PYTHONHOME' VARIABLE MANUALLY BECAUSE CLION SETS THEM TO SOME DIRECTORY INSIDE MINGW
-    Py_SetPythonHome(L"C:\\Users\\barto\\AppData\\Local\\Programs\\Python\\Python310-32");
+    std::ifstream logFile("pythonLog.txt");
+    std::string logString;
+    while (std::getline(logFile, logString)) {
+        std::cout <<logString<< std::endl;
+    }
+
+    std::ifstream ActionFile("actionToTake.txt");
+    std::string fileText;
+    const char* result;
+
+    std::getline(ActionFile, fileText);
+
+    result = &fileText[0];
+    //std::cout<<"PYTHON's decision: "<<result<<std::endl;
 
 
+    //converting string result from python into int
+    //NO ACTION TAKEN
+    if (strcmp(result, "-1") == 0) {
+        action = -1;
 
-    Py_Initialize();
+        //GO FORWARD
+    } else if (strcmp(result, "1") == 0) {
+        action = 1;
 
+        //GO BACKWARDS
+    } else if (strcmp(result, "2") == 0) {
+        action = 2;
+
+        //TURN LEFT
+    } else if (strcmp(result, "3") == 0) {
+        action = 3;
+
+        //TURN RIGHT
+    } else if (strcmp(result, "4") == 0) {
+        action = 4;
+
+        //USE KEY
+    } else if (strcmp(result, "5") == 0) {
+        action = 5;
+    }
+    //if missing input then NO ACTION -1
+    else {
+        action = -1;
+    }
+
+    *value = action;
+
+    ActionFile.close();
+}
+
+void PythonRunner::runPyAI() {
 
     PyObject *pName, *pModule, *pDict, *pFunc, *pArgs, *pValue;
 
@@ -43,41 +86,37 @@ void PythonRunner::getPyAction(int *value) {
 
     pFunc = PyObject_GetAttrString(pModule, (char*)"run");
 
-    pArgs = PyTuple_Pack(0);
+    PyObject_CallObject(pFunc, nullptr);
 
-    PyObject_CallObject(pFunc, pArgs);
+}
 
 
+void PythonRunner::setUpPyEnv() {
 
-    if (PGlobalVariablesFile) {
-        dict = PyEval_GetGlobals();
-
-        std::vector<int> intVector;
-
-        PyObject *pKeys = PyDict_Keys(dict);
-        PyObject *pValues = PyDict_Values(dict);
+    //needs to be set to python directory for compiler to find Python.h file
+    Py_SetPythonHome(L"C:\\Users\\barto\\AppData\\Local\\Programs\\Python\\Python310-32");
 
 
 
+    Py_Initialize();
 
-        intVector.reserve(PyDict_Size(dict));
+    gstate = PyGILState_Ensure();
+}
 
-        for (int i = 0; i < PyDict_Size(dict); ++i) {
-            intVector.push_back((int) PyLong_AsLong(PyList_GetItem(pValues, i)));
-            std::cout<<intVector.at(i)<<std::endl;
-        }
-
-
-
-    }
+void PythonRunner::closePyEnv() {
 
 
     Py_Finalize();
 
-    *value = action;
-
-    //return action;
 }
+
+void PythonRunner::releaseLock() {
+    PyGILState_Release(gstate);
+}
+
+
+
+
 
 
 

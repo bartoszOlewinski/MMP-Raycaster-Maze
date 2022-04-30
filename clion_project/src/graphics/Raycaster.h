@@ -6,6 +6,8 @@
 #define MMPPROTOTYPE_RAYCASTER_H
 
 
+#include <thread>
+
 #include <SFML/Window.hpp>
 #include <unordered_map>
 #include "../game/Actor.h"
@@ -70,6 +72,9 @@ private:
     //DebugConsole debugConsole = DebugConsole(nullptr);
 
     PythonRunner pyRunner;
+    bool pyEnvRunning;
+
+    bool stopThread;
 
 
 
@@ -132,6 +137,9 @@ private:
     sf::Texture bagTexture;
     sf::Texture goldKeyTexture;
     sf::Texture silverKeyTexture;
+
+
+    std::thread aiThread;
 
 
 

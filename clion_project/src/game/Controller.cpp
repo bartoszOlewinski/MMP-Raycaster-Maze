@@ -166,24 +166,7 @@ void Controller::agentControls(Actor *actor, int controls) {
         actor->planeY = oldPlaneX * sin(-rotSpeed) + actor->planeY * cos(-rotSpeed);
     }
 
-    /*
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
-
-        if (actor->mapInstance[int(actor->positionX - actor->planeX * moveSpeed)][int(actor->positionY)] <= '.')
-            actor->positionX -= actor->planeX * moveSpeed;
-        if (actor->mapInstance[int(actor->positionX)][int(actor->positionY - actor->planeY * moveSpeed)] <= '.')
-            actor->positionY -= actor->planeY * moveSpeed;
-
-    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt)) {
-
-        if (actor->mapInstance[int(actor->positionX + actor->planeX * moveSpeed)][int(actor->positionY)] <= '.')
-            actor->positionX += actor->planeX * moveSpeed;
-        if (actor->mapInstance[int(actor->positionX)][int(actor->positionY + actor->planeY * moveSpeed)] <= '.')
-            actor->positionY += actor->planeY * moveSpeed;
-
-    }
-     */
-
+    //handle door opening and interaction
     if (controls == 4) {
 
         if (actor->isCloseToDoor) {
