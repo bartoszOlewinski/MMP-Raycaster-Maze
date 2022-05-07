@@ -4,6 +4,7 @@
 
 #include "GameSetup.h"
 
+
 void GameSetup::resetAttributes() {
     //reset actors
     player->time = sf::Time::Zero;
@@ -31,58 +32,26 @@ void GameSetup::resetAttributes() {
     agent->collectedKeys.clear();
 
 
-    //COMMENTED OUT CODE IS OLD
-
-    /*
-    //pick next map at random
-    pickAndLoadMap();
-
-
-    player->positionX = map->startingPosX;
-    player->positionY = map->startingPosY;
-
-    agent->positionX = map->startingPosX;
-    agent->positionY = map->startingPosY;
-
-
-    //reset loaded map and its sprites
-    for (int i = 0; i < Map::MAP_SIZE; i++) {
-        for (int j = 0; j < Map::MAP_SIZE; j++) {
-            player->mapInstance[i][j] = map->mapArray[i][j];
-            agent->mapInstance[i][j] = map->mapArray[i][j];
-        }
-    }
-     */
-
-
     player->loadedSpriteList.clear();
     agent->loadedSpriteList.clear();
 
-    /*
-    player->loadedSpriteList = map->spriteList;
-    agent->loadedSpriteList = map->spriteList;
-     */
+
 }
 
+
 void GameSetup::pickAndLoadMap(int mapId) {
-    //srand(time(NULL));
-
-    //int mapNumber = rand() % NUMBER_OF_MAPS;
-
-    //pick random number, feed it to loading function,
-    //switch case loads map
 
     map->loadMapDetails(mapId);
 
 
-
+    //clearing sprite lists for new contents
     player->loadedSpriteList.clear();
     agent->loadedSpriteList.clear();
 
     player->loadedSpriteList = map->spriteList;
     agent->loadedSpriteList = map->spriteList;
 
-    //set up starting point
+    //set up starting points
     player->positionX = map->startingPosX;
     player->positionY = map->startingPosY;
 
@@ -100,7 +69,7 @@ void GameSetup::pickAndLoadMap(int mapId) {
     }
 }
 
-void GameSetup::setUpAttriubutes(Map *mapObject, Actor *player, Actor *agent) {
+void GameSetup::setUpAttributes(Map *mapObject, Actor *player, Actor *agent) {
     this->map = mapObject;
     this->player = player;
     this->agent = agent;

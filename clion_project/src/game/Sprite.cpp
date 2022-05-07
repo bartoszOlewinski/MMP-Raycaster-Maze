@@ -7,7 +7,9 @@
 #include <algorithm>
 
 #include "Sprite.h"
-//COPIED FROM TUTORIAL BY LODEV
+
+
+
 void Sprite::sortSprites(int *order, double *dist, unsigned int amount) {
     std::vector<std::pair<double, int>> sprites(amount);
     for(int i = 0; i < amount; i++) {
@@ -21,6 +23,7 @@ void Sprite::sortSprites(int *order, double *dist, unsigned int amount) {
         order[i] = sprites[amount - i - 1].second;
     }
 }
+
 
 void Sprite::sortSprites2(std::vector<int>* order, std::vector<double>* dist, unsigned int amount) {
     std::vector<std::pair<double, int>> sprites(amount);

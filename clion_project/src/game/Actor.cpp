@@ -14,6 +14,7 @@ void Actor::setupStatsText(sf::Font *font, int posX, int posY) {
 
 }
 
+
 void Actor::setupPopupText(sf::Font *font, int posX, int posY) {
     popupText.setFont(*font);
     popupText.setFillColor(sf::Color::Yellow);
@@ -24,6 +25,7 @@ void Actor::setupPopupText(sf::Font *font, int posX, int posY) {
     popupText.setCharacterSize(20);
 
 }
+
 
 void Actor::setupEqText(sf::Font *font, int posX, int posY) {
     eqText.setFont(*font);

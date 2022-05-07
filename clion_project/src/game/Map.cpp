@@ -7,6 +7,7 @@
 
 
 
+//uncomment if, want to load specific map regardless of in-game choices
 //#define TEST_MAP
 //#define MAP01
 //#define MAP02
@@ -14,7 +15,6 @@
 //#define MAP04
 //#define MAP05
 //#define MAP06
-
 
 
 
@@ -123,7 +123,7 @@ void Map::loadMapDetails(int mapNumber) {
 
                 spriteList.push_back(tempSprite);
             }
-            // FURTHER ELSE IF FOR OTHER TYPES OF ITEMS
+            // FURTHER ELSE IFs FOR OTHER TYPES OF ITEMS
 
         }
     }

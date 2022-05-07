@@ -10,7 +10,10 @@
 #include <vector>
 #include "Sprite.h"
 
-
+/**
+ * Class responsible for map handling,
+ * contains 2d char arrays which represent maps
+ */
 class Map {
 private:
 
@@ -19,6 +22,23 @@ public:
     static const int MAP_SIZE = 20;
 
     unsigned char mapArray[MAP_SIZE][MAP_SIZE];
+
+
+    /*LEGEND
+     * '1' - DIRT WALL
+     * '2' - BRICK WALL
+     * '3' - STONE WALL
+     * '4' - STONE WALL 2
+     * '5' - DOOR GOLD
+     * '6' - EXIT DOOR
+     * '7' - DOOR SILVER
+     *
+     * '#' - START LOCATION
+     * '!' - MONEY BAG
+     * '$' - GOLD KEY
+     * '&' - SILVER KEY
+     *
+     */
 
     /* TEMPLATE
     unsigned char emptyTemplate[MAP_SIZE][MAP_SIZE] = {
@@ -206,17 +226,21 @@ public:
             '3','3','3','3','3','3','3','3','3','4','4','3','3','3','3','3','3','3','3','3',
     };
 
+    //map specific data
     int numOfSprites = 0;
-
     int maxPoints;
 
     double startingPosX{};
-
     double startingPosY{};
-
 
     std::vector<Sprite> spriteList;
 
+
+    /**
+    * Loads number of sprites, max points amount,
+    * map itself
+    * @param mapNumber
+    */
     void loadMapDetails(int mapNumber);
 
 

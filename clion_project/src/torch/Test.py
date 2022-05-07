@@ -3,12 +3,13 @@ import random
 ACTION_TAKEN = '2'
 
 
+# function that tests interface between C++ and Python
 def run():
     global ACTION_TAKEN
     fLog = open('pythonLog.txt', 'a')
     logString = str
 
-    for (x) in range(100):
+    for (x) in range(1000):
         f = open('actionToTake.txt', 'w')
         fLog = open('pythonLog.txt', 'a+')
         act_int = random.randrange(1, 4)
@@ -32,3 +33,8 @@ def run():
         f.close()
 
         fLog.close()
+
+    # -99 is a reset map code
+    # f2 = open('actionToTake.txt', 'w')
+    # f2.write ('-99')
+    # f2.close()

@@ -3,28 +3,8 @@
 //
 
 #include <SFML/Window/Event.hpp>
-#include <iostream>
 #include <valarray>
 #include "Controller.h"
-
-void Controller::controls() {
-
-
-
-}
-
-void Controller::loadKeyMapping(Actor *actor) {
-    if (actor->name == "Player") {
-        playerKeyBindArray[0] = std::tuple<sf::Keyboard::Key, Controls>(sf::Keyboard::Up, UP);
-        playerKeyBindArray[1] = std::tuple<sf::Keyboard::Key, Controls>(sf::Keyboard::Down, DOWN);
-        playerKeyBindArray[2] = std::tuple<sf::Keyboard::Key, Controls>(sf::Keyboard::Left, TURN_LEFT);
-        playerKeyBindArray[3] = std::tuple<sf::Keyboard::Key, Controls>(sf::Keyboard::Right, TURN_RIGHT);
-        playerKeyBindArray[4] = std::tuple<sf::Keyboard::Key, Controls>(sf::Keyboard::Space, ACTION);
-
-    } else {
-
-    }
-}
 
 
 void Controller::actorControls(Actor *actor) {

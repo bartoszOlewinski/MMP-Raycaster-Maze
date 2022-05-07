@@ -12,24 +12,17 @@
 
 #include "PythonRunner.h"
 
-bool PythonRunner::checkPyGlobals() {
-
-
-
-
-    return false;
-}
-
 
 void PythonRunner::getPyAction(int *value) {
     int action;
 
-
+/*
     std::ifstream logFile("pythonLog.txt");
     std::string logString;
     while (std::getline(logFile, logString)) {
         std::cout <<logString<< std::endl;
     }
+    */
 
     std::ifstream ActionFile("actionToTake.txt");
     std::string fileText;
@@ -65,6 +58,11 @@ void PythonRunner::getPyAction(int *value) {
         //USE KEY
     } else if (strcmp(result, "5") == 0) {
         action = 5;
+
+        //RESET MAP
+    } else if (strcmp(result, "-99") == 0) {
+        action = -99;
+
     }
     //if missing input then NO ACTION -1
     else {
@@ -97,15 +95,13 @@ void PythonRunner::setUpPyEnv() {
     Py_SetPythonHome(L"C:\\Users\\barto\\AppData\\Local\\Programs\\Python\\Python310-32");
 
 
-
     Py_Initialize();
 
+    //for multi-threaded support
     gstate = PyGILState_Ensure();
 }
 
 void PythonRunner::closePyEnv() {
-
-
     Py_Finalize();
 
 }

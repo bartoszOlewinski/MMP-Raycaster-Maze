@@ -14,9 +14,10 @@
 
 #include <cmath>
 #include <iostream>
+#include <fstream> //used for writing to .txt file for Python
 
 
-void Raycaster::aiThreadHandlder() {
+void Raycaster::aiThreadHandler() {
 
 
     //run the python scripts
@@ -25,16 +26,15 @@ void Raycaster::aiThreadHandlder() {
 
 }
 
-void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
-    //debugConsole = DebugConsole(windowPtr);
+void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
 
     //establish actors, get pointers
     player = actor;
     agent = actorAI;
 
-    gameSetup.setUpAttriubutes(&mapObject, player, agent);
+    gameSetup.setUpAttributes(&mapObject, player, agent);
 
 
     menuObject.windowPtr = windowPtr;
@@ -115,7 +115,7 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
 
 
-//while window's open GAME LOOP OPEN :)
+    //while window's open GAME LOOP'S RUNNING
     while (windowPtr->isOpen()) {
 
         //MENU====================
@@ -131,6 +131,7 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
                 agentOption = menuObject.getAgentOption();
                 levelOption = menuObject.getLevelOption();
 
+                //static_cast narrowing conversion is desired
                 gameSetup.pickAndLoadMap(static_cast<std::underlying_type_t<Menu::LevelOption>>(levelOption));
             }
 
@@ -155,23 +156,22 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
             if (!agent->hasFinished)
                 agent->time += fixedTimeStepClock.getElapsedTime();
 
+
             timeSinceLastUpdate += fixedTimeStepClock.restart();
 
 
-            //if python's not working yet then set it up and run the thread
+            //if python's not working yet then set it up and run the AI thread
             if (!pyEnvRunning) {
                 pyRunner.setUpPyEnv();
                 pyEnvRunning = true;
 
-                stopThread = false;
-                aiThread = std::thread(&Raycaster::aiThreadHandlder, this);
-                //aiThread.detach();
+                //stopThread = false;
+                aiThread = std::thread(&Raycaster::aiThreadHandler, this);
             }
 
 
-            //UPDATE LOOP
+            //LOGIC UPDATE LOOP
             while (timeSinceLastUpdate > TimePerFrame) {
-
                 timeSinceLastUpdate -= TimePerFrame;
 
                 //updates for item collection, timers and points
@@ -182,18 +182,48 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
                 controllerObject.actorControls(player);
 
 
+                //AGENT CONTROL AND HANDLING
                 //==============================================
-
                 /*
-                //game gets the INT from Python file by accessing global
-                //variables and passing them into ai's in-game controller
+                game gets the int from Python script by
+                accessing 'actionsToTake.txt' file to which script writes the action
                  */
                 int randomInt = -1; //-1 is default for no action taken
                 pyRunner.getPyAction(&randomInt);
 
-                //if action has been taken then call controller
-                if (randomInt != -1)
+                //if python hasn't returned reset flag or -1, move the agent's actor
+                if (randomInt != PYTHON_RESET_CODE && randomInt != -1)
                     controllerObject.agentControls(agent, randomInt);
+
+
+
+                //RESET THE MAP, POSITIONS AND SPRITES when python calls reset()
+                //FOR 'def reset(self)' in openai gym environment
+                if (randomInt == PYTHON_RESET_CODE) {
+                    //reload the map to the starting values
+                    for (int i = 0; i < 20; i++) {
+                        for (int j = 0; j < 20; j++) {
+                            player->mapInstance[i][j] = mapObject.mapArray[i][j];
+                            agent->mapInstance[i][j] = mapObject.mapArray[i][j];
+                        }
+                    }
+
+                    //set up starting positions
+                    player->positionX = mapObject.startingPosX;
+                    player->positionY = mapObject.startingPosY;
+
+                    agent->positionX = mapObject.startingPosX;
+                    agent->positionY = mapObject.startingPosY;
+
+
+                    //reload sprite list
+                    player->loadedSpriteList.clear();
+                    agent->loadedSpriteList.clear();
+
+                    player->loadedSpriteList = mapObject.spriteList;
+                    agent->loadedSpriteList = mapObject.spriteList;
+
+                }
                 /*
                  */
                 //===============================================
@@ -223,9 +253,8 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
                 mode = MENU_MODE;
                 menuObject.menuOption = Menu::PLAY;
 
+
                 //get python thread joined, close the py env and set flag
-
-
                 aiThread.join();
                 pyRunner.releaseLock();
                 pyRunner.closePyEnv();
@@ -234,12 +263,14 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
                 pyEnvRunning = false;
             }
 
+            //if level was completed reset some stuff
             if (mode == LEVEL_SUMMARY) {
                 //if level was finished then reset attributes
                 gameSetup.resetAttributes();
 
                 //reset python stuff
-
+                aiThread.join();
+                pyRunner.releaseLock();
                 pyRunner.closePyEnv();
 
                 pyEnvRunning = false;
@@ -257,14 +288,14 @@ void Raycaster::renderWindow() {
 
 
     //RENDERING ============================
-    //clear before drawing next frame
+    //clear the screen before drawing next frame
     windowPtr->clear(sf::Color::Black);
 
 
 
 
 
-    //RAYCASTING VARIABLES
+    //RAYCASTING TEXTURE STATE VARIABLES
     sf::RenderStates wallState(&textureWallSheet);
     sf::RenderStates bagState(&bagTexture);
     sf::RenderStates goldKeyState(&goldKeyTexture);
@@ -279,13 +310,11 @@ void Raycaster::renderWindow() {
     raycastingRenderer(agent, wallState,bagState, goldKeyState, silverKeyState);
 
 
-    //debugConsole.activateDebug();
-    //debugConsole.commandOpener();
 
-
-    oldTime = fpsStartTime;
-    fpsStartTime = fpsClock.getElapsedTime();
-    frameTime = (fpsStartTime.asMilliseconds() - oldTime.asMilliseconds()) / 1000.0;
+    //old code for fps counter
+    //oldTime = fpsStartTime;
+    //fpsStartTime = fpsClock.getElapsedTime();
+    //frameTime = (fpsStartTime.asMilliseconds() - oldTime.asMilliseconds()) / 1000.0;
 
 
 #ifdef PLAYER_DEBUG_DISPLAY
@@ -308,7 +337,6 @@ void Raycaster::renderWindow() {
     //display everything that's been drawn in draw functions
     windowPtr->display();
 }
-
 
 
 void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf::RenderStates bagState,
@@ -531,6 +559,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 
 
 
+
     //SPRITE CASTING ==========================================================
 
     sf::VertexArray spriteLines(sf::Lines, RENDER_WIDTH);
@@ -544,6 +573,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 
 
     //Visual Studio's compiler doesn't allow for variable length arrays, MinGW is fine with it
+    //but changed them into vectors
 
     //int spriteOrder[numberOfSprites];
     //double spriteDistance[numberOfSprites];
@@ -554,15 +584,6 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 
 
 
-
-    /*
-    for (int i = 0; i < numberOfSprites; i++) {
-        spriteOrder[i] = i;
-        spriteDistance[i] = ((actor->positionX - actor->loadedSpriteList[i].posX) * (actor->positionX - actor->loadedSpriteList[i].posX) +
-                             (actor->positionY - actor->loadedSpriteList[i].posY) * (actor->positionY - actor->loadedSpriteList[i].posY));
-
-    }
-     */
     for (int i = 0; i < numberOfSprites; i++) {
         spriteOrder.at(i) = i;
         spriteDistance.at(i) = ((actor->positionX - actor->loadedSpriteList[i].posX) * (actor->positionX - actor->loadedSpriteList[i].posX) +
@@ -576,7 +597,6 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
     Sprite spriteSorter{};
 
     spriteSorter.sortSprites2(&spriteOrder, &spriteDistance, numberOfSprites);
-    // spriteSorter.sortSprites(spriteOrder, spriteDistance, numberOfSprites);
 
 
     //draw the sprites
@@ -691,56 +711,104 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 }
 
 
-//update texts and handle item hit detection
 void Raycaster::update(Actor *actor) {
 
+    //commented out file write code used only when Python
+    //agents are implemented
+
+    //file to which some updates will be written to
+    /*
+    std::ofstream agentInfoFile;
+    if (actor->name == "Agent") {
+        agentInfoFile.open("agentInfo.txt");
+    }
+     */
+
+
+
+
     //information column update===============================================
+
+    //get current cell's contents
     unsigned char currentCell = actor->mapInstance[(int)actor->positionX][(int)actor->positionY];
 
+    //'#' is spawn, '.' is empty cell, don't count them as pick-up items
     if ( currentCell != '#' && currentCell != '.') {
         switch (currentCell) {
             case '!':
                 actor->score += 100;
 
                 actor->popupString = "money bag picked up";
+
+                /*
+                if (actor->name == "Agent") {
+                    int numOfBags = actor->score / 100;
+                    agentInfoFile << std::to_string(numOfBags) << "\n";
+                }
+                 */
+
                 break;
 
             case '$':
                 actor->collectedKeys.push_back('$');
 
                 actor->popupString = "golden key picked up";
+
+                /*
+                if (actor->name == "Agent") {
+                    agentInfoFile << "1\n";
+                }
+                 */
+
+
                 break;
 
             case '&':
                 actor->collectedKeys.push_back('&');
 
                 actor->popupString = "silver key picked up";
+
+                /*
+                if (actor->name == "Agent") {
+                    agentInfoFile << "1\n";
+                }
+                 */
                 break;
 
             default:
                 std::cout<<"Hit detection encountered unknown instance."<<std::endl;
         }
 
+        //debug print
         //std::cout<<actor->name<<" - item picked up, showing popup" <<std::endl;
 
 
+
+        //timer for pop up message
         startPopUp = fpsClock.getElapsedTime();
 
+
+
+        //debug print
         //std::cout<<actor->name<<" - time of start popup: "<<std::to_string(startPopUp.asSeconds()) <<std::endl;
 
 
+
+        //flags that tell where to draw pop up messages
         if (agent->name == "Player")
             playerNewItem = true;
         else
             agentNewItem = true;
 
+
         actor->popupText.setString(actor->popupString);
 
 
-
+        //when item is picked up, erase the item from map instance
         actor->mapInstance[(int)actor->positionX][(int)actor->positionY] = '.';
 
-        //delete the sprite from sprite list
+
+        //delete the item from sprite list
         for(int i = 0; i < actor->loadedSpriteList.size(); i++) {
             if((int)actor->loadedSpriteList[i].posX == (int)actor->positionX && (int)actor->loadedSpriteList[i].posY == (int)actor->positionY) {
 
@@ -751,9 +819,11 @@ void Raycaster::update(Actor *actor) {
     }
 
 
+    //timer for pop up messages
     sf::Time finishPopUp = fpsClock.getElapsedTime();
 
 
+    //if enough time is elapsed, clear the pop up message
     if (finishPopUp.asSeconds() - startPopUp.asSeconds() > 1.2f && (playerNewItem || agentNewItem)) {
         /*
         std::cout<<actor->name<<" - time of end popup: "<<std::to_string(finishPopUp.asSeconds()) <<std::endl;
@@ -773,6 +843,7 @@ void Raycaster::update(Actor *actor) {
     }
 
 
+    //information column text, scores, timers
     actor->scoreString = actor-> name + " Score\n" + std::to_string(actor->score);
 
     actor->timerString = "\n\n" + actor->name +" Time\n" + std::to_string(std::round(actor->time.asSeconds() * 100.0) / 100.0) + "s";
@@ -808,6 +879,8 @@ void Raycaster::update(Actor *actor) {
 
     //==================================================================
 
+
+    //if level completed, then copy the details for summary print in menu
     if (actor->hasFinished) {
         menuObject.copyPreviousSessionDetails(player, agent, mapObject.maxPoints, agentOption, levelOption);
 

@@ -7,18 +7,26 @@
 
 
 #include <thread>
+#include <unordered_map>
 
 #include <SFML/Window.hpp>
-#include <unordered_map>
-#include "../game/Actor.h"
-#include "../game/DebugConsole.cpp"
-#include "../game/Map.h"
+
 #include "Menu.h"
+#include "../game/Map.h"
+#include "../game/Actor.h"
 #include "../game/GameSetup.h"
 #include "../game/Controller.h"
 #include "../torch/PythonRunner.h"
 
 
+/*
+ * better use 720p,
+ *
+ * without dedicated GPU raycasting is horrible performance-wise,
+ * GTX 1050, 960 and AMD equivalents should be completely fine with 900p
+ * running it above 120fps,
+ *
+ */
 #define RESOLUTION_720P
 //#define RESOLUTION_900P
 
@@ -40,8 +48,13 @@ const int RENDER_HEIGHT = 480;
 
 
 
-const float ITEM_HIT_BOX = 0.5f;
-
+/**
+ * Most important class, central to the game,
+ * handles window set up, raycasting renderer,
+ * logic updates.
+ *
+ * Contains main game loop and high level menu handling.
+ */
 class Raycaster {
 public:
     sf::RenderWindow* windowPtr;
@@ -50,8 +63,10 @@ public:
     }
 
     /**
-     * Runs rest of the functions
-     */
+    * public function to be called when game is started
+    * @param actor player object
+    * @param actorAI agent object
+    */
     void runGame(Actor *actor, Actor *actorAI);
 
 
@@ -69,25 +84,22 @@ private:
 
     Controller controllerObject;
 
-    //DebugConsole debugConsole = DebugConsole(nullptr);
-
+    //python essentials
     PythonRunner pyRunner;
     bool pyEnvRunning;
-
-    bool stopThread;
-
+    const int PYTHON_RESET_CODE = -99;
 
 
-    std::string gameVersion = "0.3.3.1";
+    //string for a debug print in-game
+    std::string gameVersion = "1.0";
 
 
-
+    //modes used when in menu loop
     enum Mode{
         MENU_MODE,
         PLAY_MODE,
         LEVEL_SUMMARY
     };
-
 
     Mode mode;
 
@@ -95,19 +107,16 @@ private:
     Menu::LevelOption levelOption;
 
 
+
+
     sf::Color greyColor;
-
-    std::string stringText;
     sf::Text debugText;
-
 
     sf::Font font;
 
     std::string eqDefaultString = "Equipment:\n";
 
-
-    double frameTime;
-
+    //for handling update timers
     sf::Clock fpsClock;
     sf::Time fpsStartTime;
     sf::Time oldTime;
@@ -119,16 +128,12 @@ private:
 
 
 
-
     const sf::Time TimePerFrame = sf::seconds(1.f / 60.f);
 
-    double rotSpeed = TimePerFrame.asSeconds() * 3.0;
-    double moveSpeed = TimePerFrame.asSeconds() * 4.0;
 
 
 
-
-
+    //texture variables
     static const int textureSheetSize = 896;
     static const int singleTextureSize = 128;
 
@@ -139,26 +144,37 @@ private:
     sf::Texture silverKeyTexture;
 
 
+
+
+    //thread for python runner
     std::thread aiThread;
 
 
-
-    void aiThreadHandlder();
+    /**
+    * Runs PythonRunner's function for Python's AI
+    */
+    void aiThreadHandler();
 
     /**
-     * handles window entity
-     */
+    * Handles main game loop, menu loop, calls renderer
+    */
     void renderWindow();
 
     /**
-     * Renders image using raycasting,
-     * depending on whether it is AI or not
-     * the image is rendered in different places
-     */
+    * Rendering raycasting magic function
+    * @param actor player's or agent's perspective
+    * @param texState wall texture sheet state file
+    * @param bagState money bag texture state file
+    * @param goldKeyState gold key texture state file
+    * @param silverKeyState silver key texture state file
+    */
     void raycastingRenderer(Actor * actor, sf::RenderStates texState, sf::RenderStates bagState,
                             sf::RenderStates goldKeyState, sf::RenderStates silverKeyState);
 
-
+    /**
+    * Handles logic update, item hit detection
+    * @param actor object
+    */
     void update(Actor *actor);
 
 

@@ -2,8 +2,6 @@
 #include <thread>
 
 #include <SFML/Graphics.hpp>
-#include <SFML/Audio.hpp>
-#include <utility>
 
 #include "../graphics/Raycaster.h"
 
@@ -18,7 +16,7 @@
 
 
 
-
+//setting up important attributes
 void setUpActor(Actor* actor, std::string name) {
     //set up actors parameters
     actor->directionX = -1.0f;
@@ -41,39 +39,46 @@ int main() {
 
     std::string WINDOW_TITLE = "Raycaster Maze";
 
-    std::string VERSION = "0.3.3.1";
+    std::string VERSION = "1.0";
 
 
-
+//debug only by name, should be used as default way of window set up, if display is above 1080p, either change preprocessor
+//commands in Raycaster.h to render in 900p or try RELEASE_MODE while ensuring 16:9 screen ratio of the display
 #ifdef DEBUG_MODE
     WINDOW_TITLE += " - " + VERSION;
     sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_TITLE, sf::Style::Default);
 #endif
 
+    //fullscreen works correctly only if screen it is displayed on is using 16:9 aspect ratio, and is >= 720p
 #ifdef RELEASE_MODE
     sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_TITLE, sf::Style::Fullscreen);
 #endif
 
+
+    //set up icons for the window
     sf::Image icon;
     icon.loadFromFile("../resources/textures/icon.png");
-
-
     window.setIcon(100, 100, icon.getPixelsPtr());
 
 
 
-
-
+    //clear the window
     window.clear(sf::Color::Black);
 
-    window.setMouseCursorVisible(false);
+    //not necessary, default value true
+    //window.setMouseCursorVisible(true);
 
+    //supposedly helps in limiting framerate, most likely not working
     window.setVerticalSyncEnabled(true);
+
 
     //create a raycaster and initialize window
     Raycaster raycaster(&window);
 
 
+
+
+    //actor set up
     Actor player{};
     player.renderX = 10;
 
@@ -84,6 +89,9 @@ int main() {
     setUpActor(&agent, "Agent");
 
 
+
+
+    //change music file to whatever is placed in the 'sounds' directory
 #ifdef MUSIC_MODE
     sf::SoundBuffer buffer;
     if (!buffer.loadFromFile("../resources/sounds/tyrian_theme.flac"))
@@ -97,7 +105,7 @@ int main() {
 #endif
 
 
-
+    //run game
     //MAIN LOOP INSIDE=====================================================
 
     raycaster.runGame(&player, &agent);

@@ -352,13 +352,16 @@ bool Menu::drawMenu(sf::RectangleShape *indicator, const sf::Font &font, bool is
     return false;
 }
 
+
 Menu::AgentOption Menu::getAgentOption() const {
     return agentOption;
 }
 
+
 Menu::LevelOption Menu::getLevelOption() const {
     return levelOption;
 }
+
 
 void Menu::copyPreviousSessionDetails(Actor *player, Actor *agent, int maxPoints, AgentOption difficulty, LevelOption level) {
     this->playerPrevScore = player->score;

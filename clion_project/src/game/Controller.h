@@ -8,30 +8,31 @@
 
 #include "Actor.h"
 
-
-class Menu;
+/**
+ * Class that handles controlling movement of Player and Agent
+ */
 class Controller {
 
 public:
-    enum Controls {
-        UP,
-        DOWN,
-        TURN_LEFT,
-        TURN_RIGHT,
-        STRAFE_LEFT,
-        STRAFE_RIGHT,
-        ACTION,
-        EMPTY,
-    };
 
+    /**
+    * Handles keyboard inputs for the Player
+    * @param actor Player object
+    */
     void actorControls(Actor *actor);
 
+    /**
+    * handles agent movement depending on input action
+    * @param actor Agent object
+    * @param controls int that represents action to take
+    */
     void agentControls(Actor *agent, int controls);
 
 
 
 private:
 
+    //cont variables that moderates speed of movement
     const sf::Time TimePerFrame = sf::seconds(1.f / 60.f);
 
     double rotSpeed = TimePerFrame.asSeconds() * 3.0;
@@ -39,23 +40,9 @@ private:
     double moveSpeed = TimePerFrame.asSeconds() * 4.0;
 
 
-
-
-    std::tuple<sf::Keyboard::Key, Controls> playerKeyBindArray[7];
-
-    std::tuple<sf::Keyboard::Key, Controls> agentKeyBindArray[7];
-
-
-    Actor *player;
+    //Actor *player;
     Actor *agent;
 
-
-    static Controls translateKeyboardControls();
-
-
-    void controls();
-
-    void loadKeyMapping(Actor *actor);
 };
 
 
