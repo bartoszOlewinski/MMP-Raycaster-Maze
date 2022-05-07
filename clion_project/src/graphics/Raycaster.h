@@ -90,8 +90,8 @@ private:
     const int PYTHON_RESET_CODE = -99;
 
 
-    //string for a debug print in-game
-    std::string gameVersion = "1.0";
+    //string for a debug print in-game, currently disabled
+    //std::string gameVersion = "1.0";
 
 
     //modes used when in menu loop
