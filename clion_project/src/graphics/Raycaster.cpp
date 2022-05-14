@@ -191,7 +191,7 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
                 int randomInt = -1; //-1 is default for no action taken
                 pyRunner.getPyAction(&randomInt);
 
-                //if python hasn't returned reset flag or -1, move the agent's actor
+                //if python hasn't returned reset flag -99 or -1, move the agent's actor
                 if (randomInt != PYTHON_RESET_CODE && randomInt != -1)
                     controllerObject.agentControls(agent, randomInt);
 
@@ -341,8 +341,9 @@ void Raycaster::renderWindow() {
 
 void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf::RenderStates bagState,
                                    sf::RenderStates goldKeyState, sf::RenderStates silverKeyState) {
-    sf::VertexArray lines (sf::Lines,  RENDER_WIDTH); //why use RENDER_WIDTH and resize to 0 after???
-    lines.resize(0);
+
+    sf::VertexArray lines (sf::Lines,  0); //why use RENDER_WIDTH and resize to 0 after???
+    //lines.resize(0);
 
     double spriteBuffer[RENDER_WIDTH];
 

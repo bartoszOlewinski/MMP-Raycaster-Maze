@@ -42,7 +42,7 @@ int main() {
     std::string VERSION = "1.0";
 
 
-//debug only by name, should be used as default way of window set up, if display is above 1080p, either change preprocessor
+//debug only by name, should be used as default way of window set up, if your display is above 1080p, either change preprocessor
 //commands in Raycaster.h to render in 900p or try RELEASE_MODE while ensuring 16:9 screen ratio of the display
 #ifdef DEBUG_MODE
     WINDOW_TITLE += " - " + VERSION;

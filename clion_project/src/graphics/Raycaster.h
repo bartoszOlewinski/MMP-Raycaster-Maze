@@ -23,7 +23,7 @@
  * better use 720p,
  *
  * without dedicated GPU raycasting is horrible performance-wise,
- * GTX 1050, 960 and AMD equivalents should be completely fine with 900p
+ * GTX 1050, 960 or AMD equivalents should be completely fine with 900p
  * running it above 120fps,
  *
  */
