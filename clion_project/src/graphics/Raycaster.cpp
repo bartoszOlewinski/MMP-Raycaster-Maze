@@ -360,6 +360,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
         int mapY = (int) actor->positionY;
 
 
+        //distances between actor and wall
         double sideDistX;
         double sideDistY;
 
@@ -369,15 +370,19 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
         double deltaDistY = std::abs(1/rayDirY);
 
 
+        //perpendicular distance to a wall
         double perpWallDist;
 
+        //initial distance steps between actor and borders of a grid cell they're in
         int stepX;
         int stepY;
 
+        //whether wall was hit, which side of the wall was hit
         int hit = 0;
         int side;
 
 
+        //initial calculation of distance based on direction actor is facing
         if (rayDirX < 0) {
             stepX = -1;
             sideDistX = (actor->positionX - mapX) * deltaDistX;
@@ -395,12 +400,10 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 
 
 
-
+        //flag whether ray hit a door
         bool hitDoor = false;
 
-        double doorDistY;
-        double doorDistX;
-
+        //add up distance until the ray hits a wall
         while (hit == 0) {
             if (sideDistX < sideDistY) {
                 sideDistX += deltaDistX;
@@ -414,15 +417,18 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 
             //if (mapInUse[mapX][mapY] != '.' && mapInUse[mapX][mapY] > 48 && mapInUse[mapX][mapY] < 58)
 
+            //if it's not an empty cell, start location, or any pick up item
             if (actor->mapInstance[mapX][mapY] != '.' && actor->mapInstance[mapX][mapY] != '#' && actor->mapInstance[mapX][mapY] != '!'
                 && actor->mapInstance[mapX][mapY] != '$' && actor->mapInstance[mapX][mapY] != '&') {
 
                 //if it's door calculate distances
                 if (actor->mapInstance[mapX][mapY] == '5' || actor->mapInstance[mapX][mapY] == '6' || actor->mapInstance[mapX][mapY] == '7') {
 
+                    //distance to the door
                     double distance = sqrt((actor->positionX - mapX - 0.5f) * (actor->positionX - mapX - 0.5f) +
                                            (actor->positionY - mapY - 0.5f) * (actor->positionY - mapY - 0.5f));
 
+                    //check if door is in range to be opened
                     if (distance < 1.5) {
                         actor->isCloseToDoor = true;
                         actor->doorX = mapX;
@@ -434,11 +440,13 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
                     }
                 }
 
+                //flag a hit
                 hit = 1;
             }
         }
 
 
+        //depending on a side calculate perpendicular distance
         if(side == 0)
             perpWallDist = (sideDistX - deltaDistX);
         else
@@ -455,6 +463,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
         lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float)actor->renderY), greyColor,
                                 sf::Vector2f( 640.0f,  0.0f)));
 
+        //calculate overflow of pixels on top of the screen
         int drawStart = int((float)-lineHeight * (1.0f - 0.5f) + RENDER_HEIGHT * 0.5f);
         int overflownPixels = -drawStart;
 
@@ -479,6 +488,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 
         int pixelAdjustment = 0;
 
+        //contain drawn images within desired pixel range in the window
         if (drawEnd > RENDER_HEIGHT) {
             drawEnd = RENDER_HEIGHT - 1;
 
