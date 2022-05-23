@@ -7,9 +7,9 @@ https://github.com/tmsbrg/adventure3d.
 
 Game tasks player with traversing a maze and finding exit. It contains locked doors along with keys, and treasure money bags that add-up to the score.
 
-=====================
+===
 Current version 1.0
-=====================
+==
 AI to be implemented,
 human vs. human to be implemented,
 additional UI to be implemented.
