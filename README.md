@@ -18,6 +18,8 @@ additional UI to be implemented.
 
 REQUIRED TO RUN:
 
+Currenet version of the setup needs to be adjusted as it doesn't translate to other machines.
+
 mingw32 7.30 32bi\
 https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/7.3.0/threads-posix/dwarf/i686-7.3.0-release-posix-dwarf-rt_v5-rev0.7z/download
 
