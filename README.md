@@ -18,9 +18,6 @@ Current version 1.0
 
 
 ## REQUIRED TO RUN:
-
-Currenet version of the setup needs to be adjusted as it doesn't translate to other machines.
-
 - mingw32 7.30 32bi\
 https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/7.3.0/threads-posix/dwarf/i686-7.3.0-release-posix-dwarf-rt_v5-rev0.7z/download
 
@@ -30,13 +27,13 @@ https://www.sfml-dev.org/files/SFML-2.5.1-windows-gcc-7.3.0-mingw-32-bit.zip
 - Python 3.10 32bit, CMakeList.txt points where to change values in-code so the game finds Python installation.
 https://www.python.org/downloads/windows/
 
-Both links for mingw and sfml are also available from SFML Download site.
+**Both links for mingw and sfml are also available from SFML Download site.
 
 SFML .dll files are required to be in the same directory as project's .exe file
 arial.ttf (font file) is required in the same directory for text displays to work.
-
 Python310.dll file is required in the same directory as .exe file.
-for Windows based machine, following environment path must be set up:
+
+for Windows based machine, following environment paths must be set up:
 - PYTHONHOME - this is python's installation directory
 - PYTHONPATH - this is project's .exe file directory
 
