@@ -23,11 +23,12 @@ Download [raycaster_maze.zip](https://github.com/bartoszOlewinski/MMP-Raycaster-
 
 for Windows based machine, following environment paths must be set up:
 - PYTHONHOME - this is python's installation directory
-- PYTHONPATH - this is project's .exe file directory
 
 
 ## REQUIRED TO COMPILE:
 Steps regarding Python from **REQUIRED TO RUN** section as well as:
+
+- PYTHONPATH - this is project's .exe file directory
 
 - [mingw32 7.30 32bit](https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/7.3.0/threads-posix/dwarf/i686-7.3.0-release-posix-dwarf-rt_v5-rev0.7z/download)
 
