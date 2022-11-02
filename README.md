@@ -1,5 +1,5 @@
 # MMP-Raycaster-Maze
-![Raycaster Maze]([https://myoctocat.com/assets/images/base-octocat.svg](https://github.com/bartoszOlewinski/MMP-Raycaster-Maze/blob/master/clion_project/resources/textures/title_card.png))
+![Raycaster Maze](clion_project/resources/textures/title_card.png)
 These are my project files for the Major Project module at Aberystwyth University.
 
 Raycaster Maze is a video game, developed using C++ and SFML2.5.1, that uses raycasting as its rendering method. Raycasting was adapted from: https://lodev.org/cgtutor/raycasting.html
