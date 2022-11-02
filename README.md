@@ -2,7 +2,7 @@
 ![Raycaster Maze](clion_project/resources/textures/title_card.png)
 These are my project files for the Major Project module at Aberystwyth University.
 
-Raycaster Maze is a video game, developed using C++ and SFML2.5.1, that uses raycasting as its rendering method. Raycasting was adapted from: https://lodev.org/cgtutor/raycasting.html
+Raycaster Maze is a video game, developed using C++14 and SFML2.5.1, that uses raycasting as its rendering method. Raycasting was adapted from: https://lodev.org/cgtutor/raycasting.html
 and
 https://github.com/tmsbrg/adventure3d.
 
