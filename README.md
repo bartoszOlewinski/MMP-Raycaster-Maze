@@ -33,7 +33,7 @@ Steps regarding Python from **REQUIRED TO RUN** section as well as:
 
 - [SFML 2.5.1 32bit](https://www.sfml-dev.org/files/SFML-2.5.1-windows-gcc-7.3.0-mingw-32-bit.zip)
 
-**Both links for mingw and sfml are also available from SFML Download site.
+_Both links for mingw and sfml are also available from SFML Download site_
 
 - **SFML .dll** files are required to be in the same directory as project's .exe file
 - **arial.ttf** (font file) is required in the same directory for text displays to work.
