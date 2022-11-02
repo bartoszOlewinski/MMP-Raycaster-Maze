@@ -1,4 +1,5 @@
 # MMP-Raycaster-Maze
+![Raycaster Maze]([https://myoctocat.com/assets/images/base-octocat.svg](https://github.com/bartoszOlewinski/MMP-Raycaster-Maze/blob/master/clion_project/resources/textures/title_card.png))
 These are my project files for the Major Project module at Aberystwyth University.
 
 Raycaster Maze is a video game, developed using C++ and SFML2.5.1, that uses raycasting as its rendering method. Raycasting was adapted from: https://lodev.org/cgtutor/raycasting.html
@@ -16,26 +17,26 @@ additional UI to be implemented.
 
 
 
-REQUIRED TO RUN:
+##REQUIRED TO RUN:
 
 Currenet version of the setup needs to be adjusted as it doesn't translate to other machines.
 
-mingw32 7.30 32bi\
+- mingw32 7.30 32bi\
 https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/7.3.0/threads-posix/dwarf/i686-7.3.0-release-posix-dwarf-rt_v5-rev0.7z/download
 
-SFML 2.5.1 32bit\
+- SFML 2.5.1 32bit\
 https://www.sfml-dev.org/files/SFML-2.5.1-windows-gcc-7.3.0-mingw-32-bit.zip
 
-Python 3.10 32bit, CMakeList.txt points where to change values in-code so the game finds Python installation.
+- Python 3.10 32bit, CMakeList.txt points where to change values in-code so the game finds Python installation.
 https://www.python.org/downloads/windows/
 
 Both links for mingw and sfml are also available from SFML Download site.
 
-SFML .dll files are required to be in the same directory as project's .exe file, also
+SFML .dll files are required to be in the same directory as project's .exe file
 arial.ttf (font file) is required in the same directory for text displays to work.
 
 Python310.dll file is required in the same directory as .exe file.
 for Windows based machine, following environment path must be set up:
-PYTHONHOME - this is python's installation directory
-PYTHONPATH - this is project's .exe file directory
+- PYTHONHOME - this is python's installation directory
+- PYTHONPATH - this is project's .exe file directory
 
