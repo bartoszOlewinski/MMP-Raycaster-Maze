@@ -33,3 +33,9 @@ Both links for mingw and sfml are also available from SFML Download site.
 
 SFML .dll files are required to be in the same directory as project's .exe file, also
 arial.ttf (font file) is required in the same directory for text displays to work.
+
+Python310.dll file is required in the same directory as .exe file.
+for Windows based machine, following environment path must be set up:
+PYTHONHOME - this is python's installation directory
+PYTHONPATH - this is project's .exe file directory
+
