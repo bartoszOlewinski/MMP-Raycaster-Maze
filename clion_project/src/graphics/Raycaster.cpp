@@ -466,8 +466,7 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
         }
 
         lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float) drawStart +
-        (float)actor->renderY),
-                                sf::Vector2f( 257.0f,  27.0f)));
+        (float)actor->renderY),sf::Vector2f( 257.0f,  27.0f)));
         //======================================================================
 
 
@@ -540,10 +539,10 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 
         //drawing textured lines==================================
         lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float)drawStart + (float)actor->renderY),color,
-                                sf::Vector2f((float)textureCoordX, (float)(textureCoordY + 1 + pixelAdjustment))));
+                                sf::Vector2f((float)textureCoordX + 1, (float)(textureCoordY + 1 + pixelAdjustment))));
 
         lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float)drawEnd + (float)actor->renderY),color,
-                                sf::Vector2f((float)textureCoordX, (float)(textureCoordY + singleTextureSize - 1 - pixelAdjustment))));
+                                sf::Vector2f((float)textureCoordX + 1, (float)(textureCoordY + singleTextureSize - 1 - pixelAdjustment))));
         //=======================================================
 
 
