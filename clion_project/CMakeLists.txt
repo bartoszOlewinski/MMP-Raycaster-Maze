@@ -8,8 +8,8 @@ set(SFML_DIR "${PROJECT_SOURCE_DIR}/resources/SFML32/lib/cmake/SFML")
 find_package(SFML COMPONENTS graphics audio REQUIRED)
 
 # add paths to your python installations, must be 3.10 32bits
-set(PYTHON_INCLUDE_DIR "$ENV{HOMEPATH}/AppData/Local/Programs/Python/Python310-32/include")
-set(PYTHON_LIBRARY "$ENV{HOMEPATH}/AppData/Local/Programs/Python/Python310-32/libs/python310.lib")
+set(PYTHON_INCLUDE_DIR "C:/Users/$ENV{USERNAME}/AppData/Local/Programs/Python/Python310-32/include")
+set(PYTHON_LIBRARY "C:/Users/$ENV{USERNAME}/AppData/Local/Programs/Python/Python310-32/libs/python310.lib")
 
 find_package(PythonLibs REQUIRED)
 include_directories(${PYTHON_INCLUDE_DIRS})
