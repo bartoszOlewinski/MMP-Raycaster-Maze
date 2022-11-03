@@ -46,13 +46,6 @@ void Raycaster::runGame(Actor *actor, Actor *actorAI) {
 
 
 
-    //floor and ceiling colour
-    greyColor.r = 120;
-    greyColor.g = 120;
-    greyColor.b = 120;
-
-
-
     //load textures
     textureWallSheet.loadFromFile("../resources/textures/texture_sheet_test.png");
     bagTexture.loadFromFile("../resources/textures/bag_money.png");
@@ -460,8 +453,8 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
         int lineHeight = (int) (RENDER_HEIGHT / perpWallDist);
 
         //drawing ceiling======================================================
-        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float)actor->renderY), greyColor,
-                                sf::Vector2f( 640.0f,  0.0f)));
+        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float)actor->renderY),
+                                sf::Vector2f( 257.0f,  27.0f)));
 
         //calculate overflow of pixels on top of the screen
         int drawStart = int((float)-lineHeight * (1.0f - 0.5f) + RENDER_HEIGHT * 0.5f);
@@ -472,8 +465,9 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
             drawStart = 0;
         }
 
-        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float) drawStart + (float)actor->renderY), greyColor,
-                                sf::Vector2f( 640.0f,  0.0f)));
+        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float) drawStart +
+        (float)actor->renderY),
+                                sf::Vector2f( 257.0f,  27.0f)));
         //======================================================================
 
 
@@ -481,8 +475,8 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
 
 
         //drawing floor=============================================
-        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float) RENDER_HEIGHT + (float)actor->renderY), greyColor,
-                                sf::Vector2f( 640.0f,  0.0f)));
+        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float) RENDER_HEIGHT +
+        (float)actor->renderY), sf::Vector2f( 257.0f,  27.0f)));
 
         int drawEnd = int((float)lineHeight * 0.5f + RENDER_HEIGHT * 0.5f);
 
@@ -496,8 +490,8 @@ void Raycaster::raycastingRenderer(Actor * actor, sf::RenderStates texState, sf:
             pixelAdjustment = overflownPixels * singleTextureSize / (overflownPixels + overflownPixels + RENDER_HEIGHT);
         }
 
-        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float) drawEnd + (float)actor->renderY), greyColor,
-                                sf::Vector2f( 640.0f,  0.0f)));
+        lines.append(sf::Vertex(sf::Vector2f((float)x + (float)actor->renderX, (float) drawEnd +
+        (float)actor->renderY), sf::Vector2f( 257.0f,  27.0f)));
         //==============================================================
 
 

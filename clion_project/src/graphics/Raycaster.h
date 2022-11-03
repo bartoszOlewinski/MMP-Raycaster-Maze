@@ -107,9 +107,6 @@ private:
     Menu::LevelOption levelOption;
 
 
-
-
-    sf::Color greyColor;
     sf::Text debugText;
 
     sf::Font font;

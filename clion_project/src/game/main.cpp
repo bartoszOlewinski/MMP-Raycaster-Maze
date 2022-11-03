@@ -39,7 +39,12 @@ int main() {
 
     std::string WINDOW_TITLE = "Raycaster Maze";
 
-    std::string VERSION = "1.0";
+
+    //1.0 release
+    //1.0.1 - fixed blue floors and ceilings
+
+
+    std::string VERSION = "1.0.1";
 
 
 //debug only by name, should be used as default way of window set up, if your display is above 1080p, either change preprocessor
