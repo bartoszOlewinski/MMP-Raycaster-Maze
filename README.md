@@ -21,7 +21,7 @@ Game tasks player with traversing a maze and finding exit. It contains locked do
 - [ ] additional UI.
 
 ## REQUIRED TO RUN:
-Download [raycaster_maze.zip](https://github.com/bartoszOlewinski/MMP-Raycaster-Maze/releases/tag/Raycaster_Maze_1.0).
+Download latest [raycaster_maze.zip](https://github.com/bartoszOlewinski/MMP-Raycaster-Maze/releases).
 
 - Install in default path [Python 3.10 32bit](https://www.python.org/downloads/windows/)
 
