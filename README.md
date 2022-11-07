@@ -9,6 +9,8 @@ https://github.com/tmsbrg/adventure3d.
 
 Game tasks player with traversing a maze and finding exit. It contains locked doors along with keys, and treasure money bags that add-up to the score.
 
+![alt-text](https://github.com/bartoszOlewinski/MMP-Raycaster-Maze/blob/master/screenshots/screenshot.png)
+
 ## Current version 1.0.1
 ### Latest Fixes:
 - Fixed ceiling and floor colouring bug
